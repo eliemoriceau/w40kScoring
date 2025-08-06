@@ -117,6 +117,7 @@ jobs:
       - name: Setup test environment
         run: |
           cp .env.example .env.test || echo "No .env.example found"
+          echo "APP_KEY=VeryLongAndSecureAppKeyForTestingPurposes123456789012345678901234567890" >> .env.test
           echo "DB_HOST=localhost" >> .env.test
           echo "DB_PORT=5432" >> .env.test
           echo "DB_USER=test_user" >> .env.test
@@ -128,6 +129,7 @@ jobs:
         run: npm run build && node ace migration:run --force || echo "No migrations to run"
         env:
           NODE_ENV: test
+          APP_KEY: VeryLongAndSecureAppKeyForTestingPurposes123456789012345678901234567890
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USER: test_user
@@ -138,6 +140,7 @@ jobs:
         run: npm test
         env:
           NODE_ENV: test
+          APP_KEY: VeryLongAndSecureAppKeyForTestingPurposes123456789012345678901234567890
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USER: test_user

@@ -24,6 +24,12 @@ Pour chaque code généré :
 
 Ne jamais coupler le code métier directement à l’infrastructure ou à un framework externe.
 
+## Development Requirements
+
+- **Node.js**: >= 20.0.0 (required for crypto.hash API used by Vite/Vue build process)
+- **npm**: >= 9.0.0
+- **PostgreSQL**: >= 12 (for database operations)
+
 ## Development Commands
 
 - `npm run dev` - Start development server with hot module replacement

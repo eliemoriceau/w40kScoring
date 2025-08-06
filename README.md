@@ -94,10 +94,13 @@ npm run typecheck
 
 ### Frontend
 
-- **Pages Vue**: `inertia/pages/`
-- **Composants**: Structure Vue 3 avec Composition API
-- **SSR**: Rendu côté serveur activé
+- **Architecture**: Vue 3 + Inertia.js avec structure organisée
+- **Layouts**: `inertia/Layouts/` - Templates globaux (AppLayout.vue)
+- **Pages**: `inertia/Pages/` - Pages de l'application (Home, NotFound)
+- **Composition API**: Vue 3 avec setup script et TypeScript
+- **SSR**: Rendu côté serveur activé via Vite
 - **Assets**: Gérés par Vite avec alias `~/`
+- **Thème**: Design system W40K (rouge, jaune, noir) avec Tailwind
 
 ### Base de données
 
@@ -129,6 +132,17 @@ Le projet utilise des alias pour les imports :
 
 - Backend: `#models/*`, `#controllers/*`, `#middleware/*`, etc.
 - Frontend: `~/` pointe vers `inertia/`
+
+### Structure des pages
+```
+inertia/
+├── Layouts/
+│   └── AppLayout.vue          # Layout principal avec navigation W40K
+├── Pages/
+│   ├── Home.vue              # Page d'accueil avec fonctionnalités
+│   └── NotFound.vue          # Page 404 personnalisée
+└── pages/errors/             # Pages d'erreur (legacy)
+```
 
 ### Middleware Stack
 

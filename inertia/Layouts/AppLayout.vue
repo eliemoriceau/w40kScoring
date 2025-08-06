@@ -8,7 +8,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   title: 'w40kScoring',
-  description: 'Application de scoring pour Warhammer 40,000'
+  description: 'Application de scoring pour Warhammer 40,000',
 })
 </script>
 
@@ -34,16 +34,28 @@ const props = withDefaults(defineProps<Props>(), {
           <!-- Navigation Menu -->
           <div class="hidden md:block">
             <div class="flex items-baseline space-x-8">
-              <a href="/" class="text-white hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <a
+                href="/"
+                class="text-white hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
                 Accueil
               </a>
-              <a href="/games" class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <a
+                href="/games"
+                class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
                 Parties
               </a>
-              <a href="/players" class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <a
+                href="/players"
+                class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
                 Joueurs
               </a>
-              <a href="/armies" class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <a
+                href="/armies"
+                class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
                 Armées
               </a>
             </div>
@@ -53,7 +65,12 @@ const props = withDefaults(defineProps<Props>(), {
           <div class="md:hidden">
             <button class="text-gray-300 hover:text-white focus:outline-none focus:text-white">
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
           </div>
@@ -74,8 +91,8 @@ const props = withDefaults(defineProps<Props>(), {
           <div>
             <h3 class="text-lg font-bold text-red-400 mb-4">w40kScoring</h3>
             <p class="text-gray-300 text-sm">
-              Application de gestion et scoring pour les parties de Warhammer 40,000.
-              Suivez vos victoires, analysez vos performances.
+              Application de gestion et scoring pour les parties de Warhammer 40,000. Suivez vos
+              victoires, analysez vos performances.
             </p>
           </div>
 
@@ -83,9 +100,21 @@ const props = withDefaults(defineProps<Props>(), {
           <div>
             <h4 class="text-white font-semibold mb-4">Liens rapides</h4>
             <ul class="space-y-2">
-              <li><a href="/" class="text-gray-300 hover:text-red-400 text-sm transition-colors">Accueil</a></li>
-              <li><a href="/games" class="text-gray-300 hover:text-red-400 text-sm transition-colors">Mes parties</a></li>
-              <li><a href="/stats" class="text-gray-300 hover:text-red-400 text-sm transition-colors">Statistiques</a></li>
+              <li>
+                <a href="/" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                  >Accueil</a
+                >
+              </li>
+              <li>
+                <a href="/games" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                  >Mes parties</a
+                >
+              </li>
+              <li>
+                <a href="/stats" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                  >Statistiques</a
+                >
+              </li>
             </ul>
           </div>
 

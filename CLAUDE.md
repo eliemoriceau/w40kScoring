@@ -86,6 +86,7 @@ This project enforces Conventional Commits using:
 - **Commitlint**: Validates commit messages against conventional commit format
 - **Husky**: Git hooks for automatic commit message validation
 - **Commitizen**: Interactive commit message creation with `npm run commit`
+- ne t'attribue pas les commits
 
 ### Commit Types
 - `feat`: New features

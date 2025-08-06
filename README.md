@@ -1,5 +1,7 @@
 # w40kScoring
 
+[![CI/CD Pipeline](https://github.com/eliemoriceau/w40kScoring/actions/workflows/main.yml/badge.svg)](https://github.com/eliemoriceau/w40kScoring/actions/workflows/main.yml)
+
 Une application de scoring pour Warhammer 40,000 construite avec AdonisJS 6 et Vue 3.
 
 ## 🚀 Technologies

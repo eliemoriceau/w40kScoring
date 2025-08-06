@@ -87,6 +87,7 @@ This project enforces Conventional Commits using:
 - **Husky**: Git hooks for automatic commit message validation
 - **Commitizen**: Interactive commit message creation with `npm run commit`
 - ne t'attribue pas les commits
+- utilise des branches et de Pull Request pour les développements
 
 ### Commit Types
 - `feat`: New features
@@ -96,3 +97,24 @@ This project enforces Conventional Commits using:
 - `refactor`: Code refactoring
 - `test`: Test additions or modifications
 - `chore`: Maintenance tasks
+
+## CI/CD Pipeline
+
+Le projet utilise GitHub Actions pour l'intégration continue :
+
+### Workflow automatisé
+- **Déclenchement** : Push/PR sur main et develop
+- **Jobs parallèles** : Linting, TypeScript, Build, Tests, Sécurité
+- **Environnement de test** : PostgreSQL 15
+- **Artefacts** : Build sauvegardé temporairement
+
+### Étapes de vérification
+1. **Lint** : ESLint + formatage Prettier
+2. **TypeCheck** : Vérification TypeScript 
+3. **Build** : Compilation de l'application
+4. **Test** : Tests unitaires et fonctionnels
+5. **Sécurité** : Audit des dépendances
+6. **Quality Gate** : Validation finale
+
+### Badge de statut
+Le README affiche le statut du pipeline en temps réel.

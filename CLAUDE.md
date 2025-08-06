@@ -2,29 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-
 Tu es un développeur expert. Pour toute production de code, tu dois appliquer les principes suivants :
+
 1. **Architecture hexagonale**
-     
-     * Structure le code selon le pattern "ports & adapters" :
-            >
-            >  * Distingue clairement les couches **domaine** (core), **application**, **infrastructure/adapters** et **interface utilisateur** si besoin.
-    * Le domaine ne doit jamais dépendre des autres couches.
-    * Les entrées/sorties (API, bases de données, services externes, etc.) doivent passer par des ports définis dans le domaine, implémentés via des adapters.
+   - Structure le code selon le pattern "ports & adapters" : > > \* Distingue clairement les couches **domaine** (core), **application**, **infrastructure/adapters** et **interface utilisateur** si besoin.
+   - Le domaine ne doit jamais dépendre des autres couches.
+   - Les entrées/sorties (API, bases de données, services externes, etc.) doivent passer par des ports définis dans le domaine, implémentés via des adapters.
 2. **Trunk based development**
-     * Tout développement doit viser des incréments petits et testables.
-* Préfère le découpage en petites branches de courte durée, intégrées fréquemment dans le tronc principal (branche principale).
-* Evite les longues branches parallèles ou les intégrations tardives.
-* Intègre les tests automatisés dès la création de chaque fonctionnalité/incrément.
+   - Tout développement doit viser des incréments petits et testables.
 
- Pour chaque code généré :
+- Préfère le découpage en petites branches de courte durée, intégrées fréquemment dans le tronc principal (branche principale).
+- Evite les longues branches parallèles ou les intégrations tardives.
+- Intègre les tests automatisés dès la création de chaque fonctionnalité/incrément.
 
- * Respecte la séparation des responsabilités.
- * Propose des exemples de structure de dossiers si pertinent.
- * Rédige des tests unitaires associés.
- * Documente brièvement les choix d’architecture appliqués.
+Pour chaque code généré :
 
- Ne jamais coupler le code métier directement à l’infrastructure ou à un framework externe.
+- Respecte la séparation des responsabilités.
+- Propose des exemples de structure de dossiers si pertinent.
+- Rédige des tests unitaires associés.
+- Documente brièvement les choix d’architecture appliqués.
+
+Ne jamais coupler le code métier directement à l’infrastructure ou à un framework externe.
 
 ## Development Commands
 
@@ -83,6 +81,7 @@ This is an AdonisJS 6 application with the following key architectural patterns:
 ## Commit Standards
 
 This project enforces Conventional Commits using:
+
 - **Commitlint**: Validates commit messages against conventional commit format
 - **Husky**: Git hooks for automatic commit message validation
 - **Commitizen**: Interactive commit message creation with `npm run commit`
@@ -90,8 +89,9 @@ This project enforces Conventional Commits using:
 - utilise des branches et de Pull Request pour les développements
 
 ### Commit Types
+
 - `feat`: New features
-- `fix`: Bug fixes  
+- `fix`: Bug fixes
 - `docs`: Documentation changes
 - `style`: Code style changes (formatting, etc.)
 - `refactor`: Code refactoring
@@ -103,18 +103,21 @@ This project enforces Conventional Commits using:
 Le projet utilise GitHub Actions pour l'intégration continue :
 
 ### Workflow automatisé
+
 - **Déclenchement** : Push/PR sur main et develop
 - **Jobs parallèles** : Linting, TypeScript, Build, Tests, Sécurité
 - **Environnement de test** : PostgreSQL 15
 - **Artefacts** : Build sauvegardé temporairement
 
 ### Étapes de vérification
+
 1. **Lint** : ESLint + formatage Prettier
-2. **TypeCheck** : Vérification TypeScript 
+2. **TypeCheck** : Vérification TypeScript
 3. **Build** : Compilation de l'application
 4. **Test** : Tests unitaires et fonctionnels
 5. **Sécurité** : Audit des dépendances
 6. **Quality Gate** : Validation finale
 
 ### Badge de statut
+
 Le README affiche le statut du pipeline en temps réel.

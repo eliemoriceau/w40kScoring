@@ -134,6 +134,7 @@ Le projet utilise des alias pour les imports :
 - Frontend: `~/` pointe vers `inertia/`
 
 ### Structure des pages
+
 ```
 inertia/
 ├── Layouts/

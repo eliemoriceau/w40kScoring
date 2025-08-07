@@ -48,8 +48,8 @@ export default class LucidGameQueryRepository implements GameQueryRepository {
 
     // Count total for pagination
     const countQuery = query.clone()
-    const total = await countQuery.count('* as total')
-    const totalCount = Number(total[0]?.total ?? 0)
+    const totalResult = await countQuery.count('* as total')
+    const totalCount = Number((totalResult[0] as any)?.total ?? 0)
 
     // Apply pagination
     if (filters.limit) {
@@ -69,18 +69,18 @@ export default class LucidGameQueryRepository implements GameQueryRepository {
   }
 
   async exists(id: GameId): Promise<boolean> {
-    const count = await GameModel.query().where('id', id.value).count('* as total')
+    const countResult = await GameModel.query().where('id', id.value).count('* as total')
 
-    return Number(count[0]?.total ?? 0) > 0
+    return Number((countResult[0] as any)?.total ?? 0) > 0
   }
 
   async countByUserAndStatus(userId: number, status: string): Promise<number> {
-    const count = await GameModel.query()
+    const countResult = await GameModel.query()
       .where('userId', userId)
       .where('status', status)
       .count('* as total')
 
-    return Number(count[0]?.total ?? 0)
+    return Number((countResult[0] as any)?.total ?? 0)
   }
 
   async findRecentByUserId(userId: number, limit: number): Promise<Game[]> {

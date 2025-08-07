@@ -1,5 +1,5 @@
-import { GameQueryRepository } from './i_game_query_repository'
-import { GameCommandRepository } from './i_game_command_repository'
+import { GameQueryRepository } from './i_game_query_repository.js'
+import { GameCommandRepository } from './i_game_command_repository.js'
 
 /**
  * GameRepository Interface - Domain Port

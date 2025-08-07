@@ -5,6 +5,8 @@ import GameType from '#domain/value-objects/game_type'
 import PointsLimit from '#domain/value-objects/points_limit'
 import GameStatus from '#domain/value-objects/game_status'
 import GameModel from '#models/game'
+import { DateTime } from 'luxon'
+import db from '@adonisjs/lucid/services/db'
 
 /**
  * LucidGameCommandRepository - Infrastructure Adapter for Commands
@@ -24,8 +26,8 @@ export default class LucidGameCommandRepository implements GameCommandRepository
         opponentScore: game.opponentScore,
         mission: game.mission,
         notes: game.notes || null,
-        startedAt: game.startedAt,
-        completedAt: game.completedAt,
+        startedAt: game.startedAt ? DateTime.fromJSDate(game.startedAt) : null,
+        completedAt: game.completedAt ? DateTime.fromJSDate(game.completedAt) : null,
       }
     )
 
@@ -40,9 +42,26 @@ export default class LucidGameCommandRepository implements GameCommandRepository
     const savedGames: Game[] = []
 
     // Use transaction for batch operations
-    await GameModel.$transaction(async () => {
+    await db.transaction(async (trx) => {
       for (const game of games) {
-        const savedGame = await this.save(game)
+        const gameModel = await GameModel.updateOrCreate(
+          { id: game.id.value },
+          {
+            userId: game.userId,
+            opponentId: game.opponentId,
+            gameType: game.gameType.value as 'MATCHED_PLAY' | 'NARRATIVE' | 'OPEN_PLAY',
+            pointsLimit: game.pointsLimit.value,
+            status: game.status.value as 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED',
+            playerScore: game.playerScore,
+            opponentScore: game.opponentScore,
+            mission: game.mission,
+            notes: game.notes || null,
+            startedAt: game.startedAt ? DateTime.fromJSDate(game.startedAt) : null,
+            completedAt: game.completedAt ? DateTime.fromJSDate(game.completedAt) : null,
+          },
+          { client: trx }
+        )
+        const savedGame = this.toDomainEntity(gameModel)
         savedGames.push(savedGame)
       }
     })

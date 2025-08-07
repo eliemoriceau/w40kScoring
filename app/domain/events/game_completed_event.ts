@@ -1,4 +1,4 @@
-import { DomainEvent } from './domain_event'
+import { DomainEvent } from './domain_event.js'
 import GameId from '#domain/value-objects/game_id'
 
 /**

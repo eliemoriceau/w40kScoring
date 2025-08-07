@@ -4,7 +4,6 @@ import PlayerId from '#domain/value-objects/player_id'
 import GameId from '#domain/value-objects/game_id'
 import Pseudo from '#domain/value-objects/pseudo'
 import PlayerModel from '#models/player'
-import db from '@adonisjs/lucid/services/db'
 
 /**
  * LucidPlayerCommandRepository - Infrastructure Adapter for Commands
@@ -14,9 +13,9 @@ export default class LucidPlayerCommandRepository implements PlayerCommandReposi
   async save(player: Player): Promise<Player> {
     // Check if player exists first
     const existingPlayer = await PlayerModel.find(player.id.value)
-    
+
     let playerModel: PlayerModel
-    
+
     if (existingPlayer) {
       // Update existing player
       existingPlayer.gameId = player.gameId.value

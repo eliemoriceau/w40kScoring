@@ -33,14 +33,8 @@ test.group('StartGameCommand', () => {
 
   test('should validate required fields', ({ assert }) => {
     // Act & Assert
-    assert.throws(
-      () => new StartGameCommand(0, 123),
-      'Game ID must be a positive integer'
-    )
+    assert.throws(() => new StartGameCommand(0, 123), 'Game ID must be a positive integer')
 
-    assert.throws(
-      () => new StartGameCommand(1, 0),
-      'User ID must be a positive integer'
-    )
+    assert.throws(() => new StartGameCommand(1, 0), 'User ID must be a positive integer')
   })
 })

@@ -29,13 +29,13 @@ test.group('PointsLimit Value Object', () => {
 
   test('should compare equality correctly', ({ assert }) => {
     // Arrange
-    const points1000_1 = new PointsLimit(1000)
-    const points1000_2 = new PointsLimit(1000)
+    const pointsLimit1000First = new PointsLimit(1000)
+    const pointsLimit1000Second = new PointsLimit(1000)
     const points1500 = new PointsLimit(1500)
 
     // Assert
-    assert.isTrue(points1000_1.equals(points1000_2))
-    assert.isFalse(points1000_1.equals(points1500))
+    assert.isTrue(pointsLimit1000First.equals(pointsLimit1000Second))
+    assert.isFalse(pointsLimit1000First.equals(points1500))
   })
 
   test('should determine if it is a standard tournament size', ({ assert }) => {

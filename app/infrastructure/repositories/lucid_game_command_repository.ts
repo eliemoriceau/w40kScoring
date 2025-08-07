@@ -1,4 +1,4 @@
-import { IGameCommandRepository } from '#domain/repositories/i_game_command_repository'
+import { GameCommandRepository } from '#domain/repositories/i_game_command_repository'
 import Game from '#domain/entities/game'
 import GameId from '#domain/value-objects/game_id'
 import GameType from '#domain/value-objects/game_type'
@@ -10,7 +10,7 @@ import GameModel from '#models/game'
  * LucidGameCommandRepository - Infrastructure Adapter for Commands
  * Implements the IGameCommandRepository domain port using Lucid ORM (Write operations)
  */
-export default class LucidGameCommandRepository implements IGameCommandRepository {
+export default class LucidGameCommandRepository implements GameCommandRepository {
   async save(game: Game): Promise<Game> {
     const gameModel = await GameModel.updateOrCreate(
       { id: game.id.value },
@@ -38,7 +38,7 @@ export default class LucidGameCommandRepository implements IGameCommandRepositor
 
   async saveBatch(games: Game[]): Promise<Game[]> {
     const savedGames: Game[] = []
-    
+
     // Use transaction for batch operations
     await GameModel.$transaction(async () => {
       for (const game of games) {
@@ -51,10 +51,9 @@ export default class LucidGameCommandRepository implements IGameCommandRepositor
   }
 
   async bulkUpdateStatus(gameIds: GameId[], status: string): Promise<void> {
-    const ids = gameIds.map(id => id.value)
-    
-    await GameModel
-      .query()
+    const ids = gameIds.map((id) => id.value)
+
+    await GameModel.query()
       .whereIn('id', ids)
       .update({ status: status as 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' })
   }
@@ -83,7 +82,7 @@ export default class LucidGameCommandRepository implements IGameCommandRepositor
       notes: model.notes || '',
       createdAt: model.createdAt.toJSDate(),
       startedAt: model.startedAt?.toJSDate() || null,
-      completedAt: model.completedAt?.toJSDate() || null
+      completedAt: model.completedAt?.toJSDate() || null,
     })
   }
 }

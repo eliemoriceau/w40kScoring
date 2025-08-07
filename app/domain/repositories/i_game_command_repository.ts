@@ -2,11 +2,11 @@ import Game from '#domain/entities/game'
 import GameId from '#domain/value-objects/game_id'
 
 /**
- * IGameCommandRepository Interface - CQRS Command Side
+ * GameCommandRepository Interface - CQRS Command Side
  * Defines write operations for game data manipulation
  * This is a port in the hexagonal architecture focused on commands
  */
-export interface IGameCommandRepository {
+export interface GameCommandRepository {
   /**
    * Save a new game or update an existing one
    */

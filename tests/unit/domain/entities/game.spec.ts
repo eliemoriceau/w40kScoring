@@ -32,12 +32,7 @@ test.group('Game Entity', () => {
 
   test('should start a planned game', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
     const mission = 'Purge the Enemy'
 
     // Act
@@ -51,26 +46,19 @@ test.group('Game Entity', () => {
 
   test('should not start a game that is not planned', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
     game.start('Mission')
-    
+
     // Act & Assert
-    assert.throws(() => game.start('Another mission'), 'Game must be in PLANNED status to be started')
+    assert.throws(
+      () => game.start('Another mission'),
+      'Game must be in PLANNED status to be started'
+    )
   })
 
   test('should complete a game in progress', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
     game.start('Mission')
 
     // Act
@@ -85,12 +73,7 @@ test.group('Game Entity', () => {
 
   test('should not complete a game that is not in progress', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
 
     // Act & Assert
     assert.throws(() => game.complete(20, 15), 'Game must be in IN_PROGRESS status to be completed')
@@ -123,12 +106,7 @@ test.group('Game Entity', () => {
 
   test('should not cancel a completed game', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
     game.start('Mission')
     game.complete(20, 15)
 
@@ -138,12 +116,7 @@ test.group('Game Entity', () => {
 
   test('should set opponent', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
 
     // Act
     game.setOpponent(456)
@@ -154,12 +127,7 @@ test.group('Game Entity', () => {
 
   test('should update notes', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
     const notes = 'Great game against Space Marines'
 
     // Act
@@ -171,19 +139,14 @@ test.group('Game Entity', () => {
 
   test('should determine winner correctly', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
     game.setOpponent(456)
     game.start('Mission')
     game.complete(20, 15)
 
     // Act & Assert
     assert.equal(game.getWinner(), 'PLAYER')
-    
+
     // Test opponent wins
     const opponentWinGame = Game.createNew(
       new GameId(2),
@@ -209,12 +172,7 @@ test.group('Game Entity', () => {
 
   test('should return null winner for incomplete game', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
 
     // Act & Assert
     assert.isNull(game.getWinner())
@@ -243,7 +201,7 @@ test.group('Game Entity', () => {
       notes: '',
       createdAt,
       startedAt: null,
-      completedAt: null
+      completedAt: null,
     })
 
     // Assert
@@ -287,7 +245,7 @@ test.group('Game Entity', () => {
       notes,
       createdAt,
       startedAt,
-      completedAt: null
+      completedAt: null,
     })
 
     // Assert
@@ -329,7 +287,7 @@ test.group('Game Entity', () => {
       notes,
       createdAt,
       startedAt,
-      completedAt
+      completedAt,
     })
 
     // Assert
@@ -360,7 +318,7 @@ test.group('Game Entity', () => {
       notes: 'Had to cancel',
       createdAt,
       startedAt: null,
-      completedAt: null
+      completedAt: null,
     })
 
     // Assert

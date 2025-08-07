@@ -8,7 +8,7 @@ test.group('GameStatus Value Object', () => {
     assert.equal(GameStatus.IN_PROGRESS.value, 'IN_PROGRESS')
     assert.equal(GameStatus.COMPLETED.value, 'COMPLETED')
     assert.equal(GameStatus.CANCELLED.value, 'CANCELLED')
-    
+
     assert.equal(GameStatus.PLANNED.displayName, 'Planned')
     assert.equal(GameStatus.IN_PROGRESS.displayName, 'In Progress')
     assert.equal(GameStatus.COMPLETED.displayName, 'Completed')
@@ -46,7 +46,7 @@ test.group('GameStatus Value Object', () => {
     assert.isTrue(GameStatus.PLANNED.canTransitionTo(GameStatus.CANCELLED))
     assert.isTrue(GameStatus.IN_PROGRESS.canTransitionTo(GameStatus.COMPLETED))
     assert.isTrue(GameStatus.IN_PROGRESS.canTransitionTo(GameStatus.CANCELLED))
-    
+
     assert.isFalse(GameStatus.COMPLETED.canTransitionTo(GameStatus.IN_PROGRESS))
     assert.isFalse(GameStatus.COMPLETED.canTransitionTo(GameStatus.CANCELLED))
     assert.isFalse(GameStatus.CANCELLED.canTransitionTo(GameStatus.IN_PROGRESS))

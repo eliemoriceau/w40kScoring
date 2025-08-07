@@ -13,11 +13,7 @@ export default class GameStartedEvent implements DomainEvent {
   readonly eventVersion = 1
   readonly data: Record<string, any>
 
-  constructor(
-    gameId: GameId,
-    userId: number,
-    mission?: string
-  ) {
+  constructor(gameId: GameId, userId: number, mission?: string) {
     this.eventId = crypto.randomUUID()
     this.aggregateId = gameId.value.toString()
     this.occurredOn = new Date()
@@ -25,7 +21,7 @@ export default class GameStartedEvent implements DomainEvent {
       gameId: gameId.value,
       userId,
       mission: mission || null,
-      startedAt: this.occurredOn.toISOString()
+      startedAt: this.occurredOn.toISOString(),
     }
   }
 }

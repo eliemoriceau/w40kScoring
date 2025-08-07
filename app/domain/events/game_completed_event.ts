@@ -29,7 +29,7 @@ export default class GameCompletedEvent implements DomainEvent {
       playerScore,
       opponentScore,
       winner,
-      completedAt: this.occurredOn.toISOString()
+      completedAt: this.occurredOn.toISOString(),
     }
   }
 }

@@ -26,7 +26,10 @@ export default class CreateGameCommand {
       throw new Error('Points limit must be greater than 0')
     }
 
-    if (this.opponentId !== undefined && (!Number.isInteger(this.opponentId) || this.opponentId <= 0)) {
+    if (
+      this.opponentId !== undefined &&
+      (!Number.isInteger(this.opponentId) || this.opponentId <= 0)
+    ) {
       throw new Error('Opponent ID must be a positive integer')
     }
   }

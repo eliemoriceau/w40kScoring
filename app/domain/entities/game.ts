@@ -30,12 +30,7 @@ export default class Game extends AggregateRoot {
     super()
   }
 
-  static createNew(
-    id: GameId,
-    userId: number,
-    gameType: GameType,
-    pointsLimit: PointsLimit
-  ): Game {
+  static createNew(id: GameId, userId: number, gameType: GameType, pointsLimit: PointsLimit): Game {
     return new Game(
       id,
       userId,
@@ -162,13 +157,9 @@ export default class Game extends AggregateRoot {
 
     // Determine winner and raise domain event
     const winner = this.getWinner()!
-    this.addDomainEvent(new GameCompletedEvent(
-      this._id, 
-      this._userId, 
-      playerScore, 
-      opponentScore, 
-      winner
-    ))
+    this.addDomainEvent(
+      new GameCompletedEvent(this._id, this._userId, playerScore, opponentScore, winner)
+    )
   }
 
   cancel(): void {
@@ -192,9 +183,11 @@ export default class Game extends AggregateRoot {
   }
 
   getWinner(): 'PLAYER' | 'OPPONENT' | 'DRAW' | null {
-    if (!this._status.equals(GameStatus.COMPLETED) || 
-        this._playerScore === null || 
-        this._opponentScore === null) {
+    if (
+      !this._status.equals(GameStatus.COMPLETED) ||
+      this._playerScore === null ||
+      this._opponentScore === null
+    ) {
       return null
     }
 

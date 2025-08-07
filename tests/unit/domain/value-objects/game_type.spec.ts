@@ -57,7 +57,7 @@ test.group('GameType Value Object', () => {
   test('should list all valid game types', ({ assert }) => {
     // Act
     const allTypes = GameType.getAllTypes()
-    const typeValues = allTypes.map(t => t.value)
+    const typeValues = allTypes.map((t) => t.value)
 
     // Assert
     assert.lengthOf(allTypes, 3)

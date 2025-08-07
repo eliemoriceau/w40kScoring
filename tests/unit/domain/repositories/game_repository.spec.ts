@@ -8,14 +8,9 @@ test.group('IGameRepository Contract', () => {
   test('repository interface should define correct contract', ({ assert }) => {
     // This test validates the interface structure
     // We'll test the actual implementation in integration tests
-    
+
     // Arrange - Create a sample game for interface validation
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
 
     // Assert - Interface contract expectations
     assert.isTrue(game instanceof Game)

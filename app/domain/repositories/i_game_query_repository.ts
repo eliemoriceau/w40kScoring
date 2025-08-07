@@ -2,11 +2,11 @@ import Game from '#domain/entities/game'
 import GameId from '#domain/value-objects/game_id'
 
 /**
- * IGameQueryRepository Interface - CQRS Query Side
+ * GameQueryRepository Interface - CQRS Query Side
  * Defines read-only operations for game data retrieval
  * This is a port in the hexagonal architecture focused on queries
  */
-export interface IGameQueryRepository {
+export interface GameQueryRepository {
   /**
    * Find a game by its unique identifier
    */

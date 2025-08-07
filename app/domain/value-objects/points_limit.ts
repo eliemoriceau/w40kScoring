@@ -11,7 +11,9 @@ export default class PointsLimit {
 
   constructor(value: number) {
     if (value < PointsLimit.MIN_POINTS || value > PointsLimit.MAX_POINTS) {
-      throw new Error(`Points limit must be between ${PointsLimit.MIN_POINTS} and ${PointsLimit.MAX_POINTS}`)
+      throw new Error(
+        `Points limit must be between ${PointsLimit.MIN_POINTS} and ${PointsLimit.MAX_POINTS}`
+      )
     }
 
     if (value % 50 !== 0) {

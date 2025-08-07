@@ -45,10 +45,7 @@ test.group('CreateGameCommand', () => {
       'User ID must be a positive integer'
     )
 
-    assert.throws(
-      () => new CreateGameCommand(123, '', 2000),
-      'Game type cannot be empty'
-    )
+    assert.throws(() => new CreateGameCommand(123, '', 2000), 'Game type cannot be empty')
 
     assert.throws(
       () => new CreateGameCommand(123, 'MATCHED_PLAY', 0),

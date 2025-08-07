@@ -10,12 +10,7 @@ import GameCancelledEvent from '#domain/events/game_cancelled_event'
 test.group('Game Domain Events', () => {
   test('should raise GameStartedEvent when game is started', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
     const mission = 'Purge the Enemy'
 
     // Act
@@ -24,7 +19,7 @@ test.group('Game Domain Events', () => {
     // Assert
     const events = game.getDomainEvents()
     assert.equal(events.length, 1)
-    
+
     const startedEvent = events[0] as GameStartedEvent
     assert.equal(startedEvent.eventType, 'GameStarted')
     assert.equal(startedEvent.aggregateId, '1')
@@ -36,12 +31,7 @@ test.group('Game Domain Events', () => {
 
   test('should raise GameCompletedEvent when game is completed', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(2),
-      456,
-      GameType.NARRATIVE,
-      new PointsLimit(1500)
-    )
+    const game = Game.createNew(new GameId(2), 456, GameType.NARRATIVE, new PointsLimit(1500))
     game.start('Battle Mission')
 
     // Act
@@ -50,7 +40,7 @@ test.group('Game Domain Events', () => {
     // Assert
     const events = game.getDomainEvents()
     assert.equal(events.length, 2) // StartedEvent + CompletedEvent
-    
+
     const completedEvent = events[1] as GameCompletedEvent
     assert.equal(completedEvent.eventType, 'GameCompleted')
     assert.equal(completedEvent.aggregateId, '2')
@@ -64,12 +54,7 @@ test.group('Game Domain Events', () => {
 
   test('should raise GameCancelledEvent when game is cancelled', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(3),
-      789,
-      GameType.OPEN_PLAY,
-      new PointsLimit(1000)
-    )
+    const game = Game.createNew(new GameId(3), 789, GameType.OPEN_PLAY, new PointsLimit(1000))
     game.start('Quick Battle')
 
     // Act
@@ -78,7 +63,7 @@ test.group('Game Domain Events', () => {
     // Assert
     const events = game.getDomainEvents()
     assert.equal(events.length, 2) // StartedEvent + CancelledEvent
-    
+
     const cancelledEvent = events[1] as GameCancelledEvent
     assert.equal(cancelledEvent.eventType, 'GameCancelled')
     assert.equal(cancelledEvent.aggregateId, '3')
@@ -90,12 +75,7 @@ test.group('Game Domain Events', () => {
 
   test('should cancel planned game and raise event', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(4),
-      101,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(4), 101, GameType.MATCHED_PLAY, new PointsLimit(2000))
 
     // Act
     game.cancel()
@@ -103,19 +83,14 @@ test.group('Game Domain Events', () => {
     // Assert
     const events = game.getDomainEvents()
     assert.equal(events.length, 1)
-    
+
     const cancelledEvent = events[0] as GameCancelledEvent
     assert.equal(cancelledEvent.data.previousStatus, 'PLANNED')
   })
 
   test('should clear domain events', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(5),
-      202,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(5), 202, GameType.MATCHED_PLAY, new PointsLimit(2000))
     game.start('Mission')
 
     // Act
@@ -129,12 +104,7 @@ test.group('Game Domain Events', () => {
 
   test('should check if game has domain events', ({ assert }) => {
     // Arrange
-    const game = Game.createNew(
-      new GameId(6),
-      303,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(6), 303, GameType.MATCHED_PLAY, new PointsLimit(2000))
 
     // Assert initial state
     assert.isFalse(game.hasDomainEvents())

@@ -13,11 +13,7 @@ export default class GameCancelledEvent implements DomainEvent {
   readonly eventVersion = 1
   readonly data: Record<string, any>
 
-  constructor(
-    gameId: GameId,
-    userId: number,
-    previousStatus: string
-  ) {
+  constructor(gameId: GameId, userId: number, previousStatus: string) {
     this.eventId = crypto.randomUUID()
     this.aggregateId = gameId.value.toString()
     this.occurredOn = new Date()
@@ -25,7 +21,7 @@ export default class GameCancelledEvent implements DomainEvent {
       gameId: gameId.value,
       userId,
       previousStatus,
-      cancelledAt: this.occurredOn.toISOString()
+      cancelledAt: this.occurredOn.toISOString(),
     }
   }
 }

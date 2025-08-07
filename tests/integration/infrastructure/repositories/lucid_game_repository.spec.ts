@@ -22,14 +22,9 @@ test.group('LucidGameRepository (Integration)', () => {
   test.skip('should save and retrieve a game', async ({ assert }) => {
     // This test requires database connection
     // Will be implemented when DB is set up for testing
-    
+
     const repository = new LucidGameRepository()
-    const game = Game.createNew(
-      new GameId(1),
-      123,
-      GameType.MATCHED_PLAY,
-      new PointsLimit(2000)
-    )
+    const game = Game.createNew(new GameId(1), 123, GameType.MATCHED_PLAY, new PointsLimit(2000))
 
     // Test would save and retrieve game
     assert.isTrue(game instanceof Game)

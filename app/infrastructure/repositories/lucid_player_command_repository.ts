@@ -12,14 +12,25 @@ import db from '@adonisjs/lucid/services/db'
  */
 export default class LucidPlayerCommandRepository implements PlayerCommandRepository {
   async save(player: Player): Promise<Player> {
-    const playerModel = await PlayerModel.updateOrCreate(
-      { id: player.id.value },
-      {
+    // Check if player exists first
+    const existingPlayer = await PlayerModel.find(player.id.value)
+    
+    let playerModel: PlayerModel
+    
+    if (existingPlayer) {
+      // Update existing player
+      existingPlayer.gameId = player.gameId.value
+      existingPlayer.userId = player.userId
+      existingPlayer.pseudo = player.pseudo.value
+      playerModel = await existingPlayer.save()
+    } else {
+      // Create new player (let database generate ID)
+      playerModel = await PlayerModel.create({
         gameId: player.gameId.value,
         userId: player.userId,
         pseudo: player.pseudo.value,
-      }
-    )
+      })
+    }
 
     return this.toDomainEntity(playerModel)
   }
@@ -31,22 +42,11 @@ export default class LucidPlayerCommandRepository implements PlayerCommandReposi
   async saveBatch(players: Player[]): Promise<Player[]> {
     const savedPlayers: Player[] = []
 
-    // Use transaction for batch operations
-    await db.transaction(async (trx) => {
-      for (const player of players) {
-        const playerModel = await PlayerModel.updateOrCreate(
-          { id: player.id.value },
-          {
-            gameId: player.gameId.value,
-            userId: player.userId,
-            pseudo: player.pseudo.value,
-          },
-          { client: trx }
-        )
-        const savedPlayer = this.toDomainEntity(playerModel)
-        savedPlayers.push(savedPlayer)
-      }
-    })
+    // Process each player using the same save method to ensure consistency
+    for (const player of players) {
+      const savedPlayer = await this.save(player)
+      savedPlayers.push(savedPlayer)
+    }
 
     return savedPlayers
   }

@@ -23,7 +23,7 @@ export const plugins: Config['plugins'] = [assert(), pluginAdonisJS(app)]
  */
 export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
   setup: [() => testUtils.db().migrate()],
-  teardown: [() => testUtils.db().truncate()],
+  teardown: [],
 }
 
 /**

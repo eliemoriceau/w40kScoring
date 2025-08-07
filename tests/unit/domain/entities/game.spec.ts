@@ -219,4 +219,152 @@ test.group('Game Entity', () => {
     // Act & Assert
     assert.isNull(game.getWinner())
   })
+
+  test('should reconstruct game in PLANNED state', ({ assert }) => {
+    // Arrange
+    const gameId = new GameId(1)
+    const userId = 123
+    const gameType = GameType.MATCHED_PLAY
+    const pointsLimit = new PointsLimit(2000)
+    const status = GameStatus.PLANNED
+    const createdAt = new Date('2024-01-01T10:00:00Z')
+
+    // Act
+    const game = Game.reconstruct({
+      id: gameId,
+      userId,
+      gameType,
+      pointsLimit,
+      status,
+      opponentId: null,
+      playerScore: null,
+      opponentScore: null,
+      mission: null,
+      notes: '',
+      createdAt,
+      startedAt: null,
+      completedAt: null
+    })
+
+    // Assert
+    assert.isTrue(game.id.equals(gameId))
+    assert.equal(game.userId, userId)
+    assert.isTrue(game.gameType.equals(gameType))
+    assert.isTrue(game.pointsLimit.equals(pointsLimit))
+    assert.isTrue(game.status.equals(GameStatus.PLANNED))
+    assert.isNull(game.opponentId)
+    assert.isNull(game.playerScore)
+    assert.isNull(game.opponentScore)
+    assert.isNull(game.mission)
+    assert.equal(game.notes, '')
+    assert.equal(game.createdAt, createdAt)
+  })
+
+  test('should reconstruct game in IN_PROGRESS state', ({ assert }) => {
+    // Arrange
+    const gameId = new GameId(2)
+    const userId = 123
+    const gameType = GameType.NARRATIVE
+    const pointsLimit = new PointsLimit(1500)
+    const status = GameStatus.IN_PROGRESS
+    const opponentId = 456
+    const mission = 'Secure the Objective'
+    const notes = 'Intense battle'
+    const createdAt = new Date('2024-01-01T10:00:00Z')
+    const startedAt = new Date('2024-01-01T11:00:00Z')
+
+    // Act
+    const game = Game.reconstruct({
+      id: gameId,
+      userId,
+      gameType,
+      pointsLimit,
+      status,
+      opponentId,
+      playerScore: null,
+      opponentScore: null,
+      mission,
+      notes,
+      createdAt,
+      startedAt,
+      completedAt: null
+    })
+
+    // Assert
+    assert.isTrue(game.status.equals(GameStatus.IN_PROGRESS))
+    assert.equal(game.opponentId, opponentId)
+    assert.equal(game.mission, mission)
+    assert.equal(game.notes, notes)
+    assert.equal(game.startedAt, startedAt)
+    assert.isNull(game.completedAt)
+  })
+
+  test('should reconstruct game in COMPLETED state', ({ assert }) => {
+    // Arrange
+    const gameId = new GameId(3)
+    const userId = 123
+    const gameType = GameType.OPEN_PLAY
+    const pointsLimit = new PointsLimit(1000)
+    const status = GameStatus.COMPLETED
+    const opponentId = 789
+    const playerScore = 25
+    const opponentScore = 18
+    const mission = 'Victory Points'
+    const notes = 'Close victory'
+    const createdAt = new Date('2024-01-01T10:00:00Z')
+    const startedAt = new Date('2024-01-01T11:00:00Z')
+    const completedAt = new Date('2024-01-01T13:30:00Z')
+
+    // Act
+    const game = Game.reconstruct({
+      id: gameId,
+      userId,
+      gameType,
+      pointsLimit,
+      status,
+      opponentId,
+      playerScore,
+      opponentScore,
+      mission,
+      notes,
+      createdAt,
+      startedAt,
+      completedAt
+    })
+
+    // Assert
+    assert.isTrue(game.status.equals(GameStatus.COMPLETED))
+    assert.equal(game.playerScore, playerScore)
+    assert.equal(game.opponentScore, opponentScore)
+    assert.equal(game.completedAt, completedAt)
+    assert.equal(game.getWinner(), 'PLAYER')
+  })
+
+  test('should reconstruct game in CANCELLED state', ({ assert }) => {
+    // Arrange
+    const gameId = new GameId(4)
+    const status = GameStatus.CANCELLED
+    const createdAt = new Date('2024-01-01T10:00:00Z')
+
+    // Act
+    const game = Game.reconstruct({
+      id: gameId,
+      userId: 123,
+      gameType: GameType.MATCHED_PLAY,
+      pointsLimit: new PointsLimit(2000),
+      status,
+      opponentId: null,
+      playerScore: null,
+      opponentScore: null,
+      mission: null,
+      notes: 'Had to cancel',
+      createdAt,
+      startedAt: null,
+      completedAt: null
+    })
+
+    // Assert
+    assert.isTrue(game.status.equals(GameStatus.CANCELLED))
+    assert.equal(game.notes, 'Had to cancel')
+  })
 })

@@ -2,12 +2,16 @@ import GameId from '#domain/value-objects/game_id'
 import GameType from '#domain/value-objects/game_type'
 import PointsLimit from '#domain/value-objects/points_limit'
 import GameStatus from '#domain/value-objects/game_status'
+import { AggregateRoot } from '#domain/aggregate_root'
+import GameStartedEvent from '#domain/events/game_started_event'
+import GameCompletedEvent from '#domain/events/game_completed_event'
+import GameCancelledEvent from '#domain/events/game_cancelled_event'
 
 /**
  * Game Aggregate Root
  * Represents a Warhammer 40K game with its business rules
  */
-export default class Game {
+export default class Game extends AggregateRoot {
   private constructor(
     private readonly _id: GameId,
     private readonly _userId: number,
@@ -22,7 +26,9 @@ export default class Game {
     private readonly _createdAt: Date,
     private _startedAt: Date | null = null,
     private _completedAt: Date | null = null
-  ) {}
+  ) {
+    super()
+  }
 
   static createNew(
     id: GameId,
@@ -42,6 +48,38 @@ export default class Game {
       null,
       '',
       new Date()
+    )
+  }
+
+  static reconstruct(data: {
+    id: GameId
+    userId: number
+    gameType: GameType
+    pointsLimit: PointsLimit
+    status: GameStatus
+    opponentId: number | null
+    playerScore: number | null
+    opponentScore: number | null
+    mission: string | null
+    notes: string
+    createdAt: Date
+    startedAt: Date | null
+    completedAt: Date | null
+  }): Game {
+    return new Game(
+      data.id,
+      data.userId,
+      data.gameType,
+      data.pointsLimit,
+      data.status,
+      data.opponentId,
+      data.playerScore,
+      data.opponentScore,
+      data.mission,
+      data.notes,
+      data.createdAt,
+      data.startedAt,
+      data.completedAt
     )
   }
 
@@ -107,6 +145,9 @@ export default class Game {
     this._status = GameStatus.IN_PROGRESS
     this._mission = mission || null
     this._startedAt = new Date()
+
+    // Raise domain event
+    this.addDomainEvent(new GameStartedEvent(this._id, this._userId, mission))
   }
 
   complete(playerScore: number, opponentScore: number): void {
@@ -118,6 +159,16 @@ export default class Game {
     this._playerScore = playerScore
     this._opponentScore = opponentScore
     this._completedAt = new Date()
+
+    // Determine winner and raise domain event
+    const winner = this.getWinner()!
+    this.addDomainEvent(new GameCompletedEvent(
+      this._id, 
+      this._userId, 
+      playerScore, 
+      opponentScore, 
+      winner
+    ))
   }
 
   cancel(): void {
@@ -125,7 +176,11 @@ export default class Game {
       throw new Error('Cannot cancel a completed game')
     }
 
+    const previousStatus = this._status.value
     this._status = GameStatus.CANCELLED
+
+    // Raise domain event
+    this.addDomainEvent(new GameCancelledEvent(this._id, this._userId, previousStatus))
   }
 
   setOpponent(opponentId: number): void {

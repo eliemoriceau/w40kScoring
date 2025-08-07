@@ -1,4 +1,4 @@
-import { IGameRepository } from '#domain/repositories/i_game_repository'
+import { IGameQueryRepository } from '#domain/repositories/i_game_query_repository'
 import Game from '#domain/entities/game'
 import GameId from '#domain/value-objects/game_id'
 import GameType from '#domain/value-objects/game_type'
@@ -7,31 +7,10 @@ import GameStatus from '#domain/value-objects/game_status'
 import GameModel from '#models/game'
 
 /**
- * LucidGameRepository - Infrastructure Adapter
- * Implements the IGameRepository domain port using Lucid ORM
+ * LucidGameQueryRepository - Infrastructure Adapter for Queries
+ * Implements the IGameQueryRepository domain port using Lucid ORM (Read-only operations)
  */
-export default class LucidGameRepository implements IGameRepository {
-  async save(game: Game): Promise<Game> {
-    const gameModel = await GameModel.updateOrCreate(
-      { id: game.id.value },
-      {
-        userId: game.userId,
-        opponentId: game.opponentId,
-        gameType: game.gameType.value as 'MATCHED_PLAY' | 'NARRATIVE' | 'OPEN_PLAY',
-        pointsLimit: game.pointsLimit.value,
-        status: game.status.value as 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED',
-        playerScore: game.playerScore,
-        opponentScore: game.opponentScore,
-        mission: game.mission,
-        notes: game.notes || null,
-        startedAt: game.startedAt,
-        completedAt: game.completedAt,
-      }
-    )
-
-    return this.toDomainEntity(gameModel)
-  }
-
+export default class LucidGameQueryRepository implements IGameQueryRepository {
   async findById(id: GameId): Promise<Game | null> {
     const gameModel = await GameModel.find(id.value)
     
@@ -92,10 +71,6 @@ export default class LucidGameRepository implements IGameRepository {
     return { games, total: totalCount }
   }
 
-  async delete(id: GameId): Promise<void> {
-    await GameModel.query().where('id', id.value).delete()
-  }
-
   async exists(id: GameId): Promise<boolean> {
     const count = await GameModel
       .query()
@@ -103,6 +78,36 @@ export default class LucidGameRepository implements IGameRepository {
       .count('* as total')
     
     return Number(count[0]?.total ?? 0) > 0
+  }
+
+  async countByUserAndStatus(userId: number, status: string): Promise<number> {
+    const count = await GameModel
+      .query()
+      .where('userId', userId)
+      .where('status', status)
+      .count('* as total')
+    
+    return Number(count[0]?.total ?? 0)
+  }
+
+  async findRecentByUserId(userId: number, limit: number): Promise<Game[]> {
+    const gameModels = await GameModel
+      .query()
+      .where('userId', userId)
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+
+    return gameModels.map(model => this.toDomainEntity(model))
+  }
+
+  async findByOpponent(userId: number, opponentId: number): Promise<Game[]> {
+    const gameModels = await GameModel
+      .query()
+      .where('userId', userId)
+      .where('opponentId', opponentId)
+      .orderBy('createdAt', 'desc')
+
+    return gameModels.map(model => this.toDomainEntity(model))
   }
 
   /**

@@ -6,15 +6,33 @@ import PlayerId from '#domain/value-objects/player_id'
 import ScoreType from '#domain/value-objects/score_type'
 import ScoreName from '#domain/value-objects/score_name'
 import ScoreValue from '#domain/value-objects/score_value'
+import { IdGenerator } from '#domain/services/id_generator'
+
+// Mock IdGenerator for testing
+class TestIdGenerator implements IdGenerator {
+  private counter = 1
+
+  generateScoreId(): ScoreId {
+    return new ScoreId(this.counter++)
+  }
+
+  reset() {
+    this.counter = 1
+  }
+}
+
+const testIdGenerator = new TestIdGenerator()
 
 test.group('Score Entity', () => {
   test('should create a new score for objective', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Hold Objective 1'),
       scoreValue: ScoreValue.forType(5, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     assert.instanceOf(score.id, ScoreId)
@@ -27,12 +45,14 @@ test.group('Score Entity', () => {
   })
 
   test('should create a bonus score', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(2),
       playerId: new PlayerId(3),
       scoreType: new ScoreType('BONUS'),
       scoreName: new ScoreName('First Blood'),
       scoreValue: ScoreValue.forType(3, new ScoreType('BONUS')),
+      idGenerator: testIdGenerator,
     })
 
     assert.isTrue(score.scoreType.equals(new ScoreType('BONUS')))
@@ -40,12 +60,14 @@ test.group('Score Entity', () => {
   })
 
   test('should create a penalty score', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(3),
       playerId: new PlayerId(2),
       scoreType: new ScoreType('PENALTY'),
       scoreName: new ScoreName('Late Deployment'),
       scoreValue: ScoreValue.forType(-5, new ScoreType('PENALTY')),
+      idGenerator: testIdGenerator,
     })
 
     assert.isTrue(score.scoreType.equals(new ScoreType('PENALTY')))
@@ -53,12 +75,14 @@ test.group('Score Entity', () => {
   })
 
   test('should create primary score', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('PRIMARY'),
       scoreName: new ScoreName('Control Objectives'),
       scoreValue: ScoreValue.forType(15, new ScoreType('PRIMARY')),
+      idGenerator: testIdGenerator,
     })
 
     assert.isTrue(score.scoreType.equals(new ScoreType('PRIMARY')))
@@ -66,12 +90,14 @@ test.group('Score Entity', () => {
   })
 
   test('should create secondary score', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(2),
       playerId: new PlayerId(4),
       scoreType: new ScoreType('SECONDARY'),
       scoreName: new ScoreName('Assassinate'),
       scoreValue: ScoreValue.forType(12, new ScoreType('SECONDARY')),
+      idGenerator: testIdGenerator,
     })
 
     assert.isTrue(score.scoreType.equals(new ScoreType('SECONDARY')))
@@ -79,12 +105,14 @@ test.group('Score Entity', () => {
   })
 
   test('should raise ScoreCreatedEvent when creating score', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Capture Point'),
       scoreValue: ScoreValue.forType(3, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     const events = score.getDomainEvents()
@@ -93,12 +121,14 @@ test.group('Score Entity', () => {
   })
 
   test('should update score value and raise event', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('PRIMARY'),
       scoreName: new ScoreName('Primary Objective'),
       scoreValue: ScoreValue.forType(10, new ScoreType('PRIMARY')),
+      idGenerator: testIdGenerator,
     })
 
     score.clearDomainEvents() // Clear creation event
@@ -114,6 +144,7 @@ test.group('Score Entity', () => {
   })
 
   test('should not update to same value', ({ assert }) => {
+    testIdGenerator.reset()
     const originalValue = ScoreValue.forType(10, new ScoreType('OBJECTIVE'))
     const score = Score.create({
       roundId: new RoundId(1),
@@ -121,6 +152,7 @@ test.group('Score Entity', () => {
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Objective'),
       scoreValue: originalValue,
+      idGenerator: testIdGenerator,
     })
 
     score.clearDomainEvents()
@@ -134,12 +166,14 @@ test.group('Score Entity', () => {
   })
 
   test('should throw error when updating with incompatible score type', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('BONUS'),
       scoreName: new ScoreName('Bonus Score'),
       scoreValue: ScoreValue.forType(5, new ScoreType('BONUS')),
+      idGenerator: testIdGenerator,
     })
 
     const penaltyValue = new ScoreValue(-3) // Negative value for bonus type
@@ -151,12 +185,14 @@ test.group('Score Entity', () => {
   })
 
   test('should update score name and raise event', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Old Objective'),
       scoreValue: ScoreValue.forType(3, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     score.clearDomainEvents()
@@ -172,6 +208,7 @@ test.group('Score Entity', () => {
   })
 
   test('should not update to same name', ({ assert }) => {
+    testIdGenerator.reset()
     const originalName = new ScoreName('Objective Name')
     const score = Score.create({
       roundId: new RoundId(1),
@@ -179,6 +216,7 @@ test.group('Score Entity', () => {
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: originalName,
       scoreValue: ScoreValue.forType(3, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     score.clearDomainEvents()
@@ -192,12 +230,14 @@ test.group('Score Entity', () => {
   })
 
   test('should check if score is positive', ({ assert }) => {
+    testIdGenerator.reset()
     const positiveScore = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Positive Score'),
       scoreValue: ScoreValue.forType(5, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     const zeroScore = Score.create({
@@ -206,6 +246,7 @@ test.group('Score Entity', () => {
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Zero Score'),
       scoreValue: ScoreValue.forType(0, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     assert.isTrue(positiveScore.isPositive())
@@ -213,12 +254,14 @@ test.group('Score Entity', () => {
   })
 
   test('should check if score is negative', ({ assert }) => {
+    testIdGenerator.reset()
     const negativeScore = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('PENALTY'),
       scoreName: new ScoreName('Penalty Score'),
       scoreValue: ScoreValue.forType(-5, new ScoreType('PENALTY')),
+      idGenerator: testIdGenerator,
     })
 
     const positiveScore = Score.create({
@@ -227,6 +270,7 @@ test.group('Score Entity', () => {
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Positive Score'),
       scoreValue: ScoreValue.forType(3, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     assert.isTrue(negativeScore.isNegative())
@@ -253,12 +297,14 @@ test.group('Score Entity', () => {
   })
 
   test('should clear domain events after retrieval', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Test Score'),
       scoreValue: ScoreValue.forType(5, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     // Should have creation event
@@ -270,12 +316,14 @@ test.group('Score Entity', () => {
   })
 
   test('should check if score has domain events', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Test Score'),
       scoreValue: ScoreValue.forType(5, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     assert.isTrue(score.hasDomainEvents())
@@ -285,12 +333,14 @@ test.group('Score Entity', () => {
   })
 
   test('should get display information', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('SECONDARY'),
       scoreName: new ScoreName('Assassinate Enemy Warlord'),
       scoreValue: ScoreValue.forType(15, new ScoreType('SECONDARY')),
+      idGenerator: testIdGenerator,
     })
 
     const displayInfo = score.getDisplayInfo()
@@ -301,12 +351,14 @@ test.group('Score Entity', () => {
   })
 
   test('should format negative value correctly', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('PENALTY'),
       scoreName: new ScoreName('Late Deployment'),
       scoreValue: ScoreValue.forType(-10, new ScoreType('PENALTY')),
+      idGenerator: testIdGenerator,
     })
 
     const displayInfo = score.getDisplayInfo()
@@ -314,12 +366,14 @@ test.group('Score Entity', () => {
   })
 
   test('should format zero value correctly', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Missed Objective'),
       scoreValue: ScoreValue.forType(0, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     const displayInfo = score.getDisplayInfo()

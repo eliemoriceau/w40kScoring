@@ -4,6 +4,10 @@ import ScoreId from '#domain/value-objects/score_id'
 import RoundId from '#domain/value-objects/round_id'
 import PlayerId from '#domain/value-objects/player_id'
 import ScoreType from '#domain/value-objects/score_type'
+import ScoreValue from '#domain/value-objects/score_value'
+import ScoreStatsSummary from '#domain/value-objects/score_stats_summary'
+import RoundStatsSummary from '#domain/value-objects/round_stats_summary'
+import PlayerRanking from '#domain/value-objects/player_ranking'
 import LucidScoreQueryRepository from './lucid_score_query_repository.js'
 import LucidScoreCommandRepository from './lucid_score_command_repository.js'
 
@@ -46,36 +50,23 @@ export default class LucidScoreRepository implements ScoreRepository {
     return this.queryRepository.findByRoundAndType(roundId, scoreType)
   }
 
-  async getTotalScoreByPlayer(playerId: PlayerId): Promise<number> {
+  async getTotalScoreByPlayer(playerId: PlayerId): Promise<ScoreValue> {
     return this.queryRepository.getTotalScoreByPlayer(playerId)
   }
 
-  async getTotalScoreByRound(roundId: RoundId): Promise<number> {
+  async getTotalScoreByRound(roundId: RoundId): Promise<ScoreValue> {
     return this.queryRepository.getTotalScoreByRound(roundId)
   }
 
-  async getTotalScoreByRoundAndPlayer(roundId: RoundId, playerId: PlayerId): Promise<number> {
+  async getTotalScoreByRoundAndPlayer(roundId: RoundId, playerId: PlayerId): Promise<ScoreValue> {
     return this.queryRepository.getTotalScoreByRoundAndPlayer(roundId, playerId)
   }
 
-  async getScoreStatsByPlayer(playerId: PlayerId): Promise<{
-    totalScore: number
-    positiveScores: number
-    negativeScores: number
-    averageScore: number
-    scoreCount: number
-    scoresByType: Record<string, number>
-  }> {
+  async getScoreStatsByPlayer(playerId: PlayerId): Promise<ScoreStatsSummary> {
     return this.queryRepository.getScoreStatsByPlayer(playerId)
   }
 
-  async getScoreStatsByRound(roundId: RoundId): Promise<{
-    totalScore: number
-    playerCount: number
-    averageScore: number
-    scoreCount: number
-    scoresByType: Record<string, number>
-  }> {
+  async getScoreStatsByRound(roundId: RoundId): Promise<RoundStatsSummary> {
     return this.queryRepository.getScoreStatsByRound(roundId)
   }
 
@@ -91,13 +82,7 @@ export default class LucidScoreRepository implements ScoreRepository {
     return this.queryRepository.countByPlayer(playerId)
   }
 
-  async findTopScoringPlayers(limit: number): Promise<
-    Array<{
-      playerId: number
-      totalScore: number
-      scoreCount: number
-    }>
-  > {
+  async findTopScoringPlayers(limit: number): Promise<PlayerRanking[]> {
     return this.queryRepository.findTopScoringPlayers(limit)
   }
 

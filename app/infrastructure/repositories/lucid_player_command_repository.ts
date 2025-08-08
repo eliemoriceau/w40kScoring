@@ -11,8 +11,11 @@ import PlayerModel from '#models/player'
  */
 export default class LucidPlayerCommandRepository implements PlayerCommandRepository {
   async save(player: Player): Promise<Player> {
-    // Check if player exists first
-    const existingPlayer = await PlayerModel.find(player.id.value)
+    // Check if player exists first - but only if it's a valid existing ID
+    let existingPlayer: PlayerModel | null = null
+    if (player.id.value > 0) {
+      existingPlayer = await PlayerModel.find(player.id.value)
+    }
 
     let playerModel: PlayerModel
 
@@ -21,14 +24,18 @@ export default class LucidPlayerCommandRepository implements PlayerCommandReposi
       existingPlayer.gameId = player.gameId.value
       existingPlayer.userId = player.userId
       existingPlayer.pseudo = player.pseudo.value
+      existingPlayer.isGuest = player.isGuest
       playerModel = await existingPlayer.save()
     } else {
-      // Create new player (let database generate ID)
-      playerModel = await PlayerModel.create({
+      // Create new player - let DB generate ID for auto-increment
+      const createData = {
         gameId: player.gameId.value,
         userId: player.userId,
         pseudo: player.pseudo.value,
-      })
+        isGuest: player.isGuest,
+      }
+
+      playerModel = await PlayerModel.create(createData)
     }
 
     return this.toDomainEntity(playerModel)
@@ -51,7 +58,7 @@ export default class LucidPlayerCommandRepository implements PlayerCommandReposi
   }
 
   async deleteByGameId(gameId: number): Promise<void> {
-    await PlayerModel.query().where('gameId', gameId).delete()
+    await PlayerModel.query().where('game_id', gameId).delete()
   }
 
   /**

@@ -6,6 +6,9 @@ import PlayerId from '#domain/value-objects/player_id'
 import ScoreType from '#domain/value-objects/score_type'
 import ScoreName from '#domain/value-objects/score_name'
 import ScoreValue from '#domain/value-objects/score_value'
+import ScoreStatsSummary from '#domain/value-objects/score_stats_summary'
+import RoundStatsSummary from '#domain/value-objects/round_stats_summary'
+import PlayerRanking from '#domain/value-objects/player_ranking'
 import ScoreModel from '#models/score'
 
 /**
@@ -65,89 +68,74 @@ export default class LucidScoreQueryRepository implements ScoreQueryRepository {
     return scoreModels.map((model) => this.toDomainEntity(model))
   }
 
-  async getTotalScoreByPlayer(playerId: PlayerId): Promise<number> {
+  async getTotalScoreByPlayer(playerId: PlayerId): Promise<ScoreValue> {
     const result = await ScoreModel.query()
       .where('joueur_id', playerId.value)
       .sum('valeur_score as total')
 
-    return Number((result[0] as any)?.$extras?.total ?? 0)
+    const total = Number((result[0] as any)?.$extras?.total ?? 0)
+    return new ScoreValue(total)
   }
 
-  async getTotalScoreByRound(roundId: RoundId): Promise<number> {
+  async getTotalScoreByRound(roundId: RoundId): Promise<ScoreValue> {
     const result = await ScoreModel.query()
       .where('round_id', roundId.value)
       .sum('valeur_score as total')
 
-    return Number((result[0] as any)?.$extras?.total ?? 0)
+    const total = Number((result[0] as any)?.$extras?.total ?? 0)
+    return new ScoreValue(total)
   }
 
-  async getTotalScoreByRoundAndPlayer(roundId: RoundId, playerId: PlayerId): Promise<number> {
+  async getTotalScoreByRoundAndPlayer(roundId: RoundId, playerId: PlayerId): Promise<ScoreValue> {
     const result = await ScoreModel.query()
       .where('round_id', roundId.value)
       .where('joueur_id', playerId.value)
       .sum('valeur_score as total')
 
-    return Number((result[0] as any)?.$extras?.total ?? 0)
+    const total = Number((result[0] as any)?.$extras?.total ?? 0)
+    return new ScoreValue(total)
   }
 
-  async getScoreStatsByPlayer(playerId: PlayerId): Promise<{
-    totalScore: number
-    positiveScores: number
-    negativeScores: number
-    averageScore: number
-    scoreCount: number
-    scoresByType: Record<string, number>
-  }> {
+  async getScoreStatsByPlayer(playerId: PlayerId): Promise<ScoreStatsSummary> {
     const scores = await ScoreModel.query().where('joueur_id', playerId.value)
 
     const positiveScores = scores.filter((s) => s.valeurScore > 0).length
     const negativeScores = scores.filter((s) => s.valeurScore < 0).length
     const totalScore = scores.reduce((sum, s) => sum + s.valeurScore, 0)
     const scoreCount = scores.length
-    const averageScore = scoreCount > 0 ? totalScore / scoreCount : 0
 
-    const scoresByType: Record<string, number> = {}
+    const scoresByType: Record<string, ScoreValue> = {}
     scores.forEach((score) => {
-      scoresByType[score.typeScore] = (scoresByType[score.typeScore] || 0) + score.valeurScore
+      const currentValue = scoresByType[score.typeScore]?.value || 0
+      const newValue = currentValue + score.valeurScore
+      scoresByType[score.typeScore] = new ScoreValue(newValue)
     })
 
-    return {
-      totalScore,
+    return new ScoreStatsSummary(
+      new ScoreValue(totalScore),
       positiveScores,
       negativeScores,
-      averageScore,
       scoreCount,
-      scoresByType,
-    }
+      scoresByType
+    )
   }
 
-  async getScoreStatsByRound(roundId: RoundId): Promise<{
-    totalScore: number
-    playerCount: number
-    averageScore: number
-    scoreCount: number
-    scoresByType: Record<string, number>
-  }> {
+  async getScoreStatsByRound(roundId: RoundId): Promise<RoundStatsSummary> {
     const scores = await ScoreModel.query().where('round_id', roundId.value)
 
     const uniquePlayers = new Set(scores.map((s) => s.joueurId))
     const playerCount = uniquePlayers.size
     const totalScore = scores.reduce((sum, s) => sum + s.valeurScore, 0)
     const scoreCount = scores.length
-    const averageScore = scoreCount > 0 ? totalScore / scoreCount : 0
 
-    const scoresByType: Record<string, number> = {}
+    const scoresByType: Record<string, ScoreValue> = {}
     scores.forEach((score) => {
-      scoresByType[score.typeScore] = (scoresByType[score.typeScore] || 0) + score.valeurScore
+      const currentValue = scoresByType[score.typeScore]?.value || 0
+      const newValue = currentValue + score.valeurScore
+      scoresByType[score.typeScore] = new ScoreValue(newValue)
     })
 
-    return {
-      totalScore,
-      playerCount,
-      averageScore,
-      scoreCount,
-      scoresByType,
-    }
+    return new RoundStatsSummary(new ScoreValue(totalScore), playerCount, scoreCount, scoresByType)
   }
 
   async exists(id: ScoreId): Promise<boolean> {
@@ -172,13 +160,7 @@ export default class LucidScoreQueryRepository implements ScoreQueryRepository {
     return Number((countResult[0] as any)?.$extras?.total ?? 0)
   }
 
-  async findTopScoringPlayers(limit: number): Promise<
-    Array<{
-      playerId: number
-      totalScore: number
-      scoreCount: number
-    }>
-  > {
+  async findTopScoringPlayers(limit: number): Promise<PlayerRanking[]> {
     const results = await ScoreModel.query()
       .select('joueur_id')
       .sum('valeur_score as total_score')
@@ -187,11 +169,13 @@ export default class LucidScoreQueryRepository implements ScoreQueryRepository {
       .orderBy('total_score', 'desc')
       .limit(limit)
 
-    return results.map((result) => ({
-      playerId: result.joueurId,
-      totalScore: Number((result as any).$extras.total_score),
-      scoreCount: Number((result as any).$extras.score_count),
-    }))
+    return results.map((result) => {
+      const playerId = new PlayerId(result.joueurId)
+      const totalScore = Number((result as any).$extras.total_score)
+      const scoreCount = Number((result as any).$extras.score_count)
+
+      return new PlayerRanking(playerId, new ScoreValue(totalScore), scoreCount)
+    })
   }
 
   /**

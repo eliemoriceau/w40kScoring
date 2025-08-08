@@ -6,15 +6,33 @@ import PlayerId from '#domain/value-objects/player_id'
 import ScoreType from '#domain/value-objects/score_type'
 import ScoreName from '#domain/value-objects/score_name'
 import ScoreValue from '#domain/value-objects/score_value'
+import { IdGenerator } from '#domain/services/id_generator'
+
+// Mock IdGenerator for testing
+class TestIdGenerator implements IdGenerator {
+  private counter = 1
+
+  generateScoreId(): ScoreId {
+    return new ScoreId(this.counter++)
+  }
+
+  reset() {
+    this.counter = 1
+  }
+}
+
+const testIdGenerator = new TestIdGenerator()
 
 test.group('Score Domain Events', () => {
   test('should raise ScoreCreatedEvent when score is created', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(2),
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Hold Objective 1'),
       scoreValue: ScoreValue.forType(5, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     const events = score.getDomainEvents()
@@ -32,12 +50,14 @@ test.group('Score Domain Events', () => {
   })
 
   test('should raise ScoreUpdatedEvent when value is updated', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('PRIMARY'),
       scoreName: new ScoreName('Primary Objective'),
       scoreValue: ScoreValue.forType(10, new ScoreType('PRIMARY')),
+      idGenerator: testIdGenerator,
     })
 
     score.clearDomainEvents() // Clear creation event
@@ -56,12 +76,14 @@ test.group('Score Domain Events', () => {
   })
 
   test('should raise ScoreUpdatedEvent when name is updated', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('SECONDARY'),
       scoreName: new ScoreName('Old Name'),
       scoreValue: ScoreValue.forType(8, new ScoreType('SECONDARY')),
+      idGenerator: testIdGenerator,
     })
 
     score.clearDomainEvents() // Clear creation event
@@ -80,6 +102,7 @@ test.group('Score Domain Events', () => {
   })
 
   test('should not raise event when updating to same value', ({ assert }) => {
+    testIdGenerator.reset()
     const originalValue = ScoreValue.forType(10, new ScoreType('OBJECTIVE'))
     const score = Score.create({
       roundId: new RoundId(1),
@@ -87,6 +110,7 @@ test.group('Score Domain Events', () => {
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: new ScoreName('Test Score'),
       scoreValue: originalValue,
+      idGenerator: testIdGenerator,
     })
 
     score.clearDomainEvents()
@@ -99,6 +123,7 @@ test.group('Score Domain Events', () => {
   })
 
   test('should not raise event when updating to same name', ({ assert }) => {
+    testIdGenerator.reset()
     const originalName = new ScoreName('Test Name')
     const score = Score.create({
       roundId: new RoundId(1),
@@ -106,6 +131,7 @@ test.group('Score Domain Events', () => {
       scoreType: new ScoreType('OBJECTIVE'),
       scoreName: originalName,
       scoreValue: ScoreValue.forType(5, new ScoreType('OBJECTIVE')),
+      idGenerator: testIdGenerator,
     })
 
     score.clearDomainEvents()
@@ -118,12 +144,14 @@ test.group('Score Domain Events', () => {
   })
 
   test('should clear domain events', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('BONUS'),
       scoreName: new ScoreName('Bonus Score'),
       scoreValue: ScoreValue.forType(3, new ScoreType('BONUS')),
+      idGenerator: testIdGenerator,
     })
 
     // Should have creation event
@@ -135,12 +163,14 @@ test.group('Score Domain Events', () => {
   })
 
   test('should check if score has domain events', ({ assert }) => {
+    testIdGenerator.reset()
     const score = Score.create({
       roundId: new RoundId(1),
       playerId: new PlayerId(1),
       scoreType: new ScoreType('PENALTY'),
       scoreName: new ScoreName('Penalty Score'),
       scoreValue: ScoreValue.forType(-5, new ScoreType('PENALTY')),
+      idGenerator: testIdGenerator,
     })
 
     assert.isTrue(score.hasDomainEvents())

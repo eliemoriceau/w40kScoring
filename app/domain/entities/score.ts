@@ -7,6 +7,7 @@ import ScoreName from '#domain/value-objects/score_name'
 import ScoreValue from '#domain/value-objects/score_value'
 import ScoreCreatedEvent from '#domain/events/score_created_event'
 import ScoreUpdatedEvent from '#domain/events/score_updated_event'
+import { IdGenerator } from '#domain/services/id_generator'
 
 /**
  * Score Entity - Aggregate Root
@@ -63,8 +64,13 @@ export default class Score extends AggregateRoot {
     scoreType: ScoreType
     scoreName: ScoreName
     scoreValue: ScoreValue
+    idGenerator: IdGenerator
   }): Score {
-    const scoreId = new ScoreId(Math.floor(Math.random() * 1000000) + 1) // Temporary ID generation
+    if (!params.idGenerator) {
+      throw new Error('IdGenerator is required for creating new Scores')
+    }
+
+    const scoreId = params.idGenerator.generateScoreId()
     const createdAt = new Date()
 
     // Validate value compatibility with score type

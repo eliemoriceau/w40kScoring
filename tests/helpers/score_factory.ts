@@ -5,6 +5,22 @@ import PlayerId from '#domain/value-objects/player_id'
 import ScoreType from '#domain/value-objects/score_type'
 import ScoreName from '#domain/value-objects/score_name'
 import ScoreValue from '#domain/value-objects/score_value'
+import { IdGenerator } from '#domain/services/id_generator'
+
+/**
+ * Test IdGenerator for consistent test results
+ */
+class TestIdGenerator implements IdGenerator {
+  private counter = 1
+
+  generateScoreId(): ScoreId {
+    return new ScoreId(this.counter++)
+  }
+
+  reset() {
+    this.counter = 1
+  }
+}
 
 /**
  * ScoreFactory - Test Helper
@@ -14,6 +30,7 @@ import ScoreValue from '#domain/value-objects/score_value'
 export class ScoreFactory {
   private static defaultRoundId = new RoundId(1)
   private static defaultPlayerId = new PlayerId(1)
+  private static testIdGenerator = new TestIdGenerator()
 
   /**
    * Create a basic objective score
@@ -24,6 +41,7 @@ export class ScoreFactory {
       playerId?: PlayerId
       scoreName?: string
       scoreValue?: number
+      idGenerator?: IdGenerator
     } = {}
   ): Score {
     const scoreType = new ScoreType('OBJECTIVE')
@@ -36,6 +54,7 @@ export class ScoreFactory {
       scoreType,
       scoreName,
       scoreValue,
+      idGenerator: options.idGenerator ?? this.testIdGenerator,
     })
   }
 
@@ -48,6 +67,7 @@ export class ScoreFactory {
       playerId?: PlayerId
       scoreName?: string
       scoreValue?: number
+      idGenerator?: IdGenerator
     } = {}
   ): Score {
     const scoreType = new ScoreType('BONUS')
@@ -60,6 +80,7 @@ export class ScoreFactory {
       scoreType,
       scoreName,
       scoreValue,
+      idGenerator: options.idGenerator ?? this.testIdGenerator,
     })
   }
 
@@ -72,6 +93,7 @@ export class ScoreFactory {
       playerId?: PlayerId
       scoreName?: string
       scoreValue?: number
+      idGenerator?: IdGenerator
     } = {}
   ): Score {
     const scoreType = new ScoreType('PENALTY')
@@ -84,6 +106,7 @@ export class ScoreFactory {
       scoreType,
       scoreName,
       scoreValue,
+      idGenerator: options.idGenerator ?? this.testIdGenerator,
     })
   }
 
@@ -96,6 +119,7 @@ export class ScoreFactory {
       playerId?: PlayerId
       scoreName?: string
       scoreValue?: number
+      idGenerator?: IdGenerator
     } = {}
   ): Score {
     const scoreType = new ScoreType('PRIMARY')
@@ -108,6 +132,7 @@ export class ScoreFactory {
       scoreType,
       scoreName,
       scoreValue,
+      idGenerator: options.idGenerator ?? this.testIdGenerator,
     })
   }
 
@@ -120,6 +145,7 @@ export class ScoreFactory {
       playerId?: PlayerId
       scoreName?: string
       scoreValue?: number
+      idGenerator?: IdGenerator
     } = {}
   ): Score {
     const scoreType = new ScoreType('SECONDARY')
@@ -132,6 +158,7 @@ export class ScoreFactory {
       scoreType,
       scoreName,
       scoreValue,
+      idGenerator: options.idGenerator ?? this.testIdGenerator,
     })
   }
 
@@ -291,6 +318,7 @@ export class ScoreFactory {
     options: {
       roundId?: RoundId
       playerId?: PlayerId
+      idGenerator?: IdGenerator
     } = {}
   ): Score[] {
     const scores: Score[] = []
@@ -309,6 +337,7 @@ export class ScoreFactory {
           scoreType,
           scoreName,
           scoreValue,
+          idGenerator: options.idGenerator ?? this.testIdGenerator,
         })
       )
     }

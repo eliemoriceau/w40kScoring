@@ -3,6 +3,10 @@ import ScoreId from '#domain/value-objects/score_id'
 import RoundId from '#domain/value-objects/round_id'
 import PlayerId from '#domain/value-objects/player_id'
 import ScoreType from '#domain/value-objects/score_type'
+import PlayerRanking from '#domain/value-objects/player_ranking'
+import ScoreStatsSummary from '#domain/value-objects/score_stats_summary'
+import RoundStatsSummary from '#domain/value-objects/round_stats_summary'
+import ScoreValue from '#domain/value-objects/score_value'
 
 /**
  * ScoreQueryRepository Interface
@@ -43,40 +47,27 @@ export interface ScoreQueryRepository {
   /**
    * Get total score for a player across all rounds
    */
-  getTotalScoreByPlayer(playerId: PlayerId): Promise<number>
+  getTotalScoreByPlayer(playerId: PlayerId): Promise<ScoreValue>
 
   /**
    * Get total score for a specific round
    */
-  getTotalScoreByRound(roundId: RoundId): Promise<number>
+  getTotalScoreByRound(roundId: RoundId): Promise<ScoreValue>
 
   /**
    * Get total score for a player in a specific round
    */
-  getTotalScoreByRoundAndPlayer(roundId: RoundId, playerId: PlayerId): Promise<number>
+  getTotalScoreByRoundAndPlayer(roundId: RoundId, playerId: PlayerId): Promise<ScoreValue>
 
   /**
    * Get score statistics by player
    */
-  getScoreStatsByPlayer(playerId: PlayerId): Promise<{
-    totalScore: number
-    positiveScores: number
-    negativeScores: number
-    averageScore: number
-    scoreCount: number
-    scoresByType: Record<string, number>
-  }>
+  getScoreStatsByPlayer(playerId: PlayerId): Promise<ScoreStatsSummary>
 
   /**
    * Get score statistics by round
    */
-  getScoreStatsByRound(roundId: RoundId): Promise<{
-    totalScore: number
-    playerCount: number
-    averageScore: number
-    scoreCount: number
-    scoresByType: Record<string, number>
-  }>
+  getScoreStatsByRound(roundId: RoundId): Promise<RoundStatsSummary>
 
   /**
    * Check if a score exists
@@ -96,11 +87,5 @@ export interface ScoreQueryRepository {
   /**
    * Find top scoring players
    */
-  findTopScoringPlayers(limit: number): Promise<
-    Array<{
-      playerId: number
-      totalScore: number
-      scoreCount: number
-    }>
-  >
+  findTopScoringPlayers(limit: number): Promise<PlayerRanking[]>
 }

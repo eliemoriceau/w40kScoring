@@ -8,22 +8,22 @@ export default class Player extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'game_id' })
   declare gameId: number
 
-  @column()
+  @column({ columnName: 'user_id' })
   declare userId: number | null
 
   @column()
   declare pseudo: string
 
-  @column()
+  @column({ columnName: 'is_guest' })
   declare isGuest: boolean
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime | null
 
   // Relationships

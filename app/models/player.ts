@@ -17,6 +17,9 @@ export default class Player extends BaseModel {
   @column()
   declare pseudo: string
 
+  @column()
+  declare isGuest: boolean
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

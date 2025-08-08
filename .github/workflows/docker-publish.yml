@@ -2,8 +2,8 @@ name: Build & Push Docker image
 
 on:
   push:
-    branches: [ main, staging ]  # Déclenché sur les branches principales
-  workflow_dispatch:  # Permet de lancer manuellement
+    branches: [main, staging] # Déclenché sur les branches principales
+  workflow_dispatch: # Permet de lancer manuellement
 
 jobs:
   build-and-push:
@@ -12,7 +12,7 @@ jobs:
 
     permissions:
       contents: read
-      packages: write  # Autorise l'accès au registry GHCR
+      packages: write # Autorise l'accès au registry GHCR
       id-token: write
 
     steps:

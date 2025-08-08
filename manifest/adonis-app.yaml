@@ -8,7 +8,7 @@ metadata:
   name: adonis-config
   namespace: staging
   labels:
-    app: adonis-app
+    app: 40kScoring
 data:
   # Variables d'environnement non sensibles
   NODE_ENV: "production"
@@ -28,7 +28,7 @@ metadata:
   name: adonis-secret
   namespace: staging
   labels:
-    app: adonis-app
+    app: 40kScoring
 type: Opaque
 stringData:
   # Clé d'application générée avec `node ace generate:key`
@@ -48,19 +48,19 @@ stringData:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: adonis-app
+  name: 40kScoring
   namespace: staging
   labels:
-    app: adonis-app
+    app: 40kScoring
 spec:
   replicas: 2  # Nombre d’instances (modifiable selon charge)
   selector:
     matchLabels:
-      app: adonis-app
+      app: 40kScoring
   template:
     metadata:
       labels:
-        app: adonis-app
+        app: 40kScoring
     spec:
       containers:
         - name: adonis
@@ -91,11 +91,11 @@ metadata:
   name: adonis-service
   namespace: staging
   labels:
-    app: adonis-app
+    app: 40kScoring
 spec:
   type: ClusterIP
   selector:
-    app: adonis-app
+    app: 40kScoring
   ports:
     - port: 80
       targetPort: 3333
@@ -120,7 +120,7 @@ metadata:
 spec:
   tls:
     - hosts:
-        - adonis-staging.example.com
+        - adonis-staging.kube.
       secretName: adonis-tls
   rules:
     - host: adonis-staging.example.com

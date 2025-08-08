@@ -1,0 +1,136 @@
+# =============================
+# CONFIGURATION DE L'APPLICATION
+# =============================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adonis-config
+  namespace: staging
+  labels:
+    app: 40kScoring
+data:
+  # Variables d'environnement non sensibles
+  NODE_ENV: "production"
+  HOST: "0.0.0.0"
+  PORT: "3333"
+  APP_NAME: "adonis-staging-app"
+  DRIVE_DISK: "local"  # si stockage local (peut être modifié selon besoin)
+
+---
+# ============================
+# VARIABLES SENSIBLES (SECRET)
+# ============================
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: adonis-secret
+  namespace: staging
+  labels:
+    app: 40kScoring
+type: Opaque
+stringData:
+  # Clé d'application générée avec `node ace generate:key`
+  APP_KEY: "base64:XXXXXXXXXXXXXXXXXXXXXXXXXXX="
+  DB_CONNECTION: "pg"
+  DB_HOST: "postgres.staging.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_USER: "adonis_user"
+  DB_PASSWORD: "adonis_password"
+  DB_DATABASE: "adonis_db"
+
+---
+# =====================
+# DEPLOYMENT DE L'APP
+# =====================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 40kScoring
+  namespace: staging
+  labels:
+    app: 40kScoring
+spec:
+  replicas: 2  # Nombre d’instances (modifiable selon charge)
+  selector:
+    matchLabels:
+      app: 40kScoring
+  template:
+    metadata:
+      labels:
+        app: 40kScoring
+    spec:
+      containers:
+        - name: adonis
+          image: ghcr.io/mon-org/mon-app:latest  # Image Docker à modifier selon ton registre
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3333
+          envFrom:
+            - configMapRef:
+                name: adonis-config
+            - secretRef:
+                name: adonis-secret
+          volumeMounts:
+            - name: log-volume
+              mountPath: /home/node/app/tmp/logs  # Modifier selon ton app
+      volumes:
+        - name: log-volume
+          emptyDir: {}  # Utilisé ici pour exemple ; à remplacer si persistance nécessaire
+
+---
+# ===========================
+# SERVICE INTERNE CLUSTERIP
+# ===========================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: adonis-service
+  namespace: staging
+  labels:
+    app: 40kScoring
+spec:
+  type: ClusterIP
+  selector:
+    app: 40kScoring
+  ports:
+    - port: 80
+      targetPort: 3333
+      protocol: TCP
+      name: http
+
+---
+# ================
+# INGRESS PUBLIC
+# ================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: adonis-ingress
+  namespace: staging
+  annotations:
+    # Force le HTTPS (redirige HTTP → HTTPS)
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    # Cert-manager (si utilisé pour TLS)
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+spec:
+  tls:
+    - hosts:
+        - adonis-staging.kube.
+      secretName: adonis-tls
+  rules:
+    - host: adonis-staging.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: adonis-service
+                port:
+                  number: 80
+

@@ -16,7 +16,7 @@ router.get('/health', ({ response }) => {
   return response.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
   })
 })
 

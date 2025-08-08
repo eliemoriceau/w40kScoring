@@ -45,6 +45,7 @@ DB_DATABASE=adonis_db
 ## 🏗️ Build de l'image Docker
 
 ### Build simple
+
 ```bash
 # Build de l'image
 docker build -t w40kscoring:latest .
@@ -54,6 +55,7 @@ docker build -t w40kscoring:v1.0.0 .
 ```
 
 ### Build multi-plateforme
+
 ```bash
 # Build pour AMD64 et ARM64
 docker buildx build --platform linux/amd64,linux/arm64 \
@@ -61,6 +63,7 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 ```
 
 ### Push vers le registry
+
 ```bash
 # Tag pour GitHub Container Registry
 docker tag w40kscoring:latest ghcr.io/eliemoriceau/w40kscoring:latest
@@ -72,6 +75,7 @@ docker push ghcr.io/eliemoriceau/w40kscoring:latest
 ## 🏃 Exécution locale avec Docker Compose
 
 ### Démarrage des services
+
 ```bash
 # Démarrer tous les services en arrière-plan
 docker-compose up -d
@@ -84,6 +88,7 @@ docker-compose up -d postgres
 ```
 
 ### Commandes utiles
+
 ```bash
 # Arrêter tous les services
 docker-compose down
@@ -101,6 +106,7 @@ docker-compose exec app node ace migration:run
 ## ☸️ Déploiement Kubernetes
 
 ### Déploiement simple
+
 ```bash
 # Appliquer la configuration
 kubectl apply -f manifest/adonis-app.yaml
@@ -112,6 +118,7 @@ kubectl get ingress -n staging
 ```
 
 ### Configuration des secrets
+
 ```bash
 # Créer le secret avec les bonnes valeurs
 kubectl create secret generic adonis-secret \
@@ -126,6 +133,7 @@ kubectl create secret generic adonis-secret \
 ```
 
 ### Mise à jour du déploiement
+
 ```bash
 # Mettre à jour l'image
 kubectl set image deployment/40kScoring adonis=ghcr.io/eliemoriceau/w40kscoring:v1.0.1 -n staging
@@ -161,11 +169,11 @@ L'image Docker utilise un **build multi-stage** pour optimiser la taille :
 ```yaml
 resources:
   requests:
-    memory: "256Mi"
-    cpu: "250m"
+    memory: '256Mi'
+    cpu: '250m'
   limits:
-    memory: "512Mi"
-    cpu: "500m"
+    memory: '512Mi'
+    cpu: '500m'
 ```
 
 ## 📊 Monitoring & Health Checks
@@ -205,6 +213,7 @@ kubectl logs -f pod/40kScoring-xyz123 -c adonis -n staging
 ### Problèmes courants
 
 #### L'application ne démarre pas
+
 ```bash
 # Vérifier les secrets
 kubectl get secret adonis-secret -n staging -o yaml
@@ -217,6 +226,7 @@ kubectl describe pod 40kScoring-xyz123 -n staging
 ```
 
 #### Problèmes de base de données
+
 ```bash
 # Tester la connexion depuis le pod
 kubectl exec -it deployment/40kScoring -n staging -- node ace healthcheck:db
@@ -226,6 +236,7 @@ kubectl exec -it deployment/40kScoring -n staging -- node ace migration:status
 ```
 
 #### Health checks qui échouent
+
 ```bash
 # Tester manuellement le endpoint
 kubectl port-forward deployment/40kScoring 3333:3333 -n staging
@@ -264,27 +275,28 @@ kubectl get events -n staging --sort-by='.firstTimestamp'
 ## 🔄 CI/CD Integration
 
 ### GitHub Actions example
+
 ```yaml
 name: Build and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Build Docker image
         run: |
           docker build -t ghcr.io/eliemoriceau/w40kscoring:${{ github.sha }} .
-          
+
       - name: Push to registry
         run: |
           docker push ghcr.io/eliemoriceau/w40kscoring:${{ github.sha }}
-          
+
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/40kScoring adonis=ghcr.io/eliemoriceau/w40kscoring:${{ github.sha }} -n staging

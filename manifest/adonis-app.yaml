@@ -11,11 +11,11 @@ metadata:
     app: 40kScoring
 data:
   # Variables d'environnement non sensibles
-  NODE_ENV: "production"
-  HOST: "0.0.0.0"
-  PORT: "3333"
-  APP_NAME: "adonis-staging-app"
-  DRIVE_DISK: "local"  # si stockage local (peut être modifié selon besoin)
+  NODE_ENV: 'production'
+  HOST: '0.0.0.0'
+  PORT: '3333'
+  APP_NAME: 'adonis-staging-app'
+  DRIVE_DISK: 'local' # si stockage local (peut être modifié selon besoin)
 
 ---
 # ============================
@@ -32,13 +32,13 @@ metadata:
 type: Opaque
 stringData:
   # Clé d'application générée avec `node ace generate:key`
-  APP_KEY: "base64:XXXXXXXXXXXXXXXXXXXXXXXXXXX="
-  DB_CONNECTION: "pg"
-  DB_HOST: "postgres.staging.svc.cluster.local"
-  DB_PORT: "5432"
-  DB_USER: "adonis_user"
-  DB_PASSWORD: "adonis_password"
-  DB_DATABASE: "adonis_db"
+  APP_KEY: 'base64:XXXXXXXXXXXXXXXXXXXXXXXXXXX='
+  DB_CONNECTION: 'pg'
+  DB_HOST: 'postgres.staging.svc.cluster.local'
+  DB_PORT: '5432'
+  DB_USER: 'adonis_user'
+  DB_PASSWORD: 'adonis_password'
+  DB_DATABASE: 'adonis_db'
 
 ---
 # =====================
@@ -53,7 +53,7 @@ metadata:
   labels:
     app: 40kScoring
 spec:
-  replicas: 2  # Nombre d’instances (modifiable selon charge)
+  replicas: 2 # Nombre d’instances (modifiable selon charge)
   selector:
     matchLabels:
       app: 40kScoring
@@ -94,11 +94,11 @@ spec:
           # Limites de ressources
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: '256Mi'
+              cpu: '250m'
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: '512Mi'
+              cpu: '500m'
           # Security context
           securityContext:
             runAsNonRoot: true
@@ -113,7 +113,7 @@ spec:
               mountPath: /app/tmp/logs
       volumes:
         - name: log-volume
-          emptyDir: {}  # Utilisé ici pour exemple ; à remplacer si persistance nécessaire
+          emptyDir: {} # Utilisé ici pour exemple ; à remplacer si persistance nécessaire
 
 ---
 # ===========================
@@ -151,7 +151,7 @@ metadata:
     # Force le HTTPS (redirige HTTP → HTTPS)
     traefik.ingress.kubernetes.io/redirect-entry-point: https
     # Cert-manager (si utilisé pour TLS)
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    cert-manager.io/cluster-issuer: 'letsencrypt-staging'
 spec:
   tls:
     - hosts:
@@ -168,4 +168,3 @@ spec:
                 name: adonis-service
                 port:
                   number: 80
-

@@ -22,24 +22,24 @@ export default class LucidPlayerQueryRepository implements PlayerQueryRepository
 
   async findByGameId(gameId: GameId): Promise<Player[]> {
     const playerModels = await PlayerModel.query()
-      .where('gameId', gameId.value)
-      .orderBy('createdAt', 'asc')
+      .where('game_id', gameId.value)
+      .orderBy('created_at', 'asc')
 
     return playerModels.map((model) => this.toDomainEntity(model))
   }
 
   async findByUserId(userId: number): Promise<Player[]> {
     const playerModels = await PlayerModel.query()
-      .where('userId', userId)
-      .orderBy('createdAt', 'desc')
+      .where('user_id', userId)
+      .orderBy('created_at', 'desc')
 
     return playerModels.map((model) => this.toDomainEntity(model))
   }
 
   async findByGameAndUser(gameId: GameId, userId: number): Promise<Player | null> {
     const playerModel = await PlayerModel.query()
-      .where('gameId', gameId.value)
-      .where('userId', userId)
+      .where('game_id', gameId.value)
+      .where('user_id', userId)
       .first()
 
     if (!playerModel) {
@@ -52,29 +52,29 @@ export default class LucidPlayerQueryRepository implements PlayerQueryRepository
   async exists(id: PlayerId): Promise<boolean> {
     const countResult = await PlayerModel.query().where('id', id.value).count('* as total')
 
-    return Number((countResult[0] as any)?.total ?? 0) > 0
+    return Number((countResult[0] as any)?.$extras?.total ?? 0) > 0
   }
 
   async isPseudoTakenInGame(gameId: GameId, pseudo: string): Promise<boolean> {
     const countResult = await PlayerModel.query()
-      .where('gameId', gameId.value)
+      .where('game_id', gameId.value)
       .where('pseudo', pseudo)
       .count('* as total')
 
-    return Number((countResult[0] as any)?.total ?? 0) > 0
+    return Number((countResult[0] as any)?.$extras?.total ?? 0) > 0
   }
 
   async countByGame(gameId: GameId): Promise<number> {
-    const countResult = await PlayerModel.query().where('gameId', gameId.value).count('* as total')
+    const countResult = await PlayerModel.query().where('game_id', gameId.value).count('* as total')
 
-    return Number((countResult[0] as any)?.total ?? 0)
+    return Number((countResult[0] as any)?.$extras?.total ?? 0)
   }
 
   async findGuestPlayers(gameId: GameId): Promise<Player[]> {
     const playerModels = await PlayerModel.query()
-      .where('gameId', gameId.value)
-      .whereNull('userId')
-      .orderBy('createdAt', 'asc')
+      .where('game_id', gameId.value)
+      .whereNull('user_id')
+      .orderBy('created_at', 'asc')
 
     return playerModels.map((model) => this.toDomainEntity(model))
   }

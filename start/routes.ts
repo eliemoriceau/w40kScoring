@@ -11,6 +11,15 @@ import router from '@adonisjs/core/services/router'
 
 const PagesController = () => import('#controllers/pages_controller')
 
+// Health check endpoint for Kubernetes
+router.get('/health', ({ response }) => {
+  return response.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  })
+})
+
 // Home page
 router.get('/', [PagesController, 'home'])
 

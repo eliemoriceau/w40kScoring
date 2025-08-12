@@ -11,4 +11,4 @@ export const DomainErrorCodes = {
   INVALID_USER_ID: 'INVALID_USER_ID',
 } as const
 
-export type DomainErrorCode = typeof DomainErrorCodes[keyof typeof DomainErrorCodes]
+export type DomainErrorCode = (typeof DomainErrorCodes)[keyof typeof DomainErrorCodes]

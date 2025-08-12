@@ -108,7 +108,12 @@ test.group('JoueurService (TDD)', (group) => {
     // Arrange - TDD: This test will fail initially
     const gameId = new GameId(1)
     const ownerId = 123
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     mockGameRepository.addMockGame(game)
 
     const addJoueurDto: AddJoueurDto = {
@@ -135,7 +140,12 @@ test.group('JoueurService (TDD)', (group) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     mockGameRepository.addMockGame(game)
 
     const addJoueurDto: AddJoueurDto = {
@@ -150,7 +160,7 @@ test.group('JoueurService (TDD)', (group) => {
     // Assert
     assert.isNotNull(result)
     assert.equal(result.pseudo, 'GuestPlayer')
-    assert.isNull(result.userId)
+    assert.isUndefined(result.userId)
     assert.isTrue(result.isGuest)
   })
 
@@ -158,7 +168,12 @@ test.group('JoueurService (TDD)', (group) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     mockGameRepository.addMockGame(game)
 
     // Add first player with pseudo
@@ -176,10 +191,16 @@ test.group('JoueurService (TDD)', (group) => {
     }
 
     // Act & Assert
-    await assert.rejects(
-      () => joueurService.addJoueur(addJoueurDto),
-      PseudoAlreadyTakenError
-    )
+    await assert.rejects(async () => {
+      await joueurService.addJoueur(addJoueurDto)
+    })
+    
+    try {
+      await joueurService.addJoueur(addJoueurDto)
+      assert.fail('Should have thrown PseudoAlreadyTakenError')
+    } catch (error) {
+      assert.instanceOf(error, PseudoAlreadyTakenError)
+    }
   })
 
   test('should throw UnauthorizedPartieAccessError for non-owner', async ({ assert }) => {
@@ -187,7 +208,12 @@ test.group('JoueurService (TDD)', (group) => {
     const gameId = new GameId(1)
     const ownerId = 123
     const unauthorizedUserId = 999
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     mockGameRepository.addMockGame(game)
 
     const addJoueurDto: AddJoueurDto = {
@@ -197,10 +223,12 @@ test.group('JoueurService (TDD)', (group) => {
     }
 
     // Act & Assert
-    await assert.rejects(
-      () => joueurService.addJoueur(addJoueurDto),
-      UnauthorizedPartieAccessError
-    )
+    try {
+      await joueurService.addJoueur(addJoueurDto)
+      assert.fail('Should have thrown UnauthorizedPartieAccessError')
+    } catch (error) {
+      assert.instanceOf(error, UnauthorizedPartieAccessError)
+    }
   })
 
   test('should throw PartieNotFoundError for invalid partieId', async ({ assert }) => {
@@ -212,21 +240,33 @@ test.group('JoueurService (TDD)', (group) => {
     }
 
     // Act & Assert
-    await assert.rejects(
-      () => joueurService.addJoueur(addJoueurDto),
-      PartieNotFoundError
-    )
+    try {
+      await joueurService.addJoueur(addJoueurDto)
+      assert.fail('Should have thrown PartieNotFoundError')
+    } catch (error) {
+      assert.instanceOf(error, PartieNotFoundError)
+    }
   })
 
   test('should list joueurs for authorized owner', async ({ assert }) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     mockGameRepository.addMockGame(game)
 
     // Add some players
-    const player1 = Player.createForRegisteredUser(new PlayerId(1), gameId, ownerId, new Pseudo('Owner'))
+    const player1 = Player.createForRegisteredUser(
+      new PlayerId(1),
+      gameId,
+      ownerId,
+      new Pseudo('Owner')
+    )
     const player2 = Player.createForGuest(new PlayerId(2), gameId, new Pseudo('Guest'))
     await mockPlayerRepository.save(player1)
     await mockPlayerRepository.save(player2)
@@ -248,7 +288,12 @@ test.group('JoueurService (TDD)', (group) => {
     const gameId = new GameId(1)
     const ownerId = 123
     const participantId = 456
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     mockGameRepository.addMockGame(game)
 
     // Add participant as player
@@ -268,26 +313,40 @@ test.group('JoueurService (TDD)', (group) => {
     assert.equal(result.joueurs.length, 1)
   })
 
-  test('should throw UnauthorizedPartieAccessError for unauthorized listing', async ({ assert }) => {
+  test('should throw UnauthorizedPartieAccessError for unauthorized listing', async ({
+    assert,
+  }) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
     const unauthorizedUserId = 999
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     mockGameRepository.addMockGame(game)
 
     // Act & Assert
-    await assert.rejects(
-      () => joueurService.listJoueurs('1', unauthorizedUserId),
-      UnauthorizedPartieAccessError
-    )
+    try {
+      await joueurService.listJoueurs('1', unauthorizedUserId)
+      assert.fail('Should have thrown UnauthorizedPartieAccessError')
+    } catch (error) {
+      assert.instanceOf(error, UnauthorizedPartieAccessError)
+    }
   })
 
   test('should identify owner correctly in response', async ({ assert }) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     mockGameRepository.addMockGame(game)
 
     const addJoueurDto: AddJoueurDto = {

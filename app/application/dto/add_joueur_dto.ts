@@ -43,7 +43,11 @@ export class AddJoueurDtoFactory {
       throw new Error('Pseudo cannot exceed 20 characters')
     }
 
-    if (!data.requestingUserId || !Number.isInteger(data.requestingUserId) || data.requestingUserId <= 0) {
+    if (
+      !data.requestingUserId ||
+      !Number.isInteger(data.requestingUserId) ||
+      data.requestingUserId <= 0
+    ) {
       throw new Error('Requesting user ID must be a positive integer')
     }
 

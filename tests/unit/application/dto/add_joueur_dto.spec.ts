@@ -94,10 +94,7 @@ test.group('AddJoueurDtoFactory', () => {
     }
 
     // Act & Assert
-    assert.throws(
-      () => AddJoueurDtoFactory.create(data),
-      'Pseudo cannot exceed 20 characters'
-    )
+    assert.throws(() => AddJoueurDtoFactory.create(data), 'Pseudo cannot exceed 20 characters')
   })
 
   test('should throw error for invalid requesting user ID', ({ assert }) => {

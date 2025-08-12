@@ -1,7 +1,6 @@
 import { AddJoueurDto } from '#application/dto/add_joueur_dto'
 import { JoueurResponseDto, JoueurListResponseDto } from '#application/dto/joueur_response_dto'
 import { JoueurMapper } from '#application/mappers/joueur_mapper'
-import Game from '#domain/entities/game'
 import Player from '#domain/entities/player'
 import GameId from '#domain/value-objects/game_id'
 import PlayerId from '#domain/value-objects/player_id'
@@ -22,7 +21,7 @@ interface ExtendedIdGenerator extends IdGenerator {
 
 /**
  * JoueurService - Application Service
- * 
+ *
  * Orchestrates joueur operations following hexagonal architecture principles.
  * Handles business validation, authorization, and domain events.
  */
@@ -40,11 +39,11 @@ export default class JoueurService {
     // 1. Authorization: verify requesting user is owner of the partie
     const gameId = new GameId(Number(dto.partieId))
     const game = await this.gameRepository.findById(gameId)
-    
+
     if (!game) {
       throw new PartieNotFoundError(dto.partieId)
     }
-    
+
     if (game.userId !== dto.requestingUserId) {
       throw new UnauthorizedPartieAccessError(dto.partieId, dto.requestingUserId)
     }
@@ -83,14 +82,14 @@ export default class JoueurService {
     // 1. Authorization (owner or participant can read)
     const gameId = new GameId(Number(partieId))
     const game = await this.gameRepository.findById(gameId)
-    
+
     if (!game) {
       throw new PartieNotFoundError(partieId)
     }
 
     const isOwner = game.userId === requestingUserId
     const isParticipant = await this.playerRepository.findByGameAndUser(gameId, requestingUserId)
-    
+
     if (!isOwner && !isParticipant) {
       throw new UnauthorizedPartieAccessError(partieId, requestingUserId)
     }

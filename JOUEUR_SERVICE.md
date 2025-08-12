@@ -7,11 +7,13 @@ Le **JoueurService** implémente la gestion des joueurs dans les parties selon l
 ## 🏗️ Architecture
 
 ### Couches DDD
+
 - **Domain** : Erreurs métier (`PseudoAlreadyTakenError`, `UnauthorizedPartieAccessError`)
-- **Application** : DTOs, Mapper, JoueurService 
+- **Application** : DTOs, Mapper, JoueurService
 - **Infrastructure** : Réutilise les repositories Player/Game existants
 
 ### Flux de Données (Hexagonal)
+
 ```
 HTTP Request → JoueurService → PlayerRepository → Domain Entity → DB
      ↓              ↓               ↓              ↓
@@ -25,24 +27,27 @@ HTTP Request → JoueurService → PlayerRepository → Domain Entity → DB
 Ajoute un joueur à une partie avec validation complète.
 
 **Paramètres** :
+
 ```typescript
 interface AddJoueurDto {
-  partieId: string         // ID de la partie
-  pseudo: string           // Pseudo (2-20 chars)
-  userId?: number         // Optionnel (null = guest)
+  partieId: string // ID de la partie
+  pseudo: string // Pseudo (2-20 chars)
+  userId?: number // Optionnel (null = guest)
   requestingUserId: number // Pour autorisation
 }
 ```
 
 **Règles Métier** :
+
 - ✅ Autorisation : seul le propriétaire peut ajouter des joueurs
 - ✅ Pseudo unique par partie (insensible à la casse)
 - ✅ Guest players supportés (userId = null)
 - ✅ Validation format et longueur
 
 **Erreurs** :
+
 - `PseudoAlreadyTakenError` : Pseudo déjà utilisé
-- `UnauthorizedPartieAccessError` : Utilisateur non autorisé  
+- `UnauthorizedPartieAccessError` : Utilisateur non autorisé
 - `PartieNotFoundError` : Partie inexistante
 
 ---
@@ -54,6 +59,7 @@ Liste les joueurs d'une partie avec pagination.
 **Autorisation** : Propriétaire OU participant à la partie
 
 **Retour** :
+
 ```typescript
 interface JoueurListResponseDto {
   joueurs: JoueurResponseDto[]
@@ -69,7 +75,7 @@ interface JoueurResponseDto {
   pseudo: string
   userId?: number
   isGuest: boolean
-  isOwner: boolean      // Si c'est le créateur de la partie
+  isOwner: boolean // Si c'est le créateur de la partie
   createdAt: Date
 }
 ```
@@ -77,10 +83,12 @@ interface JoueurResponseDto {
 ## 🔒 Sécurité & Autorisation
 
 ### Règles d'Accès
+
 - **Ajout** : Seul le propriétaire de la partie
 - **Lecture** : Propriétaire OU participant à la partie
 
 ### Gestion d'Erreurs Craft
+
 - **HTTP 409 Conflict** + Problem Details RFC 7807 pour pseudos dupliqués
 - **HTTP 403 Forbidden** pour accès non autorisé
 - **HTTP 404 Not Found** pour parties inexistantes
@@ -88,13 +96,15 @@ interface JoueurResponseDto {
 ## 🧪 Tests & Validation
 
 ### Couverture TDD Complète
+
 - ✅ 9 tests unitaires JoueurService
-- ✅ 8 tests validation DTOs 
+- ✅ 8 tests validation DTOs
 - ✅ Mocks repositories avec validation métier
 - ✅ Tests autorisation et gestion d'erreurs
 - ✅ Tests race conditions et edge cases
 
 ### Exécution
+
 ```bash
 npm test -- --grep "JoueurService|AddJoueurDtoFactory"
 ```
@@ -102,14 +112,15 @@ npm test -- --grep "JoueurService|AddJoueurDtoFactory"
 ## 🔧 Utilisation
 
 ### Exemple d'Ajout
+
 ```typescript
 const joueurService = container.resolve('JoueurService')
 
 const dto: AddJoueurDto = {
   partieId: '123',
   pseudo: 'ProPlayer',
-  userId: 456,           // Optionnel pour guest
-  requestingUserId: 789  // Owner ID
+  userId: 456, // Optionnel pour guest
+  requestingUserId: 789, // Owner ID
 }
 
 try {
@@ -123,6 +134,7 @@ try {
 ```
 
 ### Exemple de Liste
+
 ```typescript
 const result = await joueurService.listJoueurs('123', requestingUserId)
 console.log(`${result.joueurs.length} joueurs trouvés`)
@@ -131,18 +143,21 @@ console.log(`${result.joueurs.length} joueurs trouvés`)
 ## 🎯 Règles Métier
 
 ### Validation Pseudo
+
 - **Longueur** : 2-20 caractères
 - **Unicité** : Par partie (insensible à la casse)
 - **Format** : Alphanumerique + caractères spéciaux autorisés
 
 ### Types de Joueurs
+
 - **Registered** : userId fourni, lié à un compte utilisateur
 - **Guest** : userId = null, joueur invité temporaire
 
 ### Propriété Partie
+
 - Seul le propriétaire (creator) peut ajouter des joueurs
 - Propriétaires et participants peuvent lister les joueurs
 
 ---
 
-*Documentation générée pour l'issue #15 - Service hexagonal Joueur*
+_Documentation générée pour l'issue #15 - Service hexagonal Joueur_

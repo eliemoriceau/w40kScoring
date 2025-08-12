@@ -8,7 +8,10 @@ import { DomainErrorCodes } from './domain_error_codes.js'
 export class UnauthorizedPartieAccessError extends Error {
   public readonly code = DomainErrorCodes.UNAUTHORIZED_PARTIE_ACCESS
 
-  constructor(readonly partieId: string, readonly userId: number) {
+  constructor(
+    readonly partieId: string,
+    readonly userId: number
+  ) {
     super(`User ${userId} is not authorized to access partie ${partieId}`)
     this.name = 'UnauthorizedPartieAccessError'
   }

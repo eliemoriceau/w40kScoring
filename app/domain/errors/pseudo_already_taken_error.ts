@@ -8,7 +8,10 @@ import { DomainErrorCodes } from './domain_error_codes.js'
 export class PseudoAlreadyTakenError extends Error {
   public readonly code = DomainErrorCodes.PSEUDO_ALREADY_TAKEN
 
-  constructor(readonly pseudo: string, readonly partieId: string) {
+  constructor(
+    readonly pseudo: string,
+    readonly partieId: string
+  ) {
     super(`Pseudo '${pseudo}' is already taken in partie ${partieId}`)
     this.name = 'PseudoAlreadyTakenError'
   }

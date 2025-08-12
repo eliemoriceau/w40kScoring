@@ -15,7 +15,7 @@ export class JoueurMapper {
       id: player.id.value.toString(),
       partieId: player.gameId.value.toString(),
       pseudo: player.pseudo.value,
-      userId: player.userId,
+      userId: player.userId ?? undefined,
       isGuest: player.isGuest,
       isOwner: player.userId === gameOwnerId,
       createdAt: player.createdAt,

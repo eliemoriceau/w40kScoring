@@ -2,13 +2,13 @@ import { DomainEvent } from './domain_event.js'
 import GameId from '#domain/value-objects/game_id'
 
 /**
- * GameCompletedEvent
- * Raised when a game transitions from IN_PROGRESS to COMPLETED status
+ * PartieDeletedEvent
+ * Raised when a partie (complete game) is deleted
  */
-export default class GameCompletedEvent implements DomainEvent {
+export default class PartieDeletedEvent implements DomainEvent {
   readonly eventId: string
   readonly aggregateId: string
-  readonly eventType = 'GameCompleted'
+  readonly eventType = 'PartieDeleted'
   readonly occurredOn: Date
   readonly eventVersion = 1
   readonly data: Record<string, any>
@@ -16,9 +16,6 @@ export default class GameCompletedEvent implements DomainEvent {
   constructor(
     gameId: GameId,
     userId: number,
-    playerScore: number,
-    opponentScore: number,
-    winner: 'PLAYER' | 'OPPONENT' | 'DRAW',
     // Enhanced metadata for Partie service
     context: string = 'partie',
     source: string = 'partie_service',
@@ -30,10 +27,7 @@ export default class GameCompletedEvent implements DomainEvent {
     this.data = {
       gameId: gameId.value,
       userId,
-      playerScore,
-      opponentScore,
-      winner,
-      completedAt: this.occurredOn.toISOString(),
+      deletedAt: this.occurredOn.toISOString(),
       // Enhanced metadata
       context,
       source,

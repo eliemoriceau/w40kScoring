@@ -194,7 +194,7 @@ test.group('JoueurService (TDD)', (group) => {
     await assert.rejects(async () => {
       await joueurService.addJoueur(addJoueurDto)
     })
-    
+
     try {
       await joueurService.addJoueur(addJoueurDto)
       assert.fail('Should have thrown PseudoAlreadyTakenError')

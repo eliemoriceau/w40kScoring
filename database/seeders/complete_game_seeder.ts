@@ -174,7 +174,11 @@ export default class extends BaseSeeder {
       userId: completeGame.game.userId,
       gameType: completeGame.game.gameType.value as 'MATCHED_PLAY' | 'NARRATIVE' | 'OPEN_PLAY',
       pointsLimit: completeGame.game.pointsLimit.value,
-      status: completeGame.game.status.value as 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED',
+      status: completeGame.game.status.value as
+        | 'PLANNED'
+        | 'IN_PROGRESS'
+        | 'COMPLETED'
+        | 'CANCELLED',
       opponentId: completeGame.game.opponentId,
       playerScore: completeGame.game.playerScore,
       opponentScore: completeGame.game.opponentScore,

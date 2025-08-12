@@ -104,10 +104,14 @@ test.group('CompleteGameFactory', () => {
 
     // Check that the last round has higher total score than the first round for escalating pattern
     const firstRoundTotal = rounds[0].playerScore + rounds[0].opponentScore
-    const lastRoundTotal = rounds[rounds.length - 1].playerScore + rounds[rounds.length - 1].opponentScore
-    
+    const lastRoundTotal =
+      rounds[rounds.length - 1].playerScore + rounds[rounds.length - 1].opponentScore
+
     // In escalating pattern, later rounds should generally have higher scores
-    assert.isTrue(lastRoundTotal >= firstRoundTotal - 10, `Expected escalating pattern: last round (${lastRoundTotal}) should be >= first round (${firstRoundTotal}) - 10`)
+    assert.isTrue(
+      lastRoundTotal >= firstRoundTotal - 10,
+      `Expected escalating pattern: last round (${lastRoundTotal}) should be >= first round (${firstRoundTotal}) - 10`
+    )
   })
 
   test('should create detailed scores per round and player', ({ assert }) => {

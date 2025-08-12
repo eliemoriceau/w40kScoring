@@ -8,11 +8,6 @@ import LucidPlayerRepository from '#infrastructure/repositories/lucid_player_rep
 import LucidRoundRepository from '#infrastructure/repositories/lucid_round_repository'
 import LucidScoreRepository from '#infrastructure/repositories/lucid_score_repository'
 import UuidV7IdGenerator from '#infrastructure/services/uuid_v7_id_generator'
-import GameId from '#domain/value-objects/game_id'
-import PlayerId from '#domain/value-objects/player_id'
-import GameStatus from '#domain/value-objects/game_status'
-import GameType from '#domain/value-objects/game_type'
-import PointsLimit from '#domain/value-objects/points_limit'
 import GameModel from '#models/game'
 import PlayerModel from '#models/player'
 import RoundModel from '#models/round'
@@ -21,9 +16,9 @@ import UserModel from '#models/user'
 
 /**
  * Complete Game Integration Tests
- * 
+ *
  * Tests the complete chain: Application Service → Domain Entities → Infrastructure Repositories → Database
- * 
+ *
  * Issue #13: Integration tests for complete "Partie" chain
  * - Create, read, modify complete game
  * - Use models, domain, and services together
@@ -247,7 +242,7 @@ test.group('Complete Game Integration', (group) => {
 
     // Manually start the game to make it in-progress (since no rounds were provided)
     createdGame.game.start('Priority Targets')
-    await gameService.gameRepository.save(createdGame.game)
+    await gameRepository.save(createdGame.game)
 
     // Act - Add rounds to existing in-progress game
     const newRound = await gameService.addRoundToGame(gameId, 1, 18, 16)
@@ -340,7 +335,12 @@ test.group('Complete Game Integration', (group) => {
           playerScore: 25,
           opponentScore: 20,
           scores: [
-            { playerId: '1', scoreType: 'PRIMARY', scoreName: 'Dominate Battlefield', scoreValue: 15 },
+            {
+              playerId: '1',
+              scoreType: 'PRIMARY',
+              scoreName: 'Dominate Battlefield',
+              scoreValue: 15,
+            },
             { playerId: '1', scoreType: 'SECONDARY', scoreName: 'Assassinate', scoreValue: 10 },
             { playerId: '2', scoreType: 'PRIMARY', scoreName: 'Control Center', scoreValue: 12 },
             { playerId: '2', scoreType: 'BONUS', scoreName: 'Slay Warlord', scoreValue: 8 },
@@ -364,12 +364,12 @@ test.group('Complete Game Integration', (group) => {
     const result = await gameService.createCompleteGame(complexGameData)
 
     // Assert - Verify consistency across all layers
-    
+
     // 1. Domain layer consistency
     assert.equal(result.game.playerScore, 47) // 25 + 22
     assert.equal(result.game.opponentScore, 38) // 20 + 18
     assert.equal(result.game.status.value, 'COMPLETED')
-    
+
     // 2. Infrastructure layer consistency - verify database persistence
     const persistedGame = await GameModel.find(result.game.id.value)
     assert.isNotNull(persistedGame)
@@ -383,15 +383,17 @@ test.group('Complete Game Integration', (group) => {
     const persistedRounds = await RoundModel.query().where('game_id', result.game.id.value)
     assert.equal(persistedRounds.length, 2)
 
-    const persistedScores = await ScoreModel.query()
-      .whereIn('round_id', persistedRounds.map(r => r.id))
+    const persistedScores = await ScoreModel.query().whereIn(
+      'round_id',
+      persistedRounds.map((r) => r.id)
+    )
     assert.equal(persistedScores.length, 8) // 5 + 3 scores
 
     // 3. Cross-layer mapping consistency
     result.scores.forEach((domainScore) => {
-      const persistedScore = persistedScores.find(ps => ps.id === Number(domainScore.id.value))
+      const persistedScore = persistedScores.find((ps) => ps.id === Number(domainScore.id.value))
       assert.isNotNull(persistedScore, `Score ${domainScore.id.value} should exist in database`)
-      
+
       assert.equal(persistedScore!.typeScore, domainScore.scoreType.value)
       assert.equal(persistedScore!.nomScore, domainScore.scoreName.value)
       assert.equal(persistedScore!.valeurScore, domainScore.scoreValue.value)
@@ -399,9 +401,8 @@ test.group('Complete Game Integration', (group) => {
 
     // 4. Aggregate consistency
     result.rounds.forEach((domainRound) => {
-      const relatedScores = result.scores.filter(s => s.roundId.equals(domainRound.id))
-      const persistedRound = persistedRounds.find(pr => pr.id === domainRound.id.value)
-      
+      const persistedRound = persistedRounds.find((pr) => pr.id === domainRound.id.value)
+
       assert.isNotNull(persistedRound, `Round ${domainRound.id.value} should exist in database`)
       assert.equal(persistedRound!.playerScore, domainRound.playerScore)
       assert.equal(persistedRound!.opponentScore, domainRound.opponentScore)
@@ -447,18 +448,18 @@ test.group('Complete Game Integration', (group) => {
     assert.equal(result.game.getWinner(), 'DRAW')
 
     // Verify penalty scores are handled correctly
-    const penaltyScores = result.scores.filter(s => s.scoreValue.value < 0)
+    const penaltyScores = result.scores.filter((s) => s.scoreValue.value < 0)
     assert.equal(penaltyScores.length, 2)
-    
-    penaltyScores.forEach(score => {
+
+    penaltyScores.forEach((score) => {
       assert.equal(score.scoreType.value, 'PENALTY')
       assert.isTrue(score.scoreValue.isNegative())
     })
 
     // Verify domain events are properly generated
     result.game.clearDomainEvents() // Should not throw
-    result.rounds.forEach(round => {
-      round.clearDomainEvents() // Should not throw  
+    result.rounds.forEach((round) => {
+      round.clearDomainEvents() // Should not throw
     })
   })
 

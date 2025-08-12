@@ -67,10 +67,10 @@ export interface CompleteGameData {
 
 /**
  * GameService - Application Service
- * 
+ *
  * Orchestrates complete game operations across all domain boundaries.
  * Provides high-level business operations for integration testing.
- * 
+ *
  * This service demonstrates the complete flow from Application layer
  * through Domain entities to Infrastructure persistence.
  */
@@ -85,7 +85,7 @@ export default class GameService {
 
   /**
    * Create a complete game with players, rounds, and scores
-   * 
+   *
    * This method demonstrates the full application layer orchestration:
    * 1. Domain validation through Commands
    * 2. Entity creation and business rules
@@ -105,10 +105,10 @@ export default class GameService {
     // 2. Create game entity
     const gameType = GameType.fromValue(data.gameType)
     const pointsLimit = new PointsLimit(data.pointsLimit)
-    
+
     // Generate a temporary ID - will be replaced by database on save
     const tempGameId = new GameId(Math.floor(Math.random() * 1000000))
-    
+
     const game = Game.createNew(tempGameId, createCommand.userId, gameType, pointsLimit)
 
     // 3. Save game to get persistent ID
@@ -120,17 +120,17 @@ export default class GameService {
       // Generate a temporary PlayerId - will be replaced by database on save
       const tempPlayerId = new PlayerId(Math.floor(Math.random() * 1000000))
       const pseudo = new Pseudo(playerData.pseudo)
-      
-      const player = playerData.userId 
+
+      const player = playerData.userId
         ? Player.createForRegisteredUser(tempPlayerId, savedGame.id, playerData.userId, pseudo)
         : Player.createForGuest(tempPlayerId, savedGame.id, pseudo)
-      
+
       const savedPlayer = await this.playerRepository.save(player)
       players.push(savedPlayer)
     }
 
     // 5. Set opponent if available
-    const opponentPlayer = players.find(p => p.userId !== data.userId)
+    const opponentPlayer = players.find((p) => p.userId !== data.userId)
     if (opponentPlayer && opponentPlayer.userId) {
       savedGame.setOpponent(opponentPlayer.userId)
       await this.gameRepository.save(savedGame)
@@ -164,16 +164,16 @@ export default class GameService {
         if (roundData.scores) {
           for (const scoreData of roundData.scores) {
             // Map string player index to actual PlayerId
-            const playerIndex = parseInt(scoreData.playerId) - 1 // Convert to 0-based index
+            const playerIndex = Number.parseInt(scoreData.playerId) - 1 // Convert to 0-based index
             if (playerIndex < 0 || playerIndex >= players.length) {
               throw new Error(`Invalid player index: ${scoreData.playerId}`)
             }
-            
+
             const playerId = players[playerIndex].id
             const scoreType = new ScoreType(scoreData.scoreType)
-            const scoreName = new ScoreName(scoreData.scoreName) 
+            const scoreName = new ScoreName(scoreData.scoreName)
             const scoreValue = ScoreValue.forType(scoreData.scoreValue, scoreType)
-            
+
             const score = Score.create({
               roundId: savedRound.id,
               playerId,
@@ -193,7 +193,7 @@ export default class GameService {
       if (rounds.length > 0) {
         const finalPlayerScore = rounds.reduce((sum, round) => sum + round.playerScore, 0)
         const finalOpponentScore = rounds.reduce((sum, round) => sum + round.opponentScore, 0)
-        
+
         startedGame.complete(finalPlayerScore, finalOpponentScore)
         startedGame = await this.gameRepository.save(startedGame)
       }
@@ -209,7 +209,7 @@ export default class GameService {
 
   /**
    * Get complete game data by ID
-   * 
+   *
    * Demonstrates cross-repository queries and data aggregation
    */
   async getCompleteGame(gameId: GameId): Promise<CompleteGameResult | null> {
@@ -218,7 +218,7 @@ export default class GameService {
 
     const players = await this.playerRepository.findByGameId(gameId)
     const rounds = await this.roundRepository.findByGameId(gameId)
-    
+
     const scores: Score[] = []
     for (const round of rounds) {
       const roundScores = await this.scoreRepository.findByRoundId(round.id)
@@ -235,7 +235,7 @@ export default class GameService {
 
   /**
    * Add round to existing game
-   * 
+   *
    * Demonstrates game state management and validation
    */
   async addRoundToGame(
@@ -262,7 +262,7 @@ export default class GameService {
 
   /**
    * Complete game with final scores
-   * 
+   *
    * Demonstrates aggregate coordination and business rules
    */
   async completeGame(gameId: GameId): Promise<Game> {
@@ -272,7 +272,7 @@ export default class GameService {
     }
 
     const rounds = await this.roundRepository.findByGameId(gameId)
-    
+
     const finalPlayerScore = rounds.reduce((sum, round) => sum + round.playerScore, 0)
     const finalOpponentScore = rounds.reduce((sum, round) => sum + round.opponentScore, 0)
 
@@ -282,7 +282,7 @@ export default class GameService {
 
   /**
    * Delete complete game (cascade)
-   * 
+   *
    * Demonstrates transaction-like operations across aggregates
    */
   async deleteCompleteGame(gameId: GameId): Promise<void> {
@@ -314,7 +314,7 @@ export default class GameService {
 
   /**
    * Update game with new round and scores
-   * 
+   *
    * Demonstrates complex business operations and validations
    */
   async updateGameWithRound(
@@ -346,7 +346,7 @@ export default class GameService {
         const scoreType = new ScoreType(scoreData.scoreType)
         const scoreName = new ScoreName(scoreData.scoreName)
         const scoreValue = ScoreValue.forType(scoreData.scoreValue, scoreType)
-        
+
         const score = Score.create({
           roundId: savedRound.id,
           playerId,

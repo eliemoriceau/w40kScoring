@@ -41,6 +41,30 @@ Ne jamais coupler le code métier directement à l’infrastructure ou à un fra
 - `npm start` - Start the production server
 - `npm run commit` - Use commitizen for guided conventional commits
 
+### Testing Commands
+
+- `npm test` - Run all tests (unit, functional, integration)
+- `npm test -- --grep="unit"` - Run unit tests only
+- `npm test -- --grep="functional"` - Run functional tests only
+- `npm test -- --grep="integration"` - Run integration tests only
+- `npm test -- --grep="Complete Game Integration"` - Run specific integration test suite
+- `npm test -- --suite=integration` - Run integration test suite (alternative syntax)
+
+#### Integration Test Details
+
+The integration tests validate complete game workflows from Application layer through Domain entities to Infrastructure persistence. They include:
+
+- **Complete Game Creation**: End-to-end game creation with players, rounds, and scores
+- **Data Retrieval**: Cross-repository queries and data aggregation
+- **Game Modification**: Adding rounds to existing games and state management
+- **Domain Validation**: Business rule validation across the complete chain
+- **Database Integrity**: Referential integrity and constraint validation
+- **Data Consistency**: Validation across all architectural layers
+- **Complex Scenarios**: Edge cases and error handling
+- **Multi-format Support**: Different game types and tournament formats
+
+Integration tests demonstrate the complete DDD architecture with hexagonal patterns and validate the full stack from commands to database.
+
 ## Project Architecture
 
 This is an AdonisJS 6 application with the following key architectural patterns:

@@ -182,6 +182,10 @@ export default class Game extends AggregateRoot {
     this._notes = notes
   }
 
+  isInProgress(): boolean {
+    return this._status.equals(GameStatus.IN_PROGRESS)
+  }
+
   getWinner(): 'PLAYER' | 'OPPONENT' | 'DRAW' | null {
     if (
       !this._status.equals(GameStatus.COMPLETED) ||

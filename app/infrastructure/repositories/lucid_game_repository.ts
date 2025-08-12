@@ -44,6 +44,11 @@ export default class LucidGameRepository implements GameRepository {
     return this.toDomainEntity(gameModel)
   }
 
+  async findAll(): Promise<Game[]> {
+    const gameModels = await GameModel.query().orderBy('createdAt', 'desc')
+    return gameModels.map((model) => this.toDomainEntity(model))
+  }
+
   async findByUserId(userId: number): Promise<Game[]> {
     const gameModels = await GameModel.query().where('userId', userId).orderBy('createdAt', 'desc')
 

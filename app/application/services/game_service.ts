@@ -19,6 +19,13 @@ import { ScoreRepository } from '#domain/repositories/score_repository'
 import { IdGenerator } from '#domain/services/id_generator'
 import CreateGameCommand from '#application/commands/create_game_command'
 import StartGameCommand from '#application/commands/start_game_command'
+// Partie service imports
+import { CreatePartieDto } from '#application/dto/create_partie_dto'
+import { PartieResponseDto, PartieListResponseDto } from '#application/dto/partie_response_dto'
+import { PartieFilterDto } from '#application/dto/partie_filter_dto'
+import { PartieMapper } from '#application/mappers/partie_mapper'
+import { PaginationService } from '#application/services/pagination_service'
+import PartieDeletedEvent from '#domain/events/partie_deleted_event'
 
 /**
  * Complete Game Result for integration operations
@@ -362,5 +369,221 @@ export default class GameService {
     }
 
     return { round: savedRound, scores }
+  }
+
+  // ========================================
+  // PARTIE SERVICE METHODS (Issue #14)
+  // ========================================
+
+  /**
+   * Create a new partie (simplified game creation)
+   *
+   * @param dto - CreatePartieDto with game configuration
+   * @returns PartieResponseDto with created partie data
+   */
+  async createPartie(dto: CreatePartieDto): Promise<PartieResponseDto> {
+    // 1. Validate via CreateGameCommand (reuse existing validation)
+    const createCommand = new CreateGameCommand(
+      dto.userId,
+      dto.gameType,
+      dto.pointsLimit,
+      dto.opponentId,
+      dto.mission
+    )
+
+    // 2. Create game entity via existing factory
+    const gameType = GameType.fromValue(dto.gameType)
+    const pointsLimit = new PointsLimit(dto.pointsLimit)
+
+    // Generate a temporary ID - will be replaced by database on save
+    const tempGameId = new GameId(Math.floor(Math.random() * 1000000))
+
+    const game = Game.createNew(tempGameId, createCommand.userId, gameType, pointsLimit)
+
+    // Set mission if provided (without starting the game)
+    if (dto.mission) {
+      game.setMission(dto.mission)
+    }
+
+    // 3. Save game to get persistent ID
+    const savedGame = await this.gameRepository.save(game)
+
+    // 4. Set opponent if provided
+    if (dto.opponentId) {
+      savedGame.setOpponent(dto.opponentId)
+      await this.gameRepository.save(savedGame)
+    }
+
+    // 5. Return mapped DTO
+    return PartieMapper.toDto(savedGame)
+  }
+
+  /**
+   * Get a partie by ID
+   *
+   * @param id - GameId of the partie to retrieve
+   * @returns PartieResponseDto or null if not found
+   */
+  async getPartie(id: GameId): Promise<PartieResponseDto | null> {
+    const game = await this.gameRepository.findById(id)
+
+    if (!game) {
+      return null
+    }
+
+    return PartieMapper.toDto(game)
+  }
+
+  /**
+   * List parties with advanced filtering and cursor-based pagination
+   *
+   * @param filters - PartieFilterDto with filtering options
+   * @returns PartieListResponseDto with paginated results
+   */
+  async listParties(filters: PartieFilterDto): Promise<PartieListResponseDto> {
+    // 1. Get all games from repository
+    // Note: In a real implementation, filtering would be done at the repository level
+    // For TDD purposes, we'll get all games and filter in the service
+    const games = await this.gameRepository.findAll()
+
+    // 2. Convert to DTOs
+    const parties = PartieMapper.toDtoArray(games)
+
+    // 3. Apply advanced filtering that might not be at repository level
+    let filteredParties = this.applyAdvancedFilters(parties, filters)
+
+    // 4. Apply pagination
+    return PaginationService.paginate(filteredParties, filters)
+  }
+
+  /**
+   * Delete a partie and all related entities
+   *
+   * @param id - GameId of the partie to delete
+   */
+  async deletePartie(id: GameId): Promise<void> {
+    // 1. Get the game to validate it exists and get user info for event
+    const game = await this.gameRepository.findById(id)
+    if (!game) {
+      throw new Error('Partie not found')
+    }
+
+    // 2. Use existing deleteCompleteGame logic
+    await this.deleteCompleteGame(id)
+
+    // 3. Raise partie-specific domain event
+    // Note: In a full implementation, we would publish this event
+    // For now, we're focusing on the structure
+    new PartieDeletedEvent(id, game.userId, 'partie', 'partie_service', {
+      gameType: game.gameType.value,
+      status: game.status.value,
+      deletedBy: 'system', // Could be enhanced to track actual user
+    })
+  }
+
+  /**
+   * Update partie status (start, complete, cancel)
+   *
+   * @param id - GameId of the partie to update
+   * @param status - New status ('IN_PROGRESS', 'COMPLETED', 'CANCELLED')
+   * @returns Updated PartieResponseDto
+   */
+  async updatePartieStatus(id: GameId, status: string): Promise<PartieResponseDto> {
+    const game = await this.gameRepository.findById(id)
+    if (!game) {
+      throw new Error('Partie not found')
+    }
+
+    // Apply status change based on current status and target status
+    switch (status.toUpperCase()) {
+      case 'IN_PROGRESS':
+        if (!game.isInProgress()) {
+          game.start('Status updated via Partie service')
+        }
+        break
+
+      case 'COMPLETED':
+        if (game.isInProgress()) {
+          // For simplicity, complete with 0-0 score if no scores set
+          const playerScore = game.playerScore || 0
+          const opponentScore = game.opponentScore || 0
+          game.complete(playerScore, opponentScore)
+        }
+        break
+
+      case 'CANCELLED':
+        game.cancel()
+        break
+
+      default:
+        throw new Error(`Invalid status: ${status}`)
+    }
+
+    const savedGame = await this.gameRepository.save(game)
+    return PartieMapper.toDto(savedGame)
+  }
+
+  /**
+   * Apply advanced filters that might not be handled at repository level
+   *
+   * @param parties - Array of PartieResponseDto to filter
+   * @param filters - PartieFilterDto with filtering criteria
+   * @returns Filtered array of PartieResponseDto
+   */
+  private applyAdvancedFilters(
+    parties: PartieResponseDto[],
+    filters: PartieFilterDto
+  ): PartieResponseDto[] {
+    let filtered = [...parties]
+
+    // Filter by user ID
+    if (filters.userId) {
+      filtered = filtered.filter((partie) => partie.userId === filters.userId)
+    }
+
+    // Filter by opponent ID
+    if (filters.opponentId) {
+      filtered = filtered.filter((partie) => partie.opponentId === filters.opponentId)
+    }
+
+    // Filter by status array
+    if (filters.status && filters.status.length > 0) {
+      filtered = filtered.filter((partie) => filters.status!.includes(partie.status))
+    }
+
+    // Filter by game type
+    if (filters.gameType) {
+      filtered = filtered.filter((partie) => partie.gameType === filters.gameType)
+    }
+
+    // Filter by points limit
+    if (filters.pointsLimit && filters.pointsLimit.length > 0) {
+      filtered = filtered.filter((partie) => filters.pointsLimit!.includes(partie.pointsLimit))
+    }
+
+    // Filter by date ranges
+    if (filters.dateFrom) {
+      filtered = filtered.filter((partie) => new Date(partie.createdAt) >= filters.dateFrom!)
+    }
+
+    if (filters.dateTo) {
+      filtered = filtered.filter((partie) => new Date(partie.createdAt) <= filters.dateTo!)
+    }
+
+    // Filter by has opponent
+    if (filters.hasOpponent !== undefined) {
+      filtered = filtered.filter((partie) =>
+        filters.hasOpponent ? !!partie.opponentId : !partie.opponentId
+      )
+    }
+
+    // Filter by has mission
+    if (filters.hasMission !== undefined) {
+      filtered = filtered.filter((partie) =>
+        filters.hasMission ? !!partie.mission : !partie.mission
+      )
+    }
+
+    return filtered
   }
 }

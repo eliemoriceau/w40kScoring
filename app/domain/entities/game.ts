@@ -132,6 +132,17 @@ export default class Game extends AggregateRoot {
   }
 
   // Business methods
+
+  /**
+   * Set mission for the game without starting it
+   */
+  setMission(mission: string | null): void {
+    if (this._status.equals(GameStatus.COMPLETED) || this._status.equals(GameStatus.CANCELLED)) {
+      throw new Error('Cannot set mission for completed or cancelled games')
+    }
+    this._mission = mission
+  }
+
   start(mission?: string): void {
     if (!this._status.equals(GameStatus.PLANNED)) {
       throw new Error('Game must be in PLANNED status to be started')

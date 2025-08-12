@@ -13,6 +13,12 @@ export interface GameQueryRepository {
   findById(id: GameId): Promise<Game | null>
 
   /**
+   * Find all games (for admin/development purposes)
+   * Note: In production, this should have pagination or filters
+   */
+  findAll(): Promise<Game[]>
+
+  /**
    * Find all games for a specific user
    */
   findByUserId(userId: number): Promise<Game[]>

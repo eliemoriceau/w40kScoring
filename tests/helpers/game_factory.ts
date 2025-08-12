@@ -194,11 +194,12 @@ export default class GameFactory {
 
       switch (status) {
         case 'COMPLETED':
-          game = this.createCompleted(
-            this.randomScore(60, 100),
-            this.randomScore(60, 100),
-            { id: gameId, userId, gameType, pointsLimit }
-          )
+          game = this.createCompleted(this.randomScore(60, 100), this.randomScore(60, 100), {
+            id: gameId,
+            userId,
+            gameType,
+            pointsLimit,
+          })
           break
         case 'IN_PROGRESS':
           game = this.createInProgress({ id: gameId, userId, gameType, pointsLimit })
@@ -322,15 +323,18 @@ export default class GameFactory {
   ): Game {
     const pointsLimits = {
       'combat-patrol': 500,
-      incursion: 1000,
+      'incursion': 1000,
       'strike-force': 2000,
-      onslaught: 3000,
+      'onslaught': 3000,
     }
 
     const pointsLimit = new PointsLimit(pointsLimits[format])
     const baseGame = {
       pointsLimit,
-      gameType: format === 'incursion' || format === 'combat-patrol' ? GameType.NARRATIVE : GameType.MATCHED_PLAY,
+      gameType:
+        format === 'incursion' || format === 'combat-patrol'
+          ? GameType.NARRATIVE
+          : GameType.MATCHED_PLAY,
       ...overrides,
     }
 

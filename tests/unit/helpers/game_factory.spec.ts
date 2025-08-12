@@ -1,6 +1,5 @@
 import { test } from '@japa/runner'
 import GameFactory from '#tests/helpers/game_factory'
-import Game from '#domain/entities/game'
 import GameId from '#domain/value-objects/game_id'
 import GameType from '#domain/value-objects/game_type'
 import PointsLimit from '#domain/value-objects/points_limit'
@@ -12,7 +11,8 @@ test.group('GameFactory', () => {
     const game = GameFactory.createBasic()
 
     // Assert
-    assert.instanceOf(game, Game)
+    assert.isObject(game)
+    assert.equal(game.constructor.name, 'Game')
     assert.equal(game.status.value, GameStatus.PLANNED.value)
     assert.equal(game.gameType.value, GameType.MATCHED_PLAY.value)
     assert.equal(game.pointsLimit.value, 2000)

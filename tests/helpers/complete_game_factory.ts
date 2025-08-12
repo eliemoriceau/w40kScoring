@@ -93,7 +93,7 @@ export default class CompleteGameFactory {
    */
   static createCompleteGame(options: CompleteGameOptions = {}): CompleteGameResult {
     const rng = options.seed ? new SeededRandom(options.seed) : new SeededRandom(Date.now())
-    
+
     // Create the main game
     const gameId = options.gameId || new GameId(this.gameIdCounter++)
     const userId = options.userId || 1
@@ -113,10 +113,10 @@ export default class CompleteGameFactory {
       { pseudo: 'Player2', userId: null }, // Guest player
     ]
 
-    const players = this.createPlayersForGame(gameId, playerConfigs, rng)
+    const players = this.createPlayersForGame(gameId, playerConfigs)
 
     // Set opponent on game
-    const opponentPlayer = players.find(p => p.userId !== userId) || players[1]
+    const opponentPlayer = players.find((p) => p.userId !== userId) || players[1]
     if (opponentPlayer.userId) {
       game.setOpponent(opponentPlayer.userId)
     }
@@ -126,7 +126,12 @@ export default class CompleteGameFactory {
 
     // Create rounds
     const roundCount = options.roundCount || 5
-    const rounds = this.createRoundsForGame(gameId, roundCount, options.scorePattern || 'realistic', rng)
+    const rounds = this.createRoundsForGame(
+      gameId,
+      roundCount,
+      options.scorePattern || 'realistic',
+      rng
+    )
 
     // Create detailed scores if requested
     const scores: Score[] = []
@@ -137,7 +142,7 @@ export default class CompleteGameFactory {
     // Calculate final game scores and complete the game
     const finalPlayerScore = rounds.reduce((sum, round) => sum + round.playerScore, 0)
     const finalOpponentScore = rounds.reduce((sum, round) => sum + round.opponentScore, 0)
-    
+
     game.complete(finalPlayerScore, finalOpponentScore)
 
     return {
@@ -179,25 +184,25 @@ export default class CompleteGameFactory {
         // Override scores to ensure domination (one player much higher)
         const domPlayerTotal = dominationGame.game.playerScore!
         const domOpponentTotal = dominationGame.game.opponentScore!
-        
+
         // If difference isn't big enough, adjust one of them
         if (Math.abs(domPlayerTotal - domOpponentTotal) <= 25) {
           const higherScore = Math.max(domPlayerTotal, domOpponentTotal)
           const lowerScore = Math.min(domPlayerTotal, domOpponentTotal) - 30 // Create 30+ point difference
-          
+
           // Re-complete the game with adjusted scores
           const adjustedGame = GameFactory.createCompleted(
             domPlayerTotal > domOpponentTotal ? higherScore + 30 : Math.max(10, lowerScore),
             domPlayerTotal > domOpponentTotal ? Math.max(10, lowerScore) : higherScore + 30,
             { id: dominationGame.game.id }
           )
-          
+
           return {
             ...dominationGame,
             game: adjustedGame,
           }
         }
-        
+
         return dominationGame
 
       case 'learning':
@@ -215,24 +220,24 @@ export default class CompleteGameFactory {
         // Ensure low scores for learning scenario
         const learningPlayerTotal = learningGame.game.playerScore!
         const learningOpponentTotal = learningGame.game.opponentScore!
-        
+
         // If scores are too high, adjust them down
         if (learningPlayerTotal > 60 || learningOpponentTotal > 60) {
           const adjustedGame = GameFactory.createCompleted(
             Math.min(learningPlayerTotal, 45), // Cap at 45
             Math.min(learningOpponentTotal, 45), // Cap at 45
-            { 
+            {
               id: learningGame.game.id,
-              pointsLimit: new PointsLimit(500)
+              pointsLimit: new PointsLimit(500),
             }
           )
-          
+
           return {
             ...learningGame,
             game: adjustedGame,
           }
         }
-        
+
         return learningGame
 
       case 'tournament':
@@ -265,7 +270,7 @@ export default class CompleteGameFactory {
         roundCount: 3,
         scorePattern: 'realistic' as const,
       },
-      incursion: {
+      'incursion': {
         pointsLimit: new PointsLimit(1000),
         gameType: GameType.MATCHED_PLAY,
         roundCount: 4,
@@ -277,7 +282,7 @@ export default class CompleteGameFactory {
         roundCount: 5,
         scorePattern: 'realistic' as const,
       },
-      onslaught: {
+      'onslaught': {
         pointsLimit: new PointsLimit(3000),
         gameType: GameType.OPEN_PLAY,
         roundCount: 5,
@@ -297,12 +302,11 @@ export default class CompleteGameFactory {
    */
   private static createPlayersForGame(
     gameId: GameId,
-    playerConfigs: Array<{ pseudo: string; userId?: number | null }>,
-    rng: SeededRandom
+    playerConfigs: Array<{ pseudo: string; userId?: number | null }>
   ): Player[] {
     return playerConfigs.map((config) => {
       const playerId = new PlayerId(this.playerIdCounter++)
-      
+
       if (config.userId === null || config.userId === undefined) {
         return PlayerFactory.createGuestPlayer({
           id: playerId,
@@ -334,7 +338,7 @@ export default class CompleteGameFactory {
     for (let i = 1; i <= roundCount; i++) {
       const roundId = new RoundId(this.roundIdCounter++)
       const roundNumber = new RoundNumber(i)
-      
+
       const round = RoundFactory.createNew({
         id: roundId,
         gameId,
@@ -343,7 +347,7 @@ export default class CompleteGameFactory {
 
       const scores = this.generateScoresForPattern(scorePattern, i, roundCount, rng)
       round.completeRound(scores.player, scores.opponent)
-      
+
       rounds.push(round)
     }
 
@@ -410,20 +414,22 @@ export default class CompleteGameFactory {
         // Create unique scores per player per round (no duplicates)
         const availableScoreTypes = ['PRIMARY', 'SECONDARY', 'OBJECTIVE', 'BONUS']
         if (rng.next() < 0.1) availableScoreTypes.push('PENALTY') // 10% chance of penalty
-        
+
         // Shuffle and take 2-3 different score types to ensure uniqueness
-        const selectedTypes = this.shuffleArray([...availableScoreTypes], rng).slice(0, rng.range(2, 3))
-        
+        const selectedTypes = this.shuffleArray([...availableScoreTypes], rng).slice(
+          0,
+          rng.range(2, 3)
+        )
+
         selectedTypes.forEach((scoreTypeStr, index) => {
           const scoreValue = this.generateScoreValueForType(scoreTypeStr, rng)
-          
+
           try {
             const score = this.createScoreForType(
               scoreTypeStr,
               round.id,
               player.id,
               scoreValue,
-              rng,
               index // Add index to make score names unique
             )
             scores.push(score)
@@ -478,7 +484,6 @@ export default class CompleteGameFactory {
     roundId: RoundId,
     playerId: PlayerId,
     scoreValue: number,
-    rng: SeededRandom,
     index: number = 0
   ): Score {
     const scoreNames = {
@@ -561,15 +566,24 @@ export default class CompleteGameFactory {
    */
   static generateArmyBasedPseudo(): string {
     const armies = [
-      'SpaceMarine', 'ImperialGuard', 'Tau', 'Eldar', 'Ork', 'Chaos',
-      'Tyranid', 'Necron', 'DarkEldar', 'BloodAngel', 'Ultramarine'
+      'SpaceMarine',
+      'ImperialGuard',
+      'Tau',
+      'Eldar',
+      'Ork',
+      'Chaos',
+      'Tyranid',
+      'Necron',
+      'DarkEldar',
+      'BloodAngel',
+      'Ultramarine',
     ]
-    
+
     const suffixes = ['Commander', 'Veteran', 'Alpha', 'Prime', 'Lord', 'Captain', 'Sergeant']
-    
+
     const army = armies[Math.floor(Math.random() * armies.length)]
     const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
-    
+
     return `${army}_${suffix}`
   }
 }

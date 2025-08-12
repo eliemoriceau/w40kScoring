@@ -12,15 +12,15 @@ import PointsLimit from '#domain/value-objects/points_limit'
 
 /**
  * CompleteGameSeeder
- * 
+ *
  * Creates complete game scenarios for development and testing.
  * Generates realistic W40K game data including:
  * - 2 players (1 registered user, 1 guest)
  * - 5 rounds with varied scores
  * - Detailed scoring per round
- * 
+ *
  * Usage: node ace db:seed
- * 
+ *
  * Issue #12: Complete seeder/factory for full game scenarios
  */
 export default class extends BaseSeeder {
@@ -114,18 +114,16 @@ export default class extends BaseSeeder {
    */
   private async clearExistingData() {
     console.log('🧹 Clearing existing data...')
-    
+
     // Order matters due to foreign keys
     await ScoreModel.query().delete()
-    await RoundModel.query().delete()  
+    await RoundModel.query().delete()
     await PlayerModel.query().delete()
     await GameModel.query().delete()
-    
+
     // Keep users if they exist for other purposes
     // Only delete demo users we created
-    await UserModel.query()
-      .where('email', 'like', '%@demo.w40k%')
-      .delete()
+    await UserModel.query().where('email', 'like', '%@demo.w40k%').delete()
   }
 
   /**
@@ -139,7 +137,7 @@ export default class extends BaseSeeder {
         password: 'demo123', // Will be hashed by model
       },
       {
-        email: 'tau.commander@demo.w40k', 
+        email: 'tau.commander@demo.w40k',
         fullName: 'Tau Commander Shadowsun',
         password: 'demo123',
       },
@@ -155,7 +153,7 @@ export default class extends BaseSeeder {
       },
       {
         email: 'contender.beta@demo.w40k',
-        fullName: 'Contender Beta Prime', 
+        fullName: 'Contender Beta Prime',
         password: 'demo123',
       },
     ]
@@ -174,16 +172,20 @@ export default class extends BaseSeeder {
     await GameModel.create({
       id: completeGame.game.id.value,
       userId: completeGame.game.userId,
-      gameType: completeGame.game.gameType.value,
+      gameType: completeGame.game.gameType.value as 'MATCHED_PLAY' | 'NARRATIVE' | 'OPEN_PLAY',
       pointsLimit: completeGame.game.pointsLimit.value,
-      status: completeGame.game.status.value,
+      status: completeGame.game.status.value as 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED',
       opponentId: completeGame.game.opponentId,
       playerScore: completeGame.game.playerScore,
       opponentScore: completeGame.game.opponentScore,
       mission: completeGame.game.mission,
       notes: completeGame.game.notes,
-      startedAt: completeGame.game.startedAt ? DateTime.fromJSDate(completeGame.game.startedAt) : null,
-      completedAt: completeGame.game.completedAt ? DateTime.fromJSDate(completeGame.game.completedAt) : null,
+      startedAt: completeGame.game.startedAt
+        ? DateTime.fromJSDate(completeGame.game.startedAt)
+        : null,
+      completedAt: completeGame.game.completedAt
+        ? DateTime.fromJSDate(completeGame.game.completedAt)
+        : null,
       createdAt: DateTime.fromJSDate(completeGame.game.createdAt),
     })
 
@@ -215,7 +217,7 @@ export default class extends BaseSeeder {
     // Persist detailed scores (if any)
     for (const score of completeGame.scores) {
       await ScoreModel.create({
-        id: score.id.value,
+        id: Number(score.id.value),
         roundId: score.roundId.value,
         joueurId: score.playerId.value,
         typeScore: score.scoreType.value,
@@ -225,6 +227,8 @@ export default class extends BaseSeeder {
       })
     }
 
-    console.log(`  ✓ Game ${completeGame.game.id.value}: ${completeGame.players.length} players, ${completeGame.rounds.length} rounds, ${completeGame.scores.length} scores`)
+    console.log(
+      `  ✓ Game ${completeGame.game.id.value}: ${completeGame.players.length} players, ${completeGame.rounds.length} rounds, ${completeGame.scores.length} scores`
+    )
   }
 }

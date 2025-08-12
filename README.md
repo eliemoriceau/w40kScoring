@@ -123,14 +123,16 @@ node ace db:seed --files=database/seeders/complete_game_seeder.ts
 ```
 
 **Données générées :**
+
 - 🎮 **3 jeux complets** (compétitif, apprentissage, championnat)
 - 👥 **6 joueurs** (mix utilisateurs enregistrés/invités)
 - 🎲 **13 rounds** avec scores réalistes
 - 📊 **~50 scores détaillés** par type (PRIMARY, SECONDARY, etc.)
 
 **Scenarii disponibles :**
+
 - **Tournament Game** : Match compétitif 2000 points
-- **Learning Game** : Combat Patrol 500 points pour débutants  
+- **Learning Game** : Combat Patrol 500 points pour débutants
 - **Championship** : Match serré entre experts
 
 Voir [SEEDER_README.md](SEEDER_README.md) pour la documentation complète.

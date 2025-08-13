@@ -111,6 +111,13 @@ export default class LucidRoundQueryRepository implements RoundQueryRepository {
     return stats
   }
 
+  async findPreviousRound(gameId: GameId, currentRoundNumber: RoundNumber): Promise<Round | null> {
+    if (currentRoundNumber.value <= 1) return null
+
+    const previousRoundNumber = new RoundNumber(currentRoundNumber.value - 1)
+    return this.findByGameIdAndNumber(gameId, previousRoundNumber)
+  }
+
   /**
    * Convert Lucid model to Domain entity using proper domain factory
    */

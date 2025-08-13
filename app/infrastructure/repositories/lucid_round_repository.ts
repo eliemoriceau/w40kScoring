@@ -85,4 +85,8 @@ export default class LucidRoundRepository implements RoundRepository {
   async deleteMultiple(ids: RoundId[]): Promise<void> {
     return this.commandRepository.deleteMultiple(ids)
   }
+
+  async findPreviousRound(gameId: GameId, currentRoundNumber: RoundNumber): Promise<Round | null> {
+    return this.queryRepository.findPreviousRound(gameId, currentRoundNumber)
+  }
 }

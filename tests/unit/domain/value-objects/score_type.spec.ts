@@ -37,6 +37,13 @@ test.group('ScoreType Value Object', () => {
     assert.equal(scoreType.toString(), 'SECONDARY')
   })
 
+  test('should create valid ScoreType for CHALLENGER', ({ assert }) => {
+    const scoreType = new ScoreType('CHALLENGER')
+
+    assert.equal(scoreType.value, 'CHALLENGER')
+    assert.equal(scoreType.toString(), 'CHALLENGER')
+  })
+
   test('should compare equality correctly', ({ assert }) => {
     const scoreType1 = new ScoreType('OBJECTIVE')
     const scoreType2 = new ScoreType('OBJECTIVE')
@@ -73,7 +80,14 @@ test.group('ScoreType Value Object', () => {
   test('should list all valid score types', ({ assert }) => {
     const validTypes = ScoreType.getAllValidTypes()
 
-    assert.deepEqual(validTypes, ['OBJECTIVE', 'BONUS', 'PENALTY', 'PRIMARY', 'SECONDARY'])
+    assert.deepEqual(validTypes, [
+      'OBJECTIVE',
+      'BONUS',
+      'PENALTY',
+      'PRIMARY',
+      'SECONDARY',
+      'CHALLENGER',
+    ])
   })
 
   test('should check if score type allows positive values', ({ assert }) => {

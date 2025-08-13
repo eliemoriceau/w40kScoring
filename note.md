@@ -1,31 +1,11 @@
-Questions Architecturales Critiques
+1. Calcul Déficit
 
-1. 🔐 Autorisation Strategy
+- Déficit = ScoreAdversaire - ScoreJoueur au round précédent 
 
-- Ajout Round : Il y a automatiquement 5 Round
-- Liste Rounds : Owner + participants peuvent les modifier, ou public readonly ?
-- Modification : Le service doit permettre modification de rounds temps que la partie est en cours
+2. Round 1
 
-2. 🔄 Relation avec GameService
+- CHALLENGER interdit au round 1 
 
-- Validation Partie : RoundService valide l'existence de Game directement ?
-- État Game : Doit-on valider que Game est IN_PROGRESS ?
-- Orchestration : Qui coordonne Game state changes ?
+3. Égalité des Scores
 
-3. 📊 Business Rules Round
-
-- Ordre séquentiel : Rounds doivent-ils être créés dans l'ordre (1→2→3) ?
-- Pré-requis : Round N+1 nécessite Round N completed ?
-- Modification : Peut-on modifier/supprimer un round existant ?
-
-4. 🎯 Scope Fonctionnel
-
-- Score Management : RoundService gère-t-il aussi updateScores() ?
-- Completion : completeRound() fait partie du service ?
-- Stats : Faut-il inclure getRoundStats() ?
-
-5. ⚡ Performance & Cache
-
-- Pagination : Cursor-based ou offset pour listRounds ?
-- Cache : Cache rounds par partie (Redis/mémoire) ?
-- Bulk ops : Support création multiple rounds ?
+- Si déficit = 6 exactement, CHALLENGER autorisé

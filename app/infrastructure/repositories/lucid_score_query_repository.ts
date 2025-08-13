@@ -3,6 +3,7 @@ import Score from '#domain/entities/score'
 import ScoreId from '#domain/value-objects/score_id'
 import RoundId from '#domain/value-objects/round_id'
 import PlayerId from '#domain/value-objects/player_id'
+import GameId from '#domain/value-objects/game_id'
 import ScoreType from '#domain/value-objects/score_type'
 import ScoreName from '#domain/value-objects/score_name'
 import ScoreValue from '#domain/value-objects/score_value'
@@ -176,6 +177,47 @@ export default class LucidScoreQueryRepository implements ScoreQueryRepository {
 
       return new PlayerRanking(playerId, new ScoreValue(totalScore), scoreCount)
     })
+  }
+
+  async existsChallengerInRound(roundId: RoundId): Promise<boolean> {
+    const countResult = await ScoreModel.query()
+      .where('round_id', roundId.value)
+      .where('type_score', 'CHALLENGER')
+      .count('* as total')
+
+    return Number((countResult[0] as any)?.$extras?.total ?? 0) > 0
+  }
+
+  async findByPlayerInGame(playerId: PlayerId, gameId: GameId): Promise<Score[]> {
+    const scoreModels = await ScoreModel.query()
+      .innerJoin('rounds', 'scores.round_id', 'rounds.id')
+      .where('scores.joueur_id', playerId.value)
+      .where('rounds.partie_id', gameId.value)
+      .select('scores.*')
+      .orderBy('scores.created_at', 'asc')
+
+    return scoreModels.map((model) => this.toDomainEntity(model))
+  }
+
+  async getTotalByPlayerInGame(playerId: PlayerId, gameId: GameId): Promise<ScoreValue> {
+    const result = await ScoreModel.query()
+      .innerJoin('rounds', 'scores.round_id', 'rounds.id')
+      .where('scores.joueur_id', playerId.value)
+      .where('rounds.partie_id', gameId.value)
+      .sum('scores.valeur_score as total')
+
+    const total = Number((result[0] as any)?.$extras?.total ?? 0)
+    return new ScoreValue(total)
+  }
+
+  async findPlayersInGame(gameId: GameId): Promise<PlayerId[]> {
+    const results = await ScoreModel.query()
+      .innerJoin('rounds', 'scores.round_id', 'rounds.id')
+      .where('rounds.partie_id', gameId.value)
+      .distinct('scores.joueur_id')
+      .select('scores.joueur_id')
+
+    return results.map((result) => new PlayerId(result.joueurId))
   }
 
   /**

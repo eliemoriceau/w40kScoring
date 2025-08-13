@@ -10,6 +10,7 @@ export default class ScoreType {
     'PENALTY',
     'PRIMARY',
     'SECONDARY',
+    'CHALLENGER',
   ] as const
 
   private readonly _value: string
@@ -78,6 +79,8 @@ export default class ScoreType {
         return 'Primary'
       case 'SECONDARY':
         return 'Secondary'
+      case 'CHALLENGER':
+        return 'Challenger'
       default:
         return this._value
     }

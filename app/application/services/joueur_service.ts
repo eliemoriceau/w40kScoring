@@ -5,8 +5,9 @@ import Player from '#domain/entities/player'
 import GameId from '#domain/value-objects/game_id'
 import PlayerId from '#domain/value-objects/player_id'
 import Pseudo from '#domain/value-objects/pseudo'
-import { GameRepository } from '#domain/repositories/i_game_repository'
-import { PlayerRepository } from '#domain/repositories/player_repository'
+import { GameQueryRepository } from '#domain/repositories/game_query_repository'
+import { PlayerCommandRepository } from '#domain/repositories/player_command_repository'
+import { PlayerQueryRepository } from '#domain/repositories/player_query_repository'
 import { IdGenerator } from '#domain/services/id_generator'
 import { PseudoAlreadyTakenError } from '#domain/errors/pseudo_already_taken_error'
 import { PartieNotFoundError } from '#domain/errors/partie_not_found_error'
@@ -27,8 +28,8 @@ interface ExtendedIdGenerator extends IdGenerator {
  */
 export default class JoueurService {
   constructor(
-    private playerRepository: PlayerRepository,
-    private gameRepository: GameRepository,
+    private playerRepository: PlayerCommandRepository & PlayerQueryRepository,
+    private gameRepository: GameQueryRepository,
     private idGenerator: ExtendedIdGenerator
   ) {}
 

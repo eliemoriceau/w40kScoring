@@ -2,7 +2,6 @@ import { test } from '@japa/runner'
 import { ScoreFactory } from '#tests/helpers/score_factory'
 import LucidScoreQueryRepository from '#infrastructure/repositories/lucid_score_query_repository'
 import LucidScoreCommandRepository from '#infrastructure/repositories/lucid_score_command_repository'
-import LucidScoreRepository from '#infrastructure/repositories/lucid_score_repository'
 import ScoreId from '#domain/value-objects/score_id'
 import RoundId from '#domain/value-objects/round_id'
 import PlayerId from '#domain/value-objects/player_id'
@@ -15,7 +14,6 @@ import RoundModel from '#models/round'
 test.group('Score Repository Integration', (group) => {
   let queryRepository: LucidScoreQueryRepository
   let commandRepository: LucidScoreCommandRepository
-  let combinedRepository: LucidScoreRepository
   let testGameId: number
   let testRoundId: number
   let testPlayer1Id: number
@@ -25,7 +23,6 @@ test.group('Score Repository Integration', (group) => {
     // Initialize repositories
     queryRepository = new LucidScoreQueryRepository()
     commandRepository = new LucidScoreCommandRepository()
-    combinedRepository = new LucidScoreRepository()
   })
 
   group.each.setup(async () => {
@@ -537,34 +534,6 @@ test.group('Score Repository Integration', (group) => {
     assert.equal(countAfter, 6)
   })
 
-  test('Combined Repository - should provide both query and command functionality', async ({
-    assert,
-  }) => {
-    // Arrange
-    const score = ScoreFactory.createSecondary({
-      roundId: new RoundId(testRoundId),
-      playerId: new PlayerId(testPlayer1Id),
-    })
-
-    // Act - Command operation
-    await combinedRepository.save(score)
-
-    // Act - Query operation
-    const foundScores = await combinedRepository.findByRoundAndPlayer(
-      new RoundId(testRoundId),
-      new PlayerId(testPlayer1Id)
-    )
-
-    // Assert
-    assert.equal(foundScores.length, 1)
-    assert.isTrue(foundScores[0].scoreType.equals(new ScoreType('SECONDARY')))
-
-    // Act - Delete operation
-    await combinedRepository.delete(foundScores[0].id)
-
-    const exists = await combinedRepository.exists(foundScores[0].id)
-    assert.isFalse(exists)
-  })
 
   test('Database constraints - should enforce unique score per round-player-type-name combination', async ({
     assert,

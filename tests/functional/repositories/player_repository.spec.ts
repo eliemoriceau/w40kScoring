@@ -2,7 +2,6 @@ import { test } from '@japa/runner'
 import { PlayerFactory } from '#tests/helpers/player_factory'
 import LucidPlayerQueryRepository from '#infrastructure/repositories/lucid_player_query_repository'
 import LucidPlayerCommandRepository from '#infrastructure/repositories/lucid_player_command_repository'
-import LucidPlayerRepository from '#infrastructure/repositories/lucid_player_repository'
 import PlayerId from '#domain/value-objects/player_id'
 import GameId from '#domain/value-objects/game_id'
 import Pseudo from '#domain/value-objects/pseudo'
@@ -12,13 +11,11 @@ import GameModel from '#models/game'
 test.group('Player Repository Integration', (group) => {
   let queryRepository: LucidPlayerQueryRepository
   let commandRepository: LucidPlayerCommandRepository
-  let combinedRepository: LucidPlayerRepository
 
   group.setup(async () => {
     // Initialize repositories
     queryRepository = new LucidPlayerQueryRepository()
     commandRepository = new LucidPlayerCommandRepository()
-    combinedRepository = new LucidPlayerRepository()
   })
 
   group.each.setup(async () => {
@@ -307,33 +304,4 @@ test.group('Player Repository Integration', (group) => {
     assert.equal(finalCount, initialCount + 3)
   })
 
-  test('Combined Repository - should provide both query and command functionality', async ({
-    assert,
-  }) => {
-    // Arrange - Create test player
-    const testPlayer = PlayerFactory.createRegisteredPlayer({
-      id: new PlayerId(30), // This will be ignored, DB generates ID
-      gameId: new GameId(1),
-      userId: 500,
-      pseudo: new Pseudo('CombinedTest'),
-    })
-
-    // Save the test player using the combined repository
-    const savedPlayer = await combinedRepository.save(testPlayer)
-    const actualPlayerId = savedPlayer.id
-
-    // Act - Query operation
-    const foundPlayer = await combinedRepository.findById(actualPlayerId)
-
-    // Assert
-    assert.isNotNull(foundPlayer)
-    assert.isTrue(foundPlayer!.pseudo.equals(new Pseudo('CombinedTest')))
-    assert.equal(foundPlayer!.userId, 500)
-
-    // Act - Delete operation
-    await combinedRepository.delete(actualPlayerId)
-
-    const exists = await combinedRepository.exists(actualPlayerId)
-    assert.isFalse(exists)
-  })
 })

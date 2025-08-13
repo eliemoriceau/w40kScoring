@@ -2,7 +2,6 @@ import { test } from '@japa/runner'
 import { RoundFactory } from '#tests/helpers/round_factory'
 import LucidRoundQueryRepository from '#infrastructure/repositories/lucid_round_query_repository'
 import LucidRoundCommandRepository from '#infrastructure/repositories/lucid_round_command_repository'
-import LucidRoundRepository from '#infrastructure/repositories/lucid_round_repository'
 import RoundId from '#domain/value-objects/round_id'
 import GameId from '#domain/value-objects/game_id'
 import RoundNumber from '#domain/value-objects/round_number'
@@ -12,13 +11,11 @@ import GameModel from '#models/game'
 test.group('Round Repository Integration', (group) => {
   let queryRepository: LucidRoundQueryRepository
   let commandRepository: LucidRoundCommandRepository
-  let combinedRepository: LucidRoundRepository
 
   group.setup(async () => {
     // Initialize repositories
     queryRepository = new LucidRoundQueryRepository()
     commandRepository = new LucidRoundCommandRepository()
-    combinedRepository = new LucidRoundRepository()
   })
 
   group.each.setup(async () => {
@@ -288,34 +285,6 @@ test.group('Round Repository Integration', (group) => {
     assert.equal(countAfter, 3)
   })
 
-  test('Combined Repository - should provide both query and command functionality', async ({
-    assert,
-  }) => {
-    // Arrange
-    const round = RoundFactory.createNew({
-      gameId: new GameId(1),
-      roundNumber: new RoundNumber(1),
-    })
-
-    // Act - Command operation
-    await combinedRepository.save(round)
-
-    // Act - Query operation
-    const foundRound = await combinedRepository.findByGameIdAndNumber(
-      new GameId(1),
-      new RoundNumber(1)
-    )
-
-    // Assert
-    assert.isNotNull(foundRound)
-    assert.isTrue(foundRound!.roundNumber.equals(new RoundNumber(1)))
-
-    // Act - Delete operation
-    await combinedRepository.delete(foundRound!.id)
-
-    const exists = await combinedRepository.exists(foundRound!.id)
-    assert.isFalse(exists)
-  })
 
   test('Database constraints - should enforce unique game-round combination', async ({
     assert,

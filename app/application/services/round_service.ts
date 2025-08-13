@@ -2,11 +2,8 @@ import { UpdateRoundScoresDto } from '#application/dto/update_round_scores_dto'
 import { CompleteRoundDto } from '#application/dto/complete_round_dto'
 import { RoundResponseDto, RoundListResponseDto } from '#application/dto/round_response_dto'
 import { RoundMapper } from '#application/mappers/round_mapper'
-import Round from '#domain/entities/round'
-import Game from '#domain/entities/game'
 import GameId from '#domain/value-objects/game_id'
 import RoundNumber from '#domain/value-objects/round_number'
-import RoundId from '#domain/value-objects/round_id'
 import { RoundRepository } from '#domain/repositories/round_repository'
 import { GameRepository } from '#domain/repositories/i_game_repository'
 import { PlayerRepository } from '#domain/repositories/player_repository'
@@ -16,15 +13,8 @@ import { RoundAlreadyCompletedError } from '#domain/errors/round_already_complet
 import { UnauthorizedRoundAccessError } from '#domain/errors/unauthorized_round_access_error'
 
 /**
- * Interface for ID generation (temporary extension for RoundId)
- */
-interface ExtendedIdGenerator {
-  generateRoundId(): RoundId
-}
-
-/**
  * RoundService - Application Service
- * 
+ *
  * Orchestrates round operations following hexagonal architecture principles.
  * Handles business validation, authorization, and domain events.
  */
@@ -32,8 +22,7 @@ export default class RoundService {
   constructor(
     private roundRepository: RoundRepository,
     private gameRepository: GameRepository,
-    private playerRepository: PlayerRepository,
-    private idGenerator: ExtendedIdGenerator
+    private playerRepository: PlayerRepository
   ) {}
 
   /**
@@ -43,20 +32,23 @@ export default class RoundService {
     // 1. Authorization: verify requesting user is owner or participant
     const gameId = new GameId(Number(dto.gameId))
     const game = await this.gameRepository.findById(gameId)
-    
+
     if (!game) {
       throw new RoundNotFoundError(dto.gameId, dto.roundNumber) // Game not found
     }
-    
+
     // Check if user is authorized (owner or participant)
     const isOwner = game.userId === dto.requestingUserId
     let isParticipant = false
-    
+
     if (!isOwner) {
-      const participant = await this.playerRepository.findByGameAndUser(gameId, dto.requestingUserId)
+      const participant = await this.playerRepository.findByGameAndUser(
+        gameId,
+        dto.requestingUserId
+      )
       isParticipant = participant !== null
     }
-    
+
     if (!isOwner && !isParticipant) {
       throw new UnauthorizedRoundAccessError(dto.gameId, dto.requestingUserId)
     }
@@ -69,7 +61,7 @@ export default class RoundService {
     // 3. Find the round
     const roundNumber = new RoundNumber(dto.roundNumber)
     const round = await this.roundRepository.findByGameIdAndNumber(gameId, roundNumber)
-    
+
     if (!round) {
       throw new RoundNotFoundError(dto.gameId, dto.roundNumber)
     }
@@ -97,20 +89,23 @@ export default class RoundService {
     // 1. Authorization: verify requesting user is owner or participant
     const gameId = new GameId(Number(dto.gameId))
     const game = await this.gameRepository.findById(gameId)
-    
+
     if (!game) {
       throw new RoundNotFoundError(dto.gameId, dto.roundNumber)
     }
-    
+
     // Check authorization
     const isOwner = game.userId === dto.requestingUserId
     let isParticipant = false
-    
+
     if (!isOwner) {
-      const participant = await this.playerRepository.findByGameAndUser(gameId, dto.requestingUserId)
+      const participant = await this.playerRepository.findByGameAndUser(
+        gameId,
+        dto.requestingUserId
+      )
       isParticipant = participant !== null
     }
-    
+
     if (!isOwner && !isParticipant) {
       throw new UnauthorizedRoundAccessError(dto.gameId, dto.requestingUserId)
     }
@@ -123,7 +118,7 @@ export default class RoundService {
     // 3. Find the round
     const roundNumber = new RoundNumber(dto.roundNumber)
     const round = await this.roundRepository.findByGameIdAndNumber(gameId, roundNumber)
-    
+
     if (!round) {
       throw new RoundNotFoundError(dto.gameId, dto.roundNumber)
     }
@@ -146,26 +141,26 @@ export default class RoundService {
     // 1. Authorization (owner or participant can read)
     const gameIdObj = new GameId(Number(gameId))
     const game = await this.gameRepository.findById(gameIdObj)
-    
+
     if (!game) {
       throw new RoundNotFoundError(gameId, 0) // Game not found
     }
 
     const isOwner = game.userId === requestingUserId
     let isParticipant = false
-    
+
     if (!isOwner) {
       const participant = await this.playerRepository.findByGameAndUser(gameIdObj, requestingUserId)
       isParticipant = participant !== null
     }
-    
+
     if (!isOwner && !isParticipant) {
       throw new UnauthorizedRoundAccessError(gameId, requestingUserId)
     }
 
     // 2. Retrieve rounds
     const rounds = await this.roundRepository.findByGameId(gameIdObj)
-    
+
     // 3. Map to DTOs with authorization context
     const canModify = (isOwner || isParticipant) && game.isInProgress()
     const roundsDto = RoundMapper.toDtoArray(rounds, game, canModify)

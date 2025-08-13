@@ -4,10 +4,10 @@
  * Input boundary following hexagonal architecture
  */
 export interface UpdateRoundScoresDto {
-  gameId: string           // ID de la partie
-  roundNumber: number      // Numéro du round (1-5)
-  playerScore: number      // Score du joueur (≥ 0)
-  opponentScore: number    // Score de l'adversaire (≥ 0)
+  gameId: string // ID de la partie
+  roundNumber: number // Numéro du round (1-5)
+  playerScore: number // Score du joueur (≥ 0)
+  opponentScore: number // Score de l'adversaire (≥ 0)
   requestingUserId: number // ID utilisateur pour autorisation
 }
 
@@ -48,22 +48,39 @@ export class UpdateRoundScoresDtoFactory {
     }
 
     // Round number validation (1-5)
-    if (!Number.isInteger(data.roundNumber) || data.roundNumber < 1 || data.roundNumber > 5) {
+    if (
+      data.roundNumber === undefined ||
+      !Number.isInteger(data.roundNumber) ||
+      data.roundNumber < 1 ||
+      data.roundNumber > 5
+    ) {
       throw new Error('Round number must be an integer between 1 and 5')
     }
 
     // Player score validation
-    if (!Number.isInteger(data.playerScore) || data.playerScore < 0) {
+    if (
+      data.playerScore === undefined ||
+      !Number.isInteger(data.playerScore) ||
+      data.playerScore < 0
+    ) {
       throw new Error('Player score must be a non-negative integer')
     }
 
-    // Opponent score validation  
-    if (!Number.isInteger(data.opponentScore) || data.opponentScore < 0) {
+    // Opponent score validation
+    if (
+      data.opponentScore === undefined ||
+      !Number.isInteger(data.opponentScore) ||
+      data.opponentScore < 0
+    ) {
       throw new Error('Opponent score must be a non-negative integer')
     }
 
     // Requesting user validation
-    if (!Number.isInteger(data.requestingUserId) || data.requestingUserId <= 0) {
+    if (
+      data.requestingUserId === undefined ||
+      !Number.isInteger(data.requestingUserId) ||
+      data.requestingUserId <= 0
+    ) {
       throw new Error('Requesting user ID must be a positive integer')
     }
   }

@@ -11,7 +11,7 @@ export interface RoundResponseDto {
   opponentScore: number
   isCompleted: boolean
   winner: 'PLAYER' | 'OPPONENT' | 'DRAW' | null
-  canModify: boolean       // Based on authorization and game state
+  canModify: boolean // Based on authorization and game state
   createdAt: Date
   completedAt?: Date
 }

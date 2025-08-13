@@ -8,7 +8,10 @@ import { DomainErrorCodes } from './domain_error_codes.js'
 export class UnauthorizedRoundAccessError extends Error {
   public readonly code = DomainErrorCodes.UNAUTHORIZED_ROUND_ACCESS
 
-  constructor(readonly gameId: string, readonly userId: number) {
+  constructor(
+    readonly gameId: string,
+    readonly userId: number
+  ) {
     super(`User ${userId} is not authorized to access rounds for game ${gameId}`)
     this.name = 'UnauthorizedRoundAccessError'
   }

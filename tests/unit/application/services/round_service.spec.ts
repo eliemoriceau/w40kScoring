@@ -5,7 +5,6 @@ import { CompleteRoundDto } from '#application/dto/complete_round_dto'
 import GameId from '#domain/value-objects/game_id'
 import RoundId from '#domain/value-objects/round_id'
 import RoundNumber from '#domain/value-objects/round_number'
-import GameStatus from '#domain/value-objects/game_status'
 import GameType from '#domain/value-objects/game_type'
 import PointsLimit from '#domain/value-objects/points_limit'
 import Game from '#domain/entities/game'
@@ -61,9 +60,9 @@ class MockRoundRepository {
   }
 
   async findByGameIdAndNumber(gameId: GameId, roundNumber: RoundNumber): Promise<Round | null> {
-    return this.rounds.find((r) => 
-      r.gameId.equals(gameId) && r.roundNumber.equals(roundNumber)
-    ) || null
+    return (
+      this.rounds.find((r) => r.gameId.equals(gameId) && r.roundNumber.equals(roundNumber)) || null
+    )
   }
 
   async delete(id: RoundId): Promise<void> {
@@ -100,32 +99,21 @@ class MockPlayerRepository {
   }
 }
 
-class MockIdGenerator {
-  private counter = 1
-
-  generateRoundId(): RoundId {
-    return new RoundId(this.counter++)
-  }
-}
-
 test.group('RoundService (TDD)', (group) => {
   let roundService: RoundService
   let mockGameRepository: MockGameRepository
   let mockRoundRepository: MockRoundRepository
   let mockPlayerRepository: MockPlayerRepository
-  let mockIdGenerator: MockIdGenerator
 
   group.setup(() => {
     mockGameRepository = new MockGameRepository()
     mockRoundRepository = new MockRoundRepository()
     mockPlayerRepository = new MockPlayerRepository()
-    mockIdGenerator = new MockIdGenerator()
 
     roundService = new RoundService(
       mockRoundRepository as any,
       mockGameRepository as any,
-      mockPlayerRepository as any,
-      mockIdGenerator as any
+      mockPlayerRepository as any
     )
   })
 
@@ -139,7 +127,12 @@ test.group('RoundService (TDD)', (group) => {
     // Arrange - TDD: This test will fail initially
     const gameId = new GameId(1)
     const ownerId = 123
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     game.start()
     mockGameRepository.addMockGame(game)
 
@@ -175,8 +168,13 @@ test.group('RoundService (TDD)', (group) => {
     const gameId = new GameId(1)
     const ownerId = 123
     const participantId = 456
-    
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     game.start()
     mockGameRepository.addMockGame(game)
 
@@ -213,8 +211,13 @@ test.group('RoundService (TDD)', (group) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     // Game is not started - should be in PLANNED state
     mockGameRepository.addMockGame(game)
 
@@ -242,8 +245,13 @@ test.group('RoundService (TDD)', (group) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     game.start()
     mockGameRepository.addMockGame(game)
 
@@ -273,8 +281,13 @@ test.group('RoundService (TDD)', (group) => {
     const gameId = new GameId(1)
     const ownerId = 123
     const unauthorizedUserId = 999
-    
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     game.start()
     mockGameRepository.addMockGame(game)
 
@@ -302,8 +315,13 @@ test.group('RoundService (TDD)', (group) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     game.start()
     mockGameRepository.addMockGame(game)
 
@@ -330,8 +348,13 @@ test.group('RoundService (TDD)', (group) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     game.start()
     mockGameRepository.addMockGame(game)
 
@@ -360,8 +383,13 @@ test.group('RoundService (TDD)', (group) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     game.start()
     mockGameRepository.addMockGame(game)
 
@@ -369,7 +397,7 @@ test.group('RoundService (TDD)', (group) => {
     const round1 = Round.createNew(new RoundId(1), gameId, new RoundNumber(1))
     const round2 = Round.createNew(new RoundId(2), gameId, new RoundNumber(2))
     round2.completeRound(10, 8) // One completed
-    
+
     mockRoundRepository.addMockRound(round1)
     mockRoundRepository.addMockRound(round2)
 
@@ -381,11 +409,11 @@ test.group('RoundService (TDD)', (group) => {
     assert.equal(result.rounds.length, 2)
     assert.equal(result.pagination.total, 2)
     assert.isFalse(result.pagination.hasMore)
-    
+
     // Check ordering
     assert.equal(result.rounds[0].roundNumber, 1)
     assert.equal(result.rounds[1].roundNumber, 2)
-    
+
     // Check completion status
     assert.isFalse(result.rounds[0].isCompleted)
     assert.isTrue(result.rounds[1].isCompleted)
@@ -395,8 +423,13 @@ test.group('RoundService (TDD)', (group) => {
     // Arrange
     const gameId = new GameId(1)
     const ownerId = 123
-    
-    const game = Game.createNew(gameId, ownerId, GameType.fromValue('MATCHED_PLAY'), new PointsLimit(2000))
+
+    const game = Game.createNew(
+      gameId,
+      ownerId,
+      GameType.fromValue('MATCHED_PLAY'),
+      new PointsLimit(2000)
+    )
     game.start()
     mockGameRepository.addMockGame(game)
 

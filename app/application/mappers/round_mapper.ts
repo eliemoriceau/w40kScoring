@@ -17,7 +17,7 @@ export class RoundMapper {
   static toDto(round: Round, game: Game, canModify: boolean = false): RoundResponseDto {
     // Calculate winner based on current scores, even if not completed
     const winner = this.determineCurrentWinner(round.playerScore, round.opponentScore)
-    
+
     return {
       id: round.id.value.toString(),
       gameId: round.gameId.value.toString(),
@@ -35,11 +35,14 @@ export class RoundMapper {
   /**
    * Determine winner based on current scores (for display purposes)
    */
-  private static determineCurrentWinner(playerScore: number, opponentScore: number): 'PLAYER' | 'OPPONENT' | 'DRAW' | null {
+  private static determineCurrentWinner(
+    playerScore: number,
+    opponentScore: number
+  ): 'PLAYER' | 'OPPONENT' | 'DRAW' | null {
     if (playerScore === 0 && opponentScore === 0) {
       return null // No scores yet
     }
-    
+
     if (playerScore > opponentScore) {
       return 'PLAYER'
     } else if (opponentScore > playerScore) {

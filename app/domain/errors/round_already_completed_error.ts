@@ -8,7 +8,10 @@ import { DomainErrorCodes } from './domain_error_codes.js'
 export class RoundAlreadyCompletedError extends Error {
   public readonly code = DomainErrorCodes.ROUND_ALREADY_COMPLETED
 
-  constructor(readonly gameId: string, readonly roundNumber: number) {
+  constructor(
+    readonly gameId: string,
+    readonly roundNumber: number
+  ) {
     super(`Round ${roundNumber} in game ${gameId} is already completed`)
     this.name = 'RoundAlreadyCompletedError'
   }

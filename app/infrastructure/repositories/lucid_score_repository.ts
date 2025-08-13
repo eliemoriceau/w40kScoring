@@ -3,6 +3,7 @@ import Score from '#domain/entities/score'
 import ScoreId from '#domain/value-objects/score_id'
 import RoundId from '#domain/value-objects/round_id'
 import PlayerId from '#domain/value-objects/player_id'
+import GameId from '#domain/value-objects/game_id'
 import ScoreType from '#domain/value-objects/score_type'
 import ScoreValue from '#domain/value-objects/score_value'
 import ScoreStatsSummary from '#domain/value-objects/score_stats_summary'
@@ -113,5 +114,22 @@ export default class LucidScoreRepository implements ScoreRepository {
 
   async deleteMultiple(ids: ScoreId[]): Promise<void> {
     return this.commandRepository.deleteMultiple(ids)
+  }
+
+  // New ScoreService methods (delegated to query repository)
+  async existsChallengerInRound(roundId: RoundId): Promise<boolean> {
+    return this.queryRepository.existsChallengerInRound(roundId)
+  }
+
+  async findByPlayerInGame(playerId: PlayerId, gameId: GameId): Promise<Score[]> {
+    return this.queryRepository.findByPlayerInGame(playerId, gameId)
+  }
+
+  async getTotalByPlayerInGame(playerId: PlayerId, gameId: GameId): Promise<ScoreValue> {
+    return this.queryRepository.getTotalByPlayerInGame(playerId, gameId)
+  }
+
+  async findPlayersInGame(gameId: GameId): Promise<PlayerId[]> {
+    return this.queryRepository.findPlayersInGame(gameId)
   }
 }

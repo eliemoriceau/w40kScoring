@@ -2,6 +2,7 @@ import Score from '#domain/entities/score'
 import ScoreId from '#domain/value-objects/score_id'
 import RoundId from '#domain/value-objects/round_id'
 import PlayerId from '#domain/value-objects/player_id'
+import GameId from '#domain/value-objects/game_id'
 import ScoreType from '#domain/value-objects/score_type'
 import PlayerRanking from '#domain/value-objects/player_ranking'
 import ScoreStatsSummary from '#domain/value-objects/score_stats_summary'
@@ -88,4 +89,28 @@ export interface ScoreQueryRepository {
    * Find top scoring players
    */
   findTopScoringPlayers(limit: number): Promise<PlayerRanking[]>
+
+  /**
+   * Check if CHALLENGER score already exists in a specific round
+   * Used to enforce business rule: only one CHALLENGER per round
+   */
+  existsChallengerInRound(roundId: RoundId): Promise<boolean>
+
+  /**
+   * Get all scores for a player in a specific game
+   * Used for total calculations across all rounds of a game
+   */
+  findByPlayerInGame(playerId: PlayerId, gameId: GameId): Promise<Score[]>
+
+  /**
+   * Get total score value for a player in a specific game
+   * Optimized aggregation query for performance
+   */
+  getTotalByPlayerInGame(playerId: PlayerId, gameId: GameId): Promise<ScoreValue>
+
+  /**
+   * Find all players in a game (for opponent identification)
+   * Used for CHALLENGER deficit calculation
+   */
+  findPlayersInGame(gameId: GameId): Promise<PlayerId[]>
 }

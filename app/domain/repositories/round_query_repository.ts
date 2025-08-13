@@ -49,6 +49,12 @@ export interface RoundQueryRepository {
   findIncompleteRoundsByGame(gameId: GameId): Promise<Round[]>
 
   /**
+   * Find the previous round for CHALLENGER deficit calculation
+   * Returns the round with number = currentRoundNumber - 1
+   */
+  findPreviousRound(gameId: GameId, currentRoundNumber: RoundNumber): Promise<Round | null>
+
+  /**
    * Get round statistics for a game (total scores, completed rounds, etc.)
    */
   getRoundStatsByGame(gameId: GameId): Promise<{

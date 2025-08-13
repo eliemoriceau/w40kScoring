@@ -15,10 +15,11 @@ import ScoreId from '#domain/value-objects/score_id'
 import ScoreType from '#domain/value-objects/score_type'
 import ScoreName from '#domain/value-objects/score_name'
 import ScoreValue from '#domain/value-objects/score_value'
-import { ScoreRepository } from '#domain/repositories/score_repository'
-import { GameRepository } from '#domain/repositories/i_game_repository'
-import { RoundRepository } from '#domain/repositories/round_repository'
-import { PlayerRepository } from '#domain/repositories/player_repository'
+import { ScoreCommandRepository } from '#domain/repositories/score_command_repository'
+import { ScoreQueryRepository } from '#domain/repositories/score_query_repository'
+import { GameQueryRepository } from '#domain/repositories/game_query_repository'
+import { RoundQueryRepository } from '#domain/repositories/round_query_repository'
+import { PlayerQueryRepository } from '#domain/repositories/player_query_repository'
 import { IdGenerator } from '#domain/services/id_generator'
 import { InvalidScoreTypeForServiceError } from '#domain/errors/invalid_score_type_for_service_error'
 import { ScoreValueOutOfRangeError } from '#domain/errors/score_value_out_of_range_error'
@@ -44,10 +45,10 @@ export default class ScoreService {
   private static readonly MIN_DEFICIT_FOR_CHALLENGER = 6
 
   constructor(
-    private scoreRepository: ScoreRepository,
-    private gameRepository: GameRepository,
-    private roundRepository: RoundRepository,
-    private playerRepository: PlayerRepository,
+    private scoreRepository: ScoreCommandRepository & ScoreQueryRepository,
+    private gameRepository: GameQueryRepository,
+    private roundRepository: RoundQueryRepository,
+    private playerRepository: PlayerQueryRepository,
     private idGenerator: IdGenerator
   ) {}
 

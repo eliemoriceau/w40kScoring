@@ -3,10 +3,14 @@ import GameService, {
   CompleteGameData,
   CompleteGameResult,
 } from '#application/services/game_service'
-import LucidGameRepository from '#infrastructure/repositories/lucid_game_repository'
-import LucidPlayerRepository from '#infrastructure/repositories/lucid_player_repository'
-import LucidRoundRepository from '#infrastructure/repositories/lucid_round_repository'
-import LucidScoreRepository from '#infrastructure/repositories/lucid_score_repository'
+import LucidGameCommandRepository from '#infrastructure/repositories/lucid_game_command_repository'
+import LucidGameQueryRepository from '#infrastructure/repositories/lucid_game_query_repository'
+import LucidPlayerCommandRepository from '#infrastructure/repositories/lucid_player_command_repository'
+import LucidPlayerQueryRepository from '#infrastructure/repositories/lucid_player_query_repository'
+import LucidRoundCommandRepository from '#infrastructure/repositories/lucid_round_command_repository'
+import LucidRoundQueryRepository from '#infrastructure/repositories/lucid_round_query_repository'
+import LucidScoreCommandRepository from '#infrastructure/repositories/lucid_score_command_repository'
+import LucidScoreQueryRepository from '#infrastructure/repositories/lucid_score_query_repository'
 import UuidV7IdGenerator from '#infrastructure/services/uuid_v7_id_generator'
 import GameModel from '#models/game'
 import PlayerModel from '#models/player'
@@ -27,18 +31,30 @@ import UserModel from '#models/user'
  */
 test.group('Complete Game Integration', (group) => {
   let gameService: GameService
-  let gameRepository: LucidGameRepository
-  let playerRepository: LucidPlayerRepository
-  let roundRepository: LucidRoundRepository
-  let scoreRepository: LucidScoreRepository
+  let gameRepository: LucidGameCommandRepository & LucidGameQueryRepository
+  let playerRepository: LucidPlayerCommandRepository & LucidPlayerQueryRepository
+  let roundRepository: LucidRoundCommandRepository & LucidRoundQueryRepository
+  let scoreRepository: LucidScoreCommandRepository & LucidScoreQueryRepository
   let idGenerator: UuidV7IdGenerator
 
   group.setup(async () => {
     // Initialize all infrastructure components
-    gameRepository = new LucidGameRepository()
-    playerRepository = new LucidPlayerRepository()
-    roundRepository = new LucidRoundRepository()
-    scoreRepository = new LucidScoreRepository()
+    gameRepository = Object.assign(
+      new LucidGameCommandRepository(),
+      new LucidGameQueryRepository()
+    )
+    playerRepository = Object.assign(
+      new LucidPlayerCommandRepository(),
+      new LucidPlayerQueryRepository()
+    )
+    roundRepository = Object.assign(
+      new LucidRoundCommandRepository(),
+      new LucidRoundQueryRepository()
+    )
+    scoreRepository = Object.assign(
+      new LucidScoreCommandRepository(),
+      new LucidScoreQueryRepository()
+    )
     idGenerator = new UuidV7IdGenerator()
 
     // Initialize application service with all dependencies

@@ -4,7 +4,7 @@ import GameId from '#domain/value-objects/game_id'
 import GameType from '#domain/value-objects/game_type'
 import PointsLimit from '#domain/value-objects/points_limit'
 
-test.group('IGameRepository Contract', () => {
+test.group('GameRepository Contract', () => {
   test('repository interface should define correct contract', ({ assert }) => {
     // This test validates the interface structure
     // We'll test the actual implementation in integration tests

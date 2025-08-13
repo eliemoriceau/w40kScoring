@@ -12,10 +12,14 @@ import RoundNumber from '#domain/value-objects/round_number'
 import ScoreType from '#domain/value-objects/score_type'
 import ScoreName from '#domain/value-objects/score_name'
 import ScoreValue from '#domain/value-objects/score_value'
-import { GameRepository } from '#domain/repositories/i_game_repository'
-import { PlayerRepository } from '#domain/repositories/player_repository'
-import { RoundRepository } from '#domain/repositories/round_repository'
-import { ScoreRepository } from '#domain/repositories/score_repository'
+import { GameCommandRepository } from '#domain/repositories/game_command_repository'
+import { GameQueryRepository } from '#domain/repositories/game_query_repository'
+import { PlayerCommandRepository } from '#domain/repositories/player_command_repository'
+import { PlayerQueryRepository } from '#domain/repositories/player_query_repository'
+import { RoundCommandRepository } from '#domain/repositories/round_command_repository'
+import { RoundQueryRepository } from '#domain/repositories/round_query_repository'
+import { ScoreCommandRepository } from '#domain/repositories/score_command_repository'
+import { ScoreQueryRepository } from '#domain/repositories/score_query_repository'
 import { IdGenerator } from '#domain/services/id_generator'
 import CreateGameCommand from '#application/commands/create_game_command'
 import StartGameCommand from '#application/commands/start_game_command'
@@ -83,10 +87,10 @@ export interface CompleteGameData {
  */
 export default class GameService {
   constructor(
-    private gameRepository: GameRepository,
-    private playerRepository: PlayerRepository,
-    private roundRepository: RoundRepository,
-    private scoreRepository: ScoreRepository,
+    private gameRepository: GameCommandRepository & GameQueryRepository,
+    private playerRepository: PlayerCommandRepository & PlayerQueryRepository,
+    private roundRepository: RoundCommandRepository & RoundQueryRepository,
+    private scoreRepository: ScoreCommandRepository & ScoreQueryRepository,
     private idGenerator: IdGenerator
   ) {}
 

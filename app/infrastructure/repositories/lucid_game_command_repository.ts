@@ -1,4 +1,4 @@
-import { GameCommandRepository } from '#domain/repositories/i_game_command_repository'
+import { GameCommandRepository } from '#domain/repositories/game_command_repository'
 import Game from '#domain/entities/game'
 import GameId from '#domain/value-objects/game_id'
 import GameType from '#domain/value-objects/game_type'

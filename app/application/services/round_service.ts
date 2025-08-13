@@ -4,9 +4,10 @@ import { RoundResponseDto, RoundListResponseDto } from '#application/dto/round_r
 import { RoundMapper } from '#application/mappers/round_mapper'
 import GameId from '#domain/value-objects/game_id'
 import RoundNumber from '#domain/value-objects/round_number'
-import { RoundRepository } from '#domain/repositories/round_repository'
-import { GameRepository } from '#domain/repositories/i_game_repository'
-import { PlayerRepository } from '#domain/repositories/player_repository'
+import { RoundCommandRepository } from '#domain/repositories/round_command_repository'
+import { RoundQueryRepository } from '#domain/repositories/round_query_repository'
+import { GameQueryRepository } from '#domain/repositories/game_query_repository'
+import { PlayerQueryRepository } from '#domain/repositories/player_query_repository'
 import { GameNotInProgressError } from '#domain/errors/game_not_in_progress_error'
 import { RoundNotFoundError } from '#domain/errors/round_not_found_error'
 import { RoundAlreadyCompletedError } from '#domain/errors/round_already_completed_error'
@@ -20,9 +21,9 @@ import { UnauthorizedRoundAccessError } from '#domain/errors/unauthorized_round_
  */
 export default class RoundService {
   constructor(
-    private roundRepository: RoundRepository,
-    private gameRepository: GameRepository,
-    private playerRepository: PlayerRepository
+    private roundRepository: RoundCommandRepository & RoundQueryRepository,
+    private gameRepository: GameQueryRepository,
+    private playerRepository: PlayerQueryRepository
   ) {}
 
   /**

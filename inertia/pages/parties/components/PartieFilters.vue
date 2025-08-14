@@ -39,22 +39,30 @@ const gameTypeLabels: Record<string, string> = {
 }
 
 // Watchers pour la synchronisation
-watch(() => props.filters, (newFilters) => {
-  localFilters.value = { ...newFilters }
-}, { deep: true })
+watch(
+  () => props.filters,
+  (newFilters) => {
+    localFilters.value = { ...newFilters }
+  },
+  { deep: true }
+)
 
-watch(localFilters, (newFilters) => {
-  emit('update:filters', newFilters)
-  
-  // Debounce pour la recherche, émission immédiate pour les autres filtres
-  if (searchDebounce.value) {
-    clearTimeout(searchDebounce.value)
-  }
-  
-  searchDebounce.value = setTimeout(() => {
-    emit('filter-change', newFilters)
-  }, 300)
-}, { deep: true })
+watch(
+  localFilters,
+  (newFilters) => {
+    emit('update:filters', newFilters)
+
+    // Debounce pour la recherche, émission immédiate pour les autres filtres
+    if (searchDebounce.value) {
+      clearTimeout(searchDebounce.value)
+    }
+
+    searchDebounce.value = setTimeout(() => {
+      emit('filter-change', newFilters)
+    }, 300)
+  },
+  { deep: true }
+)
 
 // Handlers
 const handleStatusChange = (status: string) => {
@@ -77,7 +85,11 @@ const handleClearAll = () => {
 }
 
 const hasActiveFilters = () => {
-  return !!(localFilters.value.status || localFilters.value.gameType || localFilters.value.search?.trim())
+  return !!(
+    localFilters.value.status ||
+    localFilters.value.gameType ||
+    localFilters.value.search?.trim()
+  )
 }
 </script>
 
@@ -88,8 +100,18 @@ const hasActiveFilters = () => {
       <div class="flex-1">
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              class="h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
           <input
@@ -98,12 +120,23 @@ const hasActiveFilters = () => {
             placeholder="Rechercher par mission, notes..."
             class="block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             :disabled="loading"
-          >
+          />
           <!-- Indicateur de chargement dans la recherche -->
           <div v-if="loading" class="absolute inset-y-0 right-0 pr-3 flex items-center">
             <svg class="animate-spin h-4 w-4 text-yellow-500" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
           </div>
         </div>
@@ -121,7 +154,7 @@ const hasActiveFilters = () => {
               'px-3 py-1 text-xs font-medium rounded-full transition-colors',
               localFilters.status === status
                 ? 'bg-blue-600 text-white border border-blue-500'
-                : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600'
+                : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600',
             ]"
             :disabled="loading"
           >
@@ -142,7 +175,7 @@ const hasActiveFilters = () => {
               'px-3 py-1 text-xs font-medium rounded-full transition-colors',
               localFilters.gameType === gameType
                 ? 'bg-red-600 text-white border border-red-500'
-                : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600'
+                : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600',
             ]"
             :disabled="loading"
           >
@@ -159,7 +192,12 @@ const hasActiveFilters = () => {
         :disabled="loading"
       >
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
         Effacer
       </button>
@@ -168,49 +206,52 @@ const hasActiveFilters = () => {
     <!-- Indicateur de filtres actifs -->
     <div v-if="hasActiveFilters()" class="mt-3 flex items-center space-x-2">
       <span class="text-xs text-gray-400">Filtres actifs :</span>
-      
+
       <div class="flex flex-wrap gap-2">
-        <span 
+        <span
           v-if="localFilters.status"
           class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-600/20 text-blue-300 border border-blue-500/30"
         >
           {{ statusLabels[localFilters.status] }}
-          <button 
-            @click="localFilters.status = undefined"
-            class="ml-1 hover:text-blue-100"
-          >
+          <button @click="localFilters.status = undefined" class="ml-1 hover:text-blue-100">
             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
         </span>
 
-        <span 
+        <span
           v-if="localFilters.gameType"
           class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-600/20 text-red-300 border border-red-500/30"
         >
           {{ gameTypeLabels[localFilters.gameType] }}
-          <button 
-            @click="localFilters.gameType = undefined"
-            class="ml-1 hover:text-red-100"
-          >
+          <button @click="localFilters.gameType = undefined" class="ml-1 hover:text-red-100">
             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
         </span>
 
-        <span 
+        <span
           v-if="localFilters.search?.trim()"
           class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-600/20 text-yellow-300 border border-yellow-500/30"
         >
           "{{ localFilters.search.trim() }}"
-          <button 
-            @click="localFilters.search = ''"
-            class="ml-1 hover:text-yellow-100"
-          >
+          <button @click="localFilters.search = ''" class="ml-1 hover:text-yellow-100">
             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
         </span>

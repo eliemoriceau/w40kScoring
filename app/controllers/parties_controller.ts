@@ -6,10 +6,10 @@ import { partiesListValidator } from '#validators/parties_list_validator'
 
 /**
  * PartiesController
- * 
+ *
  * Contrôleur pour la gestion de la liste des parties utilisateur.
  * Utilise les patterns AdonisJS v6 + Inertia pour l'interface utilisateur.
- * 
+ *
  * Architecture hexagonale : Interface Layer → Application Layer (GameService)
  */
 export default class PartiesController {
@@ -23,9 +23,9 @@ export default class PartiesController {
 
   /**
    * Affiche la liste des parties de l'utilisateur connecté
-   * 
+   *
    * GET /parties
-   * 
+   *
    * @param request - Requête HTTP avec paramètres de filtrage
    * @param inertia - Service Inertia pour rendu Vue
    * @param auth - Service d'authentification
@@ -72,7 +72,7 @@ export default class PartiesController {
   /**
    * Endpoint pour rafraîchissement AJAX/Fetch
    * Retourne uniquement les données JSON sans rendu de page
-   * 
+   *
    * GET /parties/data
    */
   async data({ request, auth, response }: HttpContext) {

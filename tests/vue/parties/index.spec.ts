@@ -9,21 +9,21 @@ vi.mock('@inertiajs/vue3', () => ({
   router: {
     get: vi.fn(),
     visit: vi.fn(),
-    reload: vi.fn()
+    reload: vi.fn(),
   },
   usePage: () => ({
     props: {
       parties: {
         parties: [],
-        pagination: { hasMore: false }
+        pagination: { hasMore: false },
       },
       filters: {
         current: {},
-        available: { statuses: [], gameTypes: [] }
+        available: { statuses: [], gameTypes: [] },
       },
-      user: { id: 1, fullName: 'Test User' }
-    }
-  })
+      user: { id: 1, fullName: 'Test User' },
+    },
+  }),
 }))
 
 // Mock route helper
@@ -40,24 +40,24 @@ describe('PartiesIndex', () => {
         pagination: {
           hasMore: false,
           nextCursor: undefined,
-          totalCount: 0
+          totalCount: 0,
         },
         filters: {
           applied: {},
-          available: []
-        }
+          available: [],
+        },
       },
       filters: {
         current: {},
         available: {
           statuses: ['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
-          gameTypes: ['MATCHED_PLAY', 'NARRATIVE', 'OPEN_PLAY']
-        }
+          gameTypes: ['MATCHED_PLAY', 'NARRATIVE', 'OPEN_PLAY'],
+        },
       },
       user: {
         id: 1,
-        fullName: 'Test User'
-      }
+        fullName: 'Test User',
+      },
     }
   })
 
@@ -70,12 +70,12 @@ describe('PartiesIndex', () => {
       props: mockProps,
       global: {
         stubs: {
-          'PartieHeader': true,
-          'PartieFilters': true,
-          'PartieList': true,
-          'LoadingSpinner': true
-        }
-      }
+          PartieHeader: true,
+          PartieFilters: true,
+          PartieList: true,
+          LoadingSpinner: true,
+        },
+      },
     })
 
     expect(wrapper.exists()).toBe(true)
@@ -91,7 +91,7 @@ describe('PartiesIndex', () => {
         pointsLimit: 2000,
         status: 'IN_PROGRESS',
         createdAt: new Date(),
-        metadata: { canBeModified: true }
+        metadata: { canBeModified: true },
       },
       {
         id: '2',
@@ -100,28 +100,28 @@ describe('PartiesIndex', () => {
         pointsLimit: 1500,
         status: 'COMPLETED',
         createdAt: new Date(),
-        metadata: { winner: 'PLAYER' }
-      }
+        metadata: { winner: 'PLAYER' },
+      },
     ]
 
     const propsWithParties = {
       ...mockProps,
       parties: {
         ...mockProps.parties,
-        parties: mockPartiesData
-      }
+        parties: mockPartiesData,
+      },
     }
 
     wrapper = mount(PartiesIndex, {
       props: propsWithParties,
       global: {
         stubs: {
-          'PartieHeader': true,
-          'PartieFilters': true,
-          'PartieList': true,
-          'LoadingSpinner': true
-        }
-      }
+          PartieHeader: true,
+          PartieFilters: true,
+          PartieList: true,
+          LoadingSpinner: true,
+        },
+      },
     })
 
     // Les parties devraient être passées au composant PartieList
@@ -130,19 +130,20 @@ describe('PartiesIndex', () => {
 
   it('should handle filter changes correctly', async () => {
     const mockRouter = vi.mocked(vi.importMock('@inertiajs/vue3')).router
-    
+
     wrapper = mount(PartiesIndex, {
       props: mockProps,
       global: {
         stubs: {
-          'PartieHeader': true,
-          'PartieFilters': {
-            template: '<div @click="$emit(\'filter-change\', { status: \'IN_PROGRESS\' })">Filters</div>'
+          PartieHeader: true,
+          PartieFilters: {
+            template:
+              "<div @click=\"$emit('filter-change', { status: 'IN_PROGRESS' })\">Filters</div>",
           },
-          'PartieList': true,
-          'LoadingSpinner': true
-        }
-      }
+          PartieList: true,
+          LoadingSpinner: true,
+        },
+      },
     })
 
     // Simuler un changement de filtre
@@ -157,23 +158,23 @@ describe('PartiesIndex', () => {
       props: mockProps,
       global: {
         stubs: {
-          'PartieHeader': true,
-          'PartieFilters': true,
-          'PartieList': true,
-          'LoadingSpinner': {
-            template: '<div class="loading-spinner">Loading...</div>'
-          }
-        }
-      }
+          PartieHeader: true,
+          PartieFilters: true,
+          PartieList: true,
+          LoadingSpinner: {
+            template: '<div class="loading-spinner">Loading...</div>',
+          },
+        },
+      },
     })
 
     // Simuler état de chargement
-    await wrapper.setData({ 
-      loading: { 
-        loading: true, 
-        error: null, 
-        operation: 'refresh' 
-      } 
+    await wrapper.setData({
+      loading: {
+        loading: true,
+        error: null,
+        operation: 'refresh',
+      },
     })
 
     expect(wrapper.find('.loading-spinner').exists()).toBe(true)
@@ -184,20 +185,20 @@ describe('PartiesIndex', () => {
       props: mockProps,
       global: {
         stubs: {
-          'PartieHeader': true,
-          'PartieFilters': true,
-          'PartieList': true,
-          'LoadingSpinner': true
-        }
-      }
+          PartieHeader: true,
+          PartieFilters: true,
+          PartieList: true,
+          LoadingSpinner: true,
+        },
+      },
     })
 
     // Simuler une erreur
-    await wrapper.setData({ 
-      loading: { 
-        loading: false, 
-        error: 'Erreur de chargement des parties' 
-      } 
+    await wrapper.setData({
+      loading: {
+        loading: false,
+        error: 'Erreur de chargement des parties',
+      },
     })
 
     const errorAlert = wrapper.find('.bg-red-900\\/50')
@@ -207,19 +208,19 @@ describe('PartiesIndex', () => {
 
   it('should handle create new party action', async () => {
     const mockRouter = vi.mocked(vi.importMock('@inertiajs/vue3')).router
-    
+
     wrapper = mount(PartiesIndex, {
       props: mockProps,
       global: {
         stubs: {
-          'PartieHeader': {
-            template: '<div><button @click="$emit(\'create-new\')">Create New</button></div>'
+          PartieHeader: {
+            template: '<div><button @click="$emit(\'create-new\')">Create New</button></div>',
           },
-          'PartieFilters': true,
-          'PartieList': true,
-          'LoadingSpinner': true
-        }
-      }
+          PartieFilters: true,
+          PartieList: true,
+          LoadingSpinner: true,
+        },
+      },
     })
 
     const createButton = wrapper.find('button')
@@ -235,22 +236,22 @@ describe('PartiesIndex', () => {
       filters: {
         current: {
           status: 'IN_PROGRESS',
-          gameType: 'MATCHED_PLAY'
+          gameType: 'MATCHED_PLAY',
         },
-        available: mockProps.filters.available
-      }
+        available: mockProps.filters.available,
+      },
     }
 
     wrapper = mount(PartiesIndex, {
       props: propsWithFilters,
       global: {
         stubs: {
-          'PartieHeader': true,
-          'PartieFilters': true,
-          'PartieList': true,
-          'LoadingSpinner': true
-        }
-      }
+          PartieHeader: true,
+          PartieFilters: true,
+          PartieList: true,
+          LoadingSpinner: true,
+        },
+      },
     })
 
     // Le compte des filtres actifs devrait être 2
@@ -259,19 +260,19 @@ describe('PartiesIndex', () => {
 
   it('should handle view details action', async () => {
     const mockRouter = vi.mocked(vi.importMock('@inertiajs/vue3')).router
-    
+
     wrapper = mount(PartiesIndex, {
       props: mockProps,
       global: {
         stubs: {
-          'PartieHeader': true,
-          'PartieFilters': true,
-          'PartieList': {
-            template: '<div @click="$emit(\'view-details\', \'123\')">View Details</div>'
+          PartieHeader: true,
+          PartieFilters: true,
+          PartieList: {
+            template: "<div @click=\"$emit('view-details', '123')\">View Details</div>",
           },
-          'LoadingSpinner': true
-        }
-      }
+          LoadingSpinner: true,
+        },
+      },
     })
 
     await wrapper.findComponent({ name: 'PartieList' }).trigger('click')
@@ -281,30 +282,30 @@ describe('PartiesIndex', () => {
 
   it('should handle pagination correctly', async () => {
     const mockRouter = vi.mocked(vi.importMock('@inertiajs/vue3')).router
-    
+
     const propsWithPagination = {
       ...mockProps,
       parties: {
         ...mockProps.parties,
         pagination: {
           hasMore: true,
-          nextCursor: 'next_page_cursor'
-        }
-      }
+          nextCursor: 'next_page_cursor',
+        },
+      },
     }
 
     wrapper = mount(PartiesIndex, {
       props: propsWithPagination,
       global: {
         stubs: {
-          'PartieHeader': true,
-          'PartieFilters': true,
-          'PartieList': {
-            template: '<div><button @click="$emit(\'load-more\')">Load More</button></div>'
+          PartieHeader: true,
+          PartieFilters: true,
+          PartieList: {
+            template: '<div><button @click="$emit(\'load-more\')">Load More</button></div>',
           },
-          'LoadingSpinner': true
-        }
-      }
+          LoadingSpinner: true,
+        },
+      },
     })
 
     await wrapper.find('button').trigger('click')
@@ -312,7 +313,7 @@ describe('PartiesIndex', () => {
     expect(mockRouter.get).toHaveBeenCalledWith(
       route('parties.index'),
       expect.objectContaining({
-        cursor: 'next_page_cursor'
+        cursor: 'next_page_cursor',
       }),
       expect.any(Object)
     )

@@ -16,22 +16,17 @@ const props = defineProps<PartiesIndexProps>()
 // État réactif local
 const loading = ref<LoadingState>({
   loading: false,
-  error: null
+  error: null,
 })
 
 const filters = ref<PartiesFilters>({
   status: props.filters.current.status,
   gameType: props.filters.current.gameType,
-  search: ''
+  search: '',
 })
 
 // Composables et helpers
-const { 
-  enrichParties, 
-  getStatusColor, 
-  getStatusLabel, 
-  formatPlayersText 
-} = usePartiesHelpers()
+const { enrichParties, getStatusColor, getStatusLabel, formatPlayersText } = usePartiesHelpers()
 
 // Computed properties
 const enrichedParties = computed(() => {
@@ -40,13 +35,9 @@ const enrichedParties = computed(() => {
 
 const hasParties = computed(() => props.parties.parties.length > 0)
 
-const isEmpty = computed(() => 
-  !hasParties.value && !loading.value.loading && !loading.value.error
-)
+const isEmpty = computed(() => !hasParties.value && !loading.value.loading && !loading.value.error)
 
-const canLoadMore = computed(() => 
-  props.parties.pagination.hasMore && !loading.value.loading
-)
+const canLoadMore = computed(() => props.parties.pagination.hasMore && !loading.value.loading)
 
 const activeFiltersCount = computed(() => {
   let count = 0
@@ -69,12 +60,12 @@ const handleClearFilters = () => {
 
 const applyFilters = () => {
   loading.value = { loading: true, error: null, operation: 'filter' }
-  
+
   // Construire les paramètres pour Inertia
   const params = Object.fromEntries(
     Object.entries(filters.value).filter(([_, value]) => value && value.trim())
   )
-  
+
   router.get(route('parties.index'), params, {
     preserveState: true,
     preserveScroll: true,
@@ -82,12 +73,12 @@ const applyFilters = () => {
       loading.value = { loading: false, error: null }
     },
     onError: (errors) => {
-      loading.value = { 
-        loading: false, 
-        error: 'Erreur lors du filtrage des parties' 
+      loading.value = {
+        loading: false,
+        error: 'Erreur lors du filtrage des parties',
       }
       console.error('Filter error:', errors)
-    }
+    },
   })
 }
 
@@ -102,41 +93,45 @@ const handleCreateNew = () => {
 
 const handleLoadMore = () => {
   if (!canLoadMore.value) return
-  
+
   loading.value = { loading: true, error: null, operation: 'pagination' }
-  
-  router.get(route('parties.index'), {
-    ...filters.value,
-    cursor: props.parties.pagination.nextCursor
-  }, {
-    preserveState: true,
-    preserveScroll: true,
-    onFinish: () => {
-      loading.value = { loading: false, error: null }
+
+  router.get(
+    route('parties.index'),
+    {
+      ...filters.value,
+      cursor: props.parties.pagination.nextCursor,
     },
-    onError: () => {
-      loading.value = { 
-        loading: false, 
-        error: 'Erreur lors du chargement des parties supplémentaires' 
-      }
+    {
+      preserveState: true,
+      preserveScroll: true,
+      onFinish: () => {
+        loading.value = { loading: false, error: null }
+      },
+      onError: () => {
+        loading.value = {
+          loading: false,
+          error: 'Erreur lors du chargement des parties supplémentaires',
+        }
+      },
     }
-  })
+  )
 }
 
 const handleRefresh = () => {
   loading.value = { loading: true, error: null, operation: 'refresh' }
-  
+
   router.reload({
     only: ['parties'],
     onFinish: () => {
       loading.value = { loading: false, error: null }
     },
     onError: () => {
-      loading.value = { 
-        loading: false, 
-        error: 'Erreur lors du rafraîchissement' 
+      loading.value = {
+        loading: false,
+        error: 'Erreur lors du rafraîchissement',
       }
-    }
+    },
   })
 }
 
@@ -146,13 +141,17 @@ const dismissError = () => {
 
 // Watchers pour debug (mode développement)
 if (import.meta.env.DEV) {
-  watch(() => props.parties, (newParties) => {
-    console.log('Parties data updated:', {
-      count: newParties.parties.length,
-      hasMore: newParties.pagination.hasMore,
-      filters: newParties.filters?.applied
-    })
-  }, { deep: true })
+  watch(
+    () => props.parties,
+    (newParties) => {
+      console.log('Parties data updated:', {
+        count: newParties.parties.length,
+        hasMore: newParties.pagination.hasMore,
+        filters: newParties.filters?.applied,
+      })
+    },
+    { deep: true }
+  )
 }
 
 // Lifecycle
@@ -172,7 +171,7 @@ export default {
 <template>
   <div class="parties-page min-h-screen bg-black">
     <!-- Header avec titre et action principale -->
-    <PartieHeader 
+    <PartieHeader
       :parties-count="props.parties.parties.length"
       :total-count="props.parties.pagination.totalCount"
       :active-filters-count="activeFiltersCount"
@@ -192,29 +191,34 @@ export default {
       />
 
       <!-- Alerte d'erreur -->
-      <div 
-        v-if="loading.error" 
+      <div
+        v-if="loading.error"
         class="mb-6 bg-red-900/50 border border-red-500 rounded-lg p-4 flex items-center justify-between"
       >
         <div class="flex items-center">
           <svg class="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
           </svg>
           <span class="text-red-200">{{ loading.error }}</span>
         </div>
-        <button 
-          @click="dismissError"
-          class="text-red-400 hover:text-red-300 transition-colors"
-        >
+        <button @click="dismissError" class="text-red-400 hover:text-red-300 transition-colors">
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            <path
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
           </svg>
         </button>
       </div>
 
       <!-- Loading spinner pour opérations globales -->
-      <LoadingSpinner 
-        v-if="loading.loading && loading.operation === 'refresh'" 
+      <LoadingSpinner
+        v-if="loading.loading && loading.operation === 'refresh'"
         class="my-12"
         text="Rafraîchissement des parties..."
       />

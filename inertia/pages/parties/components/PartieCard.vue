@@ -19,8 +19,8 @@ const { formatRelativeDate, getScoreStats, getGameTypeIcon } = usePartiesHelpers
 const scoreStats = computed(() => getScoreStats(props.partie))
 
 const statusStyles = computed(() => {
-  const baseStyles = "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-  
+  const baseStyles = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium'
+
   switch (props.partie.statusColor) {
     case 'blue':
       return `${baseStyles} bg-blue-600/20 text-blue-300 border border-blue-500/30`
@@ -34,8 +34,8 @@ const statusStyles = computed(() => {
 })
 
 const gameTypeStyles = computed(() => {
-  const baseStyles = "inline-flex items-center px-2 py-1 rounded text-xs font-medium"
-  
+  const baseStyles = 'inline-flex items-center px-2 py-1 rounded text-xs font-medium'
+
   switch (props.partie.gameType) {
     case 'MATCHED_PLAY':
       return `${baseStyles} bg-purple-600/20 text-purple-300`
@@ -58,7 +58,7 @@ const formatScore = (score?: number) => {
 </script>
 
 <template>
-  <article 
+  <article
     class="partie-card bg-gray-900/50 border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/10 cursor-pointer group"
     @click="handleViewDetails"
   >
@@ -74,7 +74,7 @@ const formatScore = (score?: number) => {
             {{ partie.gameTypeLabel }}
           </span>
         </div>
-        
+
         <div class="text-xs text-gray-400">
           {{ formatRelativeDate(partie.createdAt) }}
         </div>
@@ -100,25 +100,34 @@ const formatScore = (score?: number) => {
       </div>
 
       <!-- Scores (si disponibles) -->
-      <div v-if="partie.playerScore !== undefined || partie.opponentScore !== undefined" class="space-y-2">
+      <div
+        v-if="partie.playerScore !== undefined || partie.opponentScore !== undefined"
+        class="space-y-2"
+      >
         <div class="flex items-center justify-between text-sm">
           <span class="text-gray-400">Score</span>
           <div class="flex items-center space-x-2">
-            <span 
+            <span
               :class="[
                 'font-bold',
-                scoreStats.winner === 'player' ? 'text-green-400' : 
-                scoreStats.winner === 'opponent' ? 'text-red-400' : 'text-yellow-400'
+                scoreStats.winner === 'player'
+                  ? 'text-green-400'
+                  : scoreStats.winner === 'opponent'
+                    ? 'text-red-400'
+                    : 'text-yellow-400',
               ]"
             >
               {{ formatScore(partie.playerScore) }}
             </span>
             <span class="text-gray-500">-</span>
-            <span 
+            <span
               :class="[
                 'font-bold',
-                scoreStats.winner === 'opponent' ? 'text-green-400' : 
-                scoreStats.winner === 'player' ? 'text-red-400' : 'text-yellow-400'
+                scoreStats.winner === 'opponent'
+                  ? 'text-green-400'
+                  : scoreStats.winner === 'player'
+                    ? 'text-red-400'
+                    : 'text-yellow-400',
               ]"
             >
               {{ formatScore(partie.opponentScore) }}
@@ -128,7 +137,7 @@ const formatScore = (score?: number) => {
 
         <!-- Barre de progression du score -->
         <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-          <div 
+          <div
             class="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-500"
             :style="{ width: `${scoreStats.playerPercentage}%` }"
           ></div>
@@ -160,27 +169,29 @@ const formatScore = (score?: number) => {
           <div v-else-if="partie.completedAt">
             Terminée {{ formatRelativeDate(partie.completedAt) }}
           </div>
-          <div v-else>
-            Créée {{ formatRelativeDate(partie.createdAt) }}
-          </div>
+          <div v-else>Créée {{ formatRelativeDate(partie.createdAt) }}</div>
         </div>
 
         <!-- Actions -->
         <div class="flex items-center space-x-2">
           <!-- Badge métadonnées -->
           <div v-if="partie.metadata?.winner" class="flex items-center">
-            <span 
+            <span
               :class="[
                 'text-xs px-2 py-1 rounded font-medium',
-                partie.metadata.winner === 'PLAYER' ? 'bg-green-600/20 text-green-300' :
-                partie.metadata.winner === 'OPPONENT' ? 'bg-red-600/20 text-red-300' :
-                'bg-yellow-600/20 text-yellow-300'
+                partie.metadata.winner === 'PLAYER'
+                  ? 'bg-green-600/20 text-green-300'
+                  : partie.metadata.winner === 'OPPONENT'
+                    ? 'bg-red-600/20 text-red-300'
+                    : 'bg-yellow-600/20 text-yellow-300',
               ]"
             >
-              {{ 
-                partie.metadata.winner === 'PLAYER' ? '🏆 Victoire' :
-                partie.metadata.winner === 'OPPONENT' ? '💀 Défaite' :
-                '🤝 Égalité'
+              {{
+                partie.metadata.winner === 'PLAYER'
+                  ? '🏆 Victoire'
+                  : partie.metadata.winner === 'OPPONENT'
+                    ? '💀 Défaite'
+                    : '🤝 Égalité'
               }}
             </span>
           </div>
@@ -192,7 +203,12 @@ const formatScore = (score?: number) => {
           >
             {{ partie.canContinue ? 'Continuer' : 'Voir détails' }}
             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </div>

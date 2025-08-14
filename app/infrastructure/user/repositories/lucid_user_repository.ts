@@ -14,8 +14,8 @@ export class LucidUserRepository implements UserRepositoryInterface {
   async save(user: User): Promise<void> {
     const primitives = user.toPrimitives()
 
-    const userModel = new UserModel()
-    userModel.fill({
+    // Utiliser create() pour l'auto-increment au lieu de fill() + save()
+    await UserModel.create({
       username: primitives.username,
       email: primitives.email,
       password: primitives.passwordHash,
@@ -23,8 +23,6 @@ export class LucidUserRepository implements UserRepositoryInterface {
       newsletterConsent: primitives.newsletterConsent,
       termsAcceptedAt: DateTime.fromJSDate(primitives.termsAcceptedAt),
     })
-
-    await userModel.save()
   }
 
   async findById(id: UserId): Promise<User | null> {
@@ -92,7 +90,9 @@ export class LucidUserRepository implements UserRepositoryInterface {
   }
 
   async nextId(): Promise<UserId> {
-    return UserId.fromNumber(0)
+    // Pour Lucid ORM, on retourne un ID temporaire
+    // L'ID réel sera généré lors du save()
+    return UserId.fromNumber(1)
   }
 
   private toDomain(userModel: UserModel): User {

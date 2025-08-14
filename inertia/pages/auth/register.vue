@@ -49,10 +49,10 @@
               required
               class="w-full px-3 py-2 bg-slate-700 border border-red-800/30 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
               placeholder="Votre pseudonyme de bataille"
-              :class="{ 'border-red-500': errors.username }"
+              :class="{ 'border-red-500': form.errors.username }"
             />
-            <div v-if="errors.username" class="mt-1 text-sm text-red-400">
-              {{ errors.username }}
+            <div v-if="form.errors.username" class="mt-1 text-sm text-red-400">
+              {{ form.errors.username }}
             </div>
           </div>
 
@@ -68,10 +68,10 @@
               required
               class="w-full px-3 py-2 bg-slate-700 border border-red-800/30 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
               placeholder="votre@email.com"
-              :class="{ 'border-red-500': errors.email }"
+              :class="{ 'border-red-500': form.errors.email }"
             />
-            <div v-if="errors.email" class="mt-1 text-sm text-red-400">
-              {{ errors.email }}
+            <div v-if="form.errors.email" class="mt-1 text-sm text-red-400">
+              {{ form.errors.email }}
             </div>
           </div>
 
@@ -87,10 +87,10 @@
               required
               class="w-full px-3 py-2 bg-slate-700 border border-red-800/30 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
               placeholder="Minimum 8 caractères"
-              :class="{ 'border-red-500': errors.password }"
+              :class="{ 'border-red-500': form.errors.password }"
             />
-            <div v-if="errors.password" class="mt-1 text-sm text-red-400">
-              {{ errors.password }}
+            <div v-if="form.errors.password" class="mt-1 text-sm text-red-400">
+              {{ form.errors.password }}
             </div>
           </div>
 
@@ -106,10 +106,10 @@
               required
               class="w-full px-3 py-2 bg-slate-700 border border-red-800/30 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
               placeholder="Répétez votre mot de passe"
-              :class="{ 'border-red-500': errors.passwordConfirmation }"
+              :class="{ 'border-red-500': form.errors.passwordConfirmation }"
             />
-            <div v-if="errors.passwordConfirmation" class="mt-1 text-sm text-red-400">
-              {{ errors.passwordConfirmation }}
+            <div v-if="form.errors.passwordConfirmation" class="mt-1 text-sm text-red-400">
+              {{ form.errors.passwordConfirmation }}
             </div>
           </div>
 
@@ -134,7 +134,7 @@
               type="checkbox"
               required
               class="mt-1 h-4 w-4 text-red-600 bg-slate-700 border-red-800/30 rounded focus:ring-red-600 focus:ring-2"
-              :class="{ 'border-red-500': errors.termsAccepted }"
+              :class="{ 'border-red-500': form.errors.termsAccepted }"
             />
             <label for="terms" class="ml-2 text-sm text-slate-300">
               J'accepte le
@@ -148,18 +148,18 @@
               (conditions d'utilisation) *
             </label>
           </div>
-          <div v-if="errors.termsAccepted" class="text-sm text-red-400">
-            {{ errors.termsAccepted }}
+          <div v-if="form.errors.termsAccepted" class="text-sm text-red-400">
+            {{ form.errors.termsAccepted }}
           </div>
 
           <!-- Submit Button -->
           <button
             type="submit"
-            :disabled="processing"
+            :disabled="form.processing"
             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-red-100 bg-red-700 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span v-if="processing" class="mr-2">⚡</span>
-            {{ processing ? 'Initialisation en cours...' : 'Rejoindre la Croisade' }}
+            <span v-if="form.processing" class="mr-2">⚡</span>
+            {{ form.processing ? 'Initialisation en cours...' : 'Rejoindre la Croisade' }}
           </button>
         </form>
 
@@ -181,22 +181,18 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { Head, useForm, router } from '@inertiajs/vue3'
+import { ref } from 'vue'
+import { Head, useForm } from '@inertiajs/vue3'
 import TermsModal from '~/components/auth/terms_modal.vue'
 
 defineProps({
   title: String,
-  errors: {
-    type: Object,
-    default: () => ({}),
-  },
 })
 
 const showTermsModal = ref(false)
-const processing = ref(false)
 
-const form = reactive({
+// Utiliser l'API useForm d'Inertia.js pour gérer automatiquement CSRF et validation
+const form = useForm({
   username: '',
   email: '',
   password: '',
@@ -211,15 +207,12 @@ const acceptTerms = () => {
 }
 
 const submitForm = () => {
-  processing.value = true
-
-  router.post('/register', form, {
-    onFinish: () => {
-      processing.value = false
+  form.post('/register', {
+    onSuccess: () => {
+      console.log('✅ Registration successful')
     },
     onError: (errors) => {
-      processing.value = false
-      console.error('Registration errors:', errors)
+      console.error('❌ Registration errors:', errors)
     },
   })
 }

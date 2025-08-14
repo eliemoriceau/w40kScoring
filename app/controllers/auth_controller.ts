@@ -20,8 +20,10 @@ export default class AuthController {
   }
 
   async register({ request, response, auth, session }: HttpContext) {
+    console.log('🚀 Registration attempt started')
     try {
       const data = await request.validateUsing(registerUserValidator)
+      console.log('✅ Validation passed:', { username: data.username, email: data.email })
 
       const command = RegisterUserCommand.create({
         username: data.username,
@@ -30,26 +32,33 @@ export default class AuthController {
         newsletterConsent: data.newsletterConsent ?? false,
         termsAccepted: data.termsAccepted,
       })
+      console.log('📋 Command created:', command)
 
       const result = await this.userRegistrationService.register(command)
+      console.log('🎯 Registration service result:', result)
 
       if (result.success) {
+        console.log('🔐 Attempting to login user with ID:', result.userId)
         await auth.use('web').login(await User.findOrFail(result.userId))
+        console.log('✅ User logged in successfully')
 
         session.flash(
           'success',
           `Bienvenue dans la Croisade, ${result.username}! Votre compte a été créé avec succès.`
         )
+        console.log('🏠 Redirecting to /parties')
 
         return response.redirect('/parties')
       }
 
+      console.log('❌ Registration failed:', result.message)
       session.flash(
         'error',
         result.message || 'Une erreur est survenue lors de la création du compte'
       )
       return response.redirect().back()
     } catch (error) {
+      console.error('💥 Registration error:', error)
       session.flash(
         'error',
         error.message || 'Une erreur est survenue lors de la création du compte'

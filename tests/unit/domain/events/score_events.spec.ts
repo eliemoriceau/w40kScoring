@@ -10,14 +10,20 @@ import { IdGenerator } from '#domain/services/id_generator'
 
 // Mock IdGenerator for testing
 class TestIdGenerator implements IdGenerator {
-  private counter = 1
+  private scoreCounter = 1
+  private playerCounter = 1
 
   generateScoreId(): ScoreId {
-    return new ScoreId(this.counter++)
+    return new ScoreId(this.scoreCounter++)
+  }
+
+  generatePlayerId(): PlayerId {
+    return new PlayerId(this.playerCounter++)
   }
 
   reset() {
-    this.counter = 1
+    this.scoreCounter = 1
+    this.playerCounter = 1
   }
 }
 

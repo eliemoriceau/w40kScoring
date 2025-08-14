@@ -3,7 +3,6 @@ import { JoueurResponseDto, JoueurListResponseDto } from '#application/dto/joueu
 import { JoueurMapper } from '#application/mappers/joueur_mapper'
 import Player from '#domain/entities/player'
 import GameId from '#domain/value-objects/game_id'
-import PlayerId from '#domain/value-objects/player_id'
 import Pseudo from '#domain/value-objects/pseudo'
 import { GameRepository } from '#domain/repositories/i_game_repository'
 import { PlayerRepository } from '#domain/repositories/player_repository'
@@ -11,13 +10,6 @@ import { IdGenerator } from '#domain/services/id_generator'
 import { PseudoAlreadyTakenError } from '#domain/errors/pseudo_already_taken_error'
 import { PartieNotFoundError } from '#domain/errors/partie_not_found_error'
 import { UnauthorizedPartieAccessError } from '#domain/errors/unauthorized_partie_access_error'
-
-/**
- * Interface for ID generation (temporary extension for PlayerId)
- */
-interface ExtendedIdGenerator extends IdGenerator {
-  generatePlayerId(): PlayerId
-}
 
 /**
  * JoueurService - Application Service
@@ -29,7 +21,7 @@ export default class JoueurService {
   constructor(
     private playerRepository: PlayerRepository,
     private gameRepository: GameRepository,
-    private idGenerator: ExtendedIdGenerator
+    private idGenerator: IdGenerator
   ) {}
 
   /**

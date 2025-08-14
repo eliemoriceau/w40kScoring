@@ -131,9 +131,14 @@ class MockPlayerRepository {
 
 class MockIdGenerator implements IdGenerator {
   private scoreCounter = 1
+  private playerCounter = 1
 
   generateScoreId(): ScoreId {
     return new ScoreId(this.scoreCounter++)
+  }
+
+  generatePlayerId(): PlayerId {
+    return new PlayerId(this.playerCounter++)
   }
 }
 

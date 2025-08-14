@@ -16,3 +16,18 @@ export { ChallengerAlreadyExistsInRoundError } from './challenger_already_exists
 export { InsufficientDeficitForChallengerError } from './insufficient_deficit_for_challenger_error.js'
 export { OpponentNotFoundForChallengerError } from './opponent_not_found_for_challenger_error.js'
 export { UnauthorizedScoreAccessError } from './unauthorized_score_access_error.js'
+
+// Partie Complete Orchestration Errors
+export {
+  PartieCompleteError,
+  PartieCompleteValidationError,
+  PartieCompleteTransactionError,
+  PartieCompleteRollbackError,
+  PartieCompleteAuthorizationError,
+  PartieCompleteBusinessRuleError,
+  PartieCompleteCoordinationError,
+  PartieCompleteTimeoutError,
+  PartieCompleteResourceNotFoundError,
+  PartieCompleteAggregateError,
+  PartieCompleteErrorFactory,
+} from './partie_complete_errors.js'

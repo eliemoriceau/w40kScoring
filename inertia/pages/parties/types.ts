@@ -97,15 +97,15 @@ export interface ComponentEvents {
   // Événements PartieCard
   'partie-action': [event: PartieActionEvent]
   'view-details': [partieId: string]
-  
+
   // Événements PartieFilters
   'filter-change': [filters: PartiesFilters]
   'clear-filters': []
-  
+
   // Événements PartieList
   'load-more': []
   'refresh': []
-  
+
   // Événements globaux
   'create-new': []
   'error': [message: string]

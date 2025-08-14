@@ -12,6 +12,7 @@ import { middleware } from '#start/kernel'
 
 const PagesController = () => import('#controllers/pages_controller')
 const PartiesController = () => import('#controllers/parties_controller')
+const AuthController = () => import('#controllers/auth_controller')
 
 // Health check endpoint for Kubernetes
 router.get('/health', ({ response }) => {
@@ -24,6 +25,15 @@ router.get('/health', ({ response }) => {
 
 // Home page
 router.get('/', [PagesController, 'home'])
+
+/*
+|--------------------------------------------------------------------------
+| Authentication Routes
+|--------------------------------------------------------------------------
+| Routes for user authentication (register, login, logout)
+*/
+router.get('/register', [AuthController, 'showRegister']).as('auth.show_register')
+router.post('/register', [AuthController, 'register']).as('auth.register')
 
 /*
 |--------------------------------------------------------------------------

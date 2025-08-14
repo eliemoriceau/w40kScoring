@@ -1,4 +1,5 @@
 import { test } from '@japa/runner'
+import { DateTime } from 'luxon'
 import Game from '#models/game'
 import User from '#models/user'
 import GameService from '#application/services/game_service'
@@ -7,7 +8,7 @@ import { PartieFilterDto } from '#application/dto/partie_filter_dto'
 
 /**
  * Tests fonctionnels pour GameService et parties listing
- * 
+ *
  * Valide l'intégration complète :
  * - Service métier GameService
  * - Filtrage et pagination
@@ -31,7 +32,7 @@ async function createGame(options: {
     status: options.status || 'PLANNED',
     pointsLimit: options.pointsLimit || 2000,
     playerScore: options.playerScore || null,
-    opponentScore: options.opponentScore || null
+    opponentScore: options.opponentScore || null,
   })
 }
 
@@ -55,7 +56,7 @@ async function createBatch(options: {
       status: variant.status,
       pointsLimit: variant.pointsLimit,
       playerScore: variant.playerScore,
-      opponentScore: variant.opponentScore
+      opponentScore: variant.opponentScore,
     })
     games.push(game)
   }
@@ -74,9 +75,13 @@ test.group('GameService Parties Listing', (group) => {
   group.each.setup(async () => {
     // Créer un utilisateur de test
     user = await User.create({
+      username: 'test_parties',
       email: 'test.parties@example.com',
       fullName: 'Test User Parties',
       password: 'password123',
+      roleId: 1,
+      newsletterConsent: false,
+      termsAcceptedAt: DateTime.now(),
     })
   })
 
@@ -114,15 +119,19 @@ test.group('GameService Parties Listing', (group) => {
       variants: [
         { gameType: 'MATCHED_PLAY', status: 'IN_PROGRESS', playerScore: 85, opponentScore: 72 },
         { gameType: 'NARRATIVE', status: 'COMPLETED', playerScore: 92, opponentScore: 88 },
-        { gameType: 'OPEN_PLAY', status: 'PLANNED' }
-      ]
+        { gameType: 'OPEN_PLAY', status: 'PLANNED' },
+      ],
     })
 
     // Créer aussi une partie pour un autre utilisateur (ne doit pas apparaître)
     const otherUser = await User.create({
+      username: 'other_user',
       email: 'other@example.com',
       fullName: 'Other User',
-      password: 'password123'
+      password: 'password123',
+      roleId: 1,
+      newsletterConsent: false,
+      termsAcceptedAt: DateTime.now(),
     })
     await createGame({ userId: otherUser.id })
 
@@ -132,14 +141,19 @@ test.group('GameService Parties Listing', (group) => {
 
     // Assert: Vérification des données
     assert.equal(result.parties.length, 3)
-    
+
     // Vérifier la structure des données
     const firstPartie = result.parties[0]
     assert.properties(firstPartie, [
-      'id', 'userId', 'gameType', 'pointsLimit', 'status',
-      'createdAt', 'metadata'
+      'id',
+      'userId',
+      'gameType',
+      'pointsLimit',
+      'status',
+      'createdAt',
+      'metadata',
     ])
-    
+
     // Vérifier que toutes les parties appartiennent au bon utilisateur
     result.parties.forEach((partie) => {
       assert.equal(partie.userId, user.id)
@@ -158,20 +172,20 @@ test.group('GameService Parties Listing', (group) => {
         { status: 'PLANNED' },
         { status: 'PLANNED' },
         { status: 'IN_PROGRESS' },
-        { status: 'COMPLETED' }
-      ]
+        { status: 'COMPLETED' },
+      ],
     })
 
     // Act: Filtrer par statut PLANNED
-    const filters: PartieFilterDto = { 
+    const filters: PartieFilterDto = {
       userId: user.id,
-      status: 'PLANNED'
+      status: 'PLANNED',
     }
     const result = await gameService.listParties(filters)
 
     // Assert: Vérifier le filtrage
     assert.equal(result.parties.length, 2)
-    
+
     result.parties.forEach((partie) => {
       assert.equal(partie.status, 'PLANNED')
     })
@@ -188,20 +202,20 @@ test.group('GameService Parties Listing', (group) => {
       variants: [
         { gameType: 'MATCHED_PLAY' },
         { gameType: 'MATCHED_PLAY' },
-        { gameType: 'NARRATIVE' }
-      ]
+        { gameType: 'NARRATIVE' },
+      ],
     })
 
     // Act: Filtrer par type MATCHED_PLAY
     const filters: PartieFilterDto = {
       userId: user.id,
-      gameType: 'MATCHED_PLAY'
+      gameType: 'MATCHED_PLAY',
     }
     const result = await gameService.listParties(filters)
 
     // Assert: Vérifier le filtrage
     assert.equal(result.parties.length, 2)
-    
+
     result.parties.forEach((partie) => {
       assert.equal(partie.gameType, 'MATCHED_PLAY')
     })
@@ -214,13 +228,13 @@ test.group('GameService Parties Listing', (group) => {
     // Arrange: Créer plus de parties que la limite
     await createBatch({
       userId: user.id,
-      count: 25 // Plus que la limite par défaut de 20
+      count: 25, // Plus que la limite par défaut de 20
     })
 
     // Act: Demander avec limite de 10
     const filters: PartieFilterDto = {
       userId: user.id,
-      limit: 10
+      limit: 10,
     }
     const result = await gameService.listParties(filters)
 
@@ -244,21 +258,21 @@ test.group('GameService Parties Listing', (group) => {
         { gameType: 'NARRATIVE', status: 'PLANNED' },
         { gameType: 'NARRATIVE', status: 'COMPLETED' },
         { gameType: 'OPEN_PLAY', status: 'PLANNED' },
-        { gameType: 'OPEN_PLAY', status: 'CANCELLED' }
-      ]
+        { gameType: 'OPEN_PLAY', status: 'CANCELLED' },
+      ],
     })
 
     // Act: Appliquer filtres combinés
     const filters: PartieFilterDto = {
       userId: user.id,
       status: 'PLANNED',
-      gameType: 'MATCHED_PLAY'
+      gameType: 'MATCHED_PLAY',
     }
     const result = await gameService.listParties(filters)
 
     // Assert: Une seule partie doit matcher
     assert.equal(result.parties.length, 1)
-    
+
     const partie = result.parties[0]
     assert.equal(partie.status, 'PLANNED')
     assert.equal(partie.gameType, 'MATCHED_PLAY')
@@ -273,7 +287,7 @@ test.group('GameService Parties Listing', (group) => {
       userId: user.id,
       status: 'COMPLETED',
       playerScore: 95,
-      opponentScore: 78
+      opponentScore: 78,
     })
 
     // Act: Récupérer les parties
@@ -297,7 +311,7 @@ test.group('GameService Parties Listing', (group) => {
       userId: user.id,
       status: 'COMPLETED',
       playerScore: 88,
-      opponentScore: 92
+      opponentScore: 92,
     })
 
     // Act: Récupérer les parties
@@ -308,7 +322,7 @@ test.group('GameService Parties Listing', (group) => {
     assert.equal(result.parties.length, 1)
     const partie = result.parties[0]
     assert.properties(partie, ['metadata'])
-    
+
     // La métadonnée devrait indiquer si la partie peut être modifiée
     assert.properties(partie.metadata, ['canBeModified'])
   })

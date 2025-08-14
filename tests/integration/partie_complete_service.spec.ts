@@ -8,6 +8,7 @@
  */
 
 import { test } from '@japa/runner'
+import { DateTime } from 'luxon'
 import PartieCompleteService from '#application/services/partie_complete_service'
 import GameService from '#application/services/game_service'
 import JoueurService from '#application/services/joueur_service'
@@ -105,14 +106,22 @@ test.group('Partie Complete Service - Integration Tests', (group) => {
     // Créer utilisateurs de test
     await UserModel.createMany([
       {
+        username: 'user1_orchestration',
         email: 'user1@test.orchestration',
         fullName: 'Test User 1',
         password: 'password123',
+        roleId: 1,
+        newsletterConsent: false,
+        termsAcceptedAt: DateTime.now(),
       },
       {
+        username: 'user2_orchestration',
         email: 'user2@test.orchestration',
         fullName: 'Test User 2',
         password: 'password123',
+        roleId: 1,
+        newsletterConsent: false,
+        termsAcceptedAt: DateTime.now(),
       },
     ])
   })

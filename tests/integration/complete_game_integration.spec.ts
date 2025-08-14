@@ -1,4 +1,5 @@
 import { test } from '@japa/runner'
+import { DateTime } from 'luxon'
 import GameService, {
   CompleteGameData,
   CompleteGameResult,
@@ -62,14 +63,22 @@ test.group('Complete Game Integration', (group) => {
     // Create test users for integration tests
     await UserModel.createMany([
       {
+        username: 'player1_integration',
         email: 'player1@integration.test',
         fullName: 'Integration Test Player 1',
         password: 'password123',
+        roleId: 1,
+        newsletterConsent: false,
+        termsAcceptedAt: DateTime.now(),
       },
       {
+        username: 'player2_integration',
         email: 'player2@integration.test',
         fullName: 'Integration Test Player 2',
         password: 'password123',
+        roleId: 1,
+        newsletterConsent: false,
+        termsAcceptedAt: DateTime.now(),
       },
     ])
   })

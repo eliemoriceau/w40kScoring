@@ -23,13 +23,13 @@ const isLoadingMore = ref(false)
 
 const groupedParties = computed(() => {
   const groups: Record<string, PartieUI[]> = {
-    'EN_COURS': [],
-    'PLANIFIEES': [],
-    'TERMINEES': [],
-    'ANNULEES': [],
+    EN_COURS: [],
+    PLANIFIEES: [],
+    TERMINEES: [],
+    ANNULEES: [],
   }
 
-  props.parties.forEach(partie => {
+  props.parties.forEach((partie) => {
     switch (partie.status) {
       case 'IN_PROGRESS':
         groups.EN_COURS.push(partie)
@@ -50,7 +50,7 @@ const groupedParties = computed(() => {
 })
 
 const hasPartiesInGroups = computed(() => {
-  return Object.values(groupedParties.value).some(group => group.length > 0)
+  return Object.values(groupedParties.value).some((group) => group.length > 0)
 })
 
 const handleViewDetails = (partieId: string) => {
@@ -59,10 +59,10 @@ const handleViewDetails = (partieId: string) => {
 
 const handleLoadMore = async () => {
   if (!props.canLoadMore || isLoadingMore.value) return
-  
+
   isLoadingMore.value = true
   emit('load-more')
-  
+
   // Reset loading state after a short delay
   setTimeout(() => {
     isLoadingMore.value = false
@@ -153,23 +153,33 @@ const handleLoadMore = async () => {
         :disabled="loading || isLoadingMore"
         class="inline-flex items-center px-6 py-3 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-800 hover:border-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-black"
       >
-        <svg 
-          v-if="loading || isLoadingMore" 
-          class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-300" 
-          fill="none" 
+        <svg
+          v-if="loading || isLoadingMore"
+          class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-300"
+          fill="none"
           viewBox="0 0 24 24"
         >
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
         </svg>
-        <svg 
-          v-else 
-          class="w-5 h-5 mr-2" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        <svg v-else class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
         {{ loading || isLoadingMore ? 'Chargement...' : 'Charger plus de parties' }}
       </button>
@@ -218,10 +228,22 @@ const handleLoadMore = async () => {
   animation: slideInUp 0.3s ease-out;
 }
 
-.partie-group .grid > :nth-child(1) { animation-delay: 0.1s; }
-.partie-group .grid > :nth-child(2) { animation-delay: 0.2s; }
-.partie-group .grid > :nth-child(3) { animation-delay: 0.3s; }
-.partie-group .grid > :nth-child(4) { animation-delay: 0.4s; }
-.partie-group .grid > :nth-child(5) { animation-delay: 0.5s; }
-.partie-group .grid > :nth-child(6) { animation-delay: 0.6s; }
+.partie-group .grid > :nth-child(1) {
+  animation-delay: 0.1s;
+}
+.partie-group .grid > :nth-child(2) {
+  animation-delay: 0.2s;
+}
+.partie-group .grid > :nth-child(3) {
+  animation-delay: 0.3s;
+}
+.partie-group .grid > :nth-child(4) {
+  animation-delay: 0.4s;
+}
+.partie-group .grid > :nth-child(5) {
+  animation-delay: 0.5s;
+}
+.partie-group .grid > :nth-child(6) {
+  animation-delay: 0.6s;
+}
 </style>

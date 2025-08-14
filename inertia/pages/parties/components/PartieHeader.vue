@@ -26,16 +26,18 @@ const handleRefresh = () => emit('refresh')
           <h1 class="text-3xl font-bold text-white flex items-center">
             <span class="text-red-400">Mes</span>
             <span class="text-yellow-400 ml-2">Parties</span>
-            
+
             <!-- Badge compteur -->
-            <span class="ml-3 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-600/20 text-red-300 border border-red-500/30">
+            <span
+              class="ml-3 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-600/20 text-red-300 border border-red-500/30"
+            >
               {{ partiesCount }}
               {{ partiesCount > 1 ? 'parties' : 'partie' }}
             </span>
 
             <!-- Badge filtres actifs -->
             <Transition name="filter-badge">
-              <span 
+              <span
                 v-if="activeFiltersCount > 0"
                 class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600/20 text-blue-300 border border-blue-500/30"
               >
@@ -43,7 +45,7 @@ const handleRefresh = () => emit('refresh')
               </span>
             </Transition>
           </h1>
-          
+
           <p class="mt-2 text-gray-300">
             Gérez vos parties de Warhammer 40,000 et suivez vos performances
             <span v-if="totalCount && totalCount !== partiesCount" class="text-yellow-400">
@@ -61,7 +63,12 @@ const handleRefresh = () => emit('refresh')
             title="Rafraîchir la liste"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
             Rafraîchir
           </button>
@@ -72,7 +79,12 @@ const handleRefresh = () => emit('refresh')
             class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-red-600 to-yellow-600 hover:from-red-700 hover:to-yellow-700 text-white font-bold rounded-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-black shadow-lg"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
             Nouvelle Partie
           </button>

@@ -83,7 +83,7 @@ export function usePartiesHelpers() {
 
     const start = new Date(partie.startedAt)
     const end = partie.completedAt ? new Date(partie.completedAt) : new Date()
-    
+
     const diffMs = end.getTime() - start.getTime()
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
@@ -110,7 +110,7 @@ export function usePartiesHelpers() {
    */
   const formatDate = (date: Date | string): string => {
     const dateObj = typeof date === 'string' ? new Date(date) : date
-    
+
     return new Intl.DateTimeFormat('fr-FR', {
       day: 'numeric',
       month: 'short',
@@ -127,7 +127,7 @@ export function usePartiesHelpers() {
     const dateObj = typeof date === 'string' ? new Date(date) : date
     const now = new Date()
     const diffMs = now.getTime() - dateObj.getTime()
-    
+
     const diffMinutes = Math.floor(diffMs / (1000 * 60))
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
@@ -141,7 +141,7 @@ export function usePartiesHelpers() {
     if (diffDays < 7) {
       return `Il y a ${diffDays}j`
     }
-    
+
     return formatDate(dateObj)
   }
 
@@ -164,14 +164,14 @@ export function usePartiesHelpers() {
     const playerScore = partie.playerScore || 0
     const opponentScore = partie.opponentScore || 0
     const total = playerScore + opponentScore
-    
+
     return {
       playerScore,
       opponentScore,
       total,
       playerPercentage: total > 0 ? Math.round((playerScore / total) * 100) : 0,
-      winner: playerScore > opponentScore ? 'player' : 
-              playerScore < opponentScore ? 'opponent' : 'draw',
+      winner:
+        playerScore > opponentScore ? 'player' : playerScore < opponentScore ? 'opponent' : 'draw',
       margin: Math.abs(playerScore - opponentScore),
     }
   }

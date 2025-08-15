@@ -35,6 +35,10 @@ router.get('/', [PagesController, 'home'])
 router.get('/register', [AuthController, 'showRegister']).as('auth.show_register')
 router.post('/register', [AuthController, 'register']).as('auth.register')
 
+router.get('/login', [AuthController, 'showLogin']).as('auth.show_login')
+router.post('/login', [AuthController, 'login']).as('auth.login')
+router.post('/logout', [AuthController, 'logout']).as('auth.logout')
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated Routes

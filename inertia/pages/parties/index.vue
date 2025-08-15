@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
-import { usePartiesHelpers } from './composables/usePartiesHelpers'
+import { usePartiesHelpers } from './composables/use_parties_helpers'
 import type { PartiesIndexProps, PartiesFilters, LoadingState } from './types'
 
 // Import des composants

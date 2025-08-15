@@ -4,6 +4,10 @@ import Game from '#models/game'
 import User from '#models/user'
 import GameService from '#application/services/game_service'
 import LucidGameRepository from '#infrastructure/repositories/lucid_game_repository'
+import LucidPlayerRepository from '#infrastructure/repositories/lucid_player_repository'
+import LucidRoundRepository from '#infrastructure/repositories/lucid_round_repository'
+import LucidScoreRepository from '#infrastructure/repositories/lucid_score_repository'
+import UuidV7IdGenerator from '#infrastructure/services/uuid_v7_id_generator'
 import { PartieFilterDto } from '#application/dto/partie_filter_dto'
 
 /**
@@ -69,7 +73,17 @@ test.group('GameService Parties Listing', (group) => {
 
   group.setup(async () => {
     const gameRepository = new LucidGameRepository()
-    gameService = new GameService(gameRepository)
+    const playerRepository = new LucidPlayerRepository()
+    const roundRepository = new LucidRoundRepository()
+    const scoreRepository = new LucidScoreRepository()
+    const idGenerator = new UuidV7IdGenerator()
+    gameService = new GameService(
+      gameRepository,
+      playerRepository,
+      roundRepository,
+      scoreRepository,
+      idGenerator
+    )
   })
 
   group.each.setup(async () => {
@@ -113,7 +127,7 @@ test.group('GameService Parties Listing', (group) => {
    */
   test('should return user parties with correct data', async ({ assert }) => {
     // Arrange: Créer des parties pour l'utilisateur
-    const parties = await createBatch({
+    await createBatch({
       userId: user.id,
       count: 3,
       variants: [
@@ -179,7 +193,7 @@ test.group('GameService Parties Listing', (group) => {
     // Act: Filtrer par statut PLANNED
     const filters: PartieFilterDto = {
       userId: user.id,
-      status: 'PLANNED',
+      status: ['PLANNED'],
     }
     const result = await gameService.listParties(filters)
 
@@ -265,7 +279,7 @@ test.group('GameService Parties Listing', (group) => {
     // Act: Appliquer filtres combinés
     const filters: PartieFilterDto = {
       userId: user.id,
-      status: 'PLANNED',
+      status: ['PLANNED'],
       gameType: 'MATCHED_PLAY',
     }
     const result = await gameService.listParties(filters)

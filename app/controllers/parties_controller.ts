@@ -1,6 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GameService from '#application/services/game_service'
 import LucidGameRepository from '#infrastructure/repositories/lucid_game_repository'
+import LucidPlayerRepository from '#infrastructure/repositories/lucid_player_repository'
+import LucidRoundRepository from '#infrastructure/repositories/lucid_round_repository'
+import LucidScoreRepository from '#infrastructure/repositories/lucid_score_repository'
+import UuidV7IdGenerator from '#infrastructure/services/uuid_v7_id_generator'
 import { PartieFilterDto } from '#application/dto/partie_filter_dto'
 import { partiesListValidator } from '#validators/parties_list_validator'
 
@@ -18,7 +22,17 @@ export default class PartiesController {
   constructor() {
     // Instanciation manuelle des dépendances (workaround IoC)
     const gameRepository = new LucidGameRepository()
-    this.gameService = new GameService(gameRepository)
+    const playerRepository = new LucidPlayerRepository()
+    const roundRepository = new LucidRoundRepository()
+    const scoreRepository = new LucidScoreRepository()
+    const idGenerator = new UuidV7IdGenerator()
+    this.gameService = new GameService(
+      gameRepository,
+      playerRepository,
+      roundRepository,
+      scoreRepository,
+      idGenerator
+    )
   }
 
   /**
@@ -40,7 +54,7 @@ export default class PartiesController {
     // 3. Construction du DTO de filtrage
     const filters: PartieFilterDto = {
       userId: user.id,
-      status: queryParams.status,
+      status: queryParams.status ? [queryParams.status] : undefined,
       gameType: queryParams.gameType,
       limit: queryParams.limit ?? 20,
       cursor: queryParams.cursor,
@@ -81,7 +95,7 @@ export default class PartiesController {
 
     const filters: PartieFilterDto = {
       userId: user.id,
-      status: queryParams.status,
+      status: queryParams.status ? [queryParams.status] : undefined,
       gameType: queryParams.gameType,
       limit: queryParams.limit ?? 20,
       cursor: queryParams.cursor,

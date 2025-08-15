@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PartieUI } from '../types'
-import { usePartiesHelpers } from '../composables/usePartiesHelpers'
+import { usePartiesHelpers } from '../composables/use_parties_helpers'
 
 interface Props {
   partie: PartieUI

@@ -50,7 +50,11 @@ export const partiesListValidator = vine.compile(
 /**
  * Type inféré du validator pour utilisation TypeScript
  */
-export type PartiesListRequest = Infer<typeof partiesListValidator>
-
-// Export du type pour l'utiliser dans d'autres parties du code
-type Infer<T> = T extends vine.VineValidator<any, infer U> ? U : never
+export type PartiesListRequest = {
+  status?: 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+  gameType?: 'MATCHED_PLAY' | 'NARRATIVE' | 'OPEN_PLAY'
+  limit?: number
+  cursor?: string
+  sort?: 'createdAt' | 'updatedAt' | 'status' | 'gameType'
+  order?: 'asc' | 'desc'
+}

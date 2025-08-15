@@ -114,7 +114,7 @@
           >
             <span v-if="form.processing" class="mr-2">⚡</span>
             <span v-else-if="backoffSeconds > 0" class="mr-2">⏳</span>
-            {{ getButtonText() }}
+            {{ getButtonText }}
           </button>
 
           <!-- Failed Attempts Indicator -->

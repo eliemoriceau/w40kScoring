@@ -96,6 +96,10 @@ export class LucidUserRepository implements UserRepositoryInterface {
   }
 
   private toDomain(userModel: UserModel): User {
+    if (!userModel.role) {
+      throw new Error(`User with ID ${userModel.id} has no role loaded or assigned`)
+    }
+    
     return User.reconstitute(
       UserId.fromNumber(userModel.id),
       Username.fromString(userModel.username),

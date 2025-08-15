@@ -27,15 +27,8 @@ export class UserRegistrationService {
 
     await this.userRepository.save(user)
 
-    // Récupérer l'utilisateur créé pour avoir l'ID réel généré par la base
-    const createdUser = await this.userRepository.findByUsername(username)
-
-    if (!createdUser) {
-      throw new Error('Failed to create user')
-    }
-
     return {
-      userId: createdUser.getId().getValue(),
+      userId: user.getId().getValue(),
       username: username.getValue(),
       email: email.getValue(),
       success: true,

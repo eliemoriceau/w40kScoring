@@ -100,17 +100,31 @@ export class LucidUserRepository implements UserRepositoryInterface {
       throw new Error(`User with ID ${userModel.id} has no role loaded or assigned`)
     }
 
-    return User.reconstitute(
-      UserId.fromNumber(userModel.id),
-      Username.fromString(userModel.username),
-      EmailAddress.fromString(userModel.email),
-      userModel.password,
-      UserRole.fromString(userModel.role.name),
-      userModel.newsletterConsent,
-      userModel.termsAcceptedAt.toJSDate(),
-      userModel.createdAt,
-      userModel.updatedAt
-    )
+    console.log('🔍 Debug repository - Converting user to domain:', {
+      userId: userModel.id,
+      username: userModel.username,
+      roleId: userModel.roleId,
+      roleName: userModel.role?.name,
+      createdAt: userModel.createdAt?.toString(),
+      updatedAt: userModel.updatedAt?.toString()
+    })
+
+    try {
+      return User.reconstitute(
+        UserId.fromNumber(userModel.id),
+        Username.fromString(userModel.username),
+        EmailAddress.fromString(userModel.email),
+        userModel.password,
+        UserRole.fromString(userModel.role.name),
+        userModel.newsletterConsent,
+        userModel.termsAcceptedAt.toJSDate(),
+        userModel.createdAt, // Garder DateTime Luxon pour l'entité Domain
+        userModel.updatedAt || null // Garder DateTime Luxon pour l'entité Domain
+      )
+    } catch (error) {
+      console.error('🔍 Debug repository - Error in User.reconstitute:', error.message)
+      throw error
+    }
   }
 
   private getRoleIdFromRoleType(roleType: UserRoleType): number {

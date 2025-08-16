@@ -101,50 +101,29 @@ export default class AuthController {
     try {
       const data = await request.validateUsing(loginUserValidator)
 
-      const command = LoginUserCommand.create({
-        login: data.login,
-        password: data.password,
-        rememberMe: data.rememberMe,
-        ipAddress: request.ip(),
-        userAgent: request.header('user-agent'),
-        deviceId: request.header('x-device-id'), // Optionnel, pour tracking des appareils
-      })
+      console.log('🔧 Standard auth - Attempting login with:', data.login)
 
-      const result = await this.secureAuthService.login(command)
-
-      if (result.isSuccess()) {
-        // Authentification réussie - utiliser AdonisJS pour la session
-        const user = await User.findOrFail(result.userId!)
-        await auth.use('web').login(user, !!data.rememberMe)
-
-        session.flash('success', `Bienvenue dans le Commandement, ${result.username}!`)
-
-        return response.redirect('/parties')
-      }
-
-      // Gestion des erreurs spécifiques
-      if (result.isRateLimited()) {
-        response.status(429)
-        return response.json({
-          error: result.toResponse().error,
-          retryAfter: result.retryAfter,
-        })
-      }
-
-      if (result.isAccountLocked()) {
-        session.flash(
-          'error',
-          `Compte temporairement verrouillé (${Math.ceil(result.lockDuration! / 60)} minutes restantes)`
-        )
+      // Utiliser l'authentification AdonisJS standard avec AuthFinder
+      const user = await User.verifyCredentials(data.login, data.password)
+      
+      if (!user) {
+        session.flash('error', 'Identifiants invalides')
         return response.redirect().back()
       }
 
-      // Erreur générique d'authentification
-      session.flash('error', 'Identifiants invalides')
-      return response.redirect().back()
+      console.log('✅ Standard auth - User verified:', user.username)
+      
+      // Connexion avec AdonisJS
+      await auth.use('web').login(user, !!data.rememberMe)
+
+      console.log('✅ Standard auth - User logged in successfully')
+
+      session.flash('success', `Bienvenue dans le Commandement, ${user.username}!`)
+
+      return response.redirect('/parties')
     } catch (error) {
       console.error('💥 Login error:', error)
-      session.flash('error', 'Une erreur est survenue lors de la connexion')
+      session.flash('error', 'Identifiants invalides')
       return response.redirect().back()
     }
   }

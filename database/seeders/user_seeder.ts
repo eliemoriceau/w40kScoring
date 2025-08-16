@@ -22,7 +22,7 @@ export default class extends BaseSeeder {
       },
       {
         username: 'user',
-        email: 'user@example.com', 
+        email: 'user@example.com',
         password: userPassword,
         role_id: 1, // USER role
         newsletter_consent: false,

@@ -132,29 +132,49 @@ export default class extends BaseSeeder {
   private async createDemoUsers() {
     const demoUsers = [
       {
+        username: 'imperial_commander',
         email: 'imperial.commander@demo.w40k',
         fullName: 'Imperial Commander VII',
         password: 'demo123', // Will be hashed by model
+        roleId: 1, // USER role
+        newsletterConsent: false,
+        termsAcceptedAt: DateTime.now(),
       },
       {
+        username: 'tau_shadowsun',
         email: 'tau.commander@demo.w40k',
         fullName: 'Tau Commander Shadowsun',
         password: 'demo123',
+        roleId: 1, // USER role
+        newsletterConsent: false,
+        termsAcceptedAt: DateTime.now(),
       },
       {
+        username: 'rookie_marine',
         email: 'rookie.marine@demo.w40k',
         fullName: 'Rookie Space Marine',
         password: 'demo123',
+        roleId: 1, // USER role
+        newsletterConsent: false,
+        termsAcceptedAt: DateTime.now(),
       },
       {
+        username: 'champion_alpha',
         email: 'champion.alpha@demo.w40k',
         fullName: 'Champion Player Alpha',
         password: 'demo123',
+        roleId: 1, // USER role
+        newsletterConsent: false,
+        termsAcceptedAt: DateTime.now(),
       },
       {
+        username: 'contender_beta',
         email: 'contender.beta@demo.w40k',
         fullName: 'Contender Beta Prime',
         password: 'demo123',
+        roleId: 1, // USER role
+        newsletterConsent: false,
+        termsAcceptedAt: DateTime.now(),
       },
     ]
 

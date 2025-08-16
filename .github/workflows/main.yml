@@ -129,6 +129,7 @@ jobs:
           echo "DB_PASSWORD=test_password" >> .env.test
           echo "DB_DATABASE=w40k_scoring_test" >> .env.test
           echo "NODE_ENV=test" >> .env.test
+          echo "DB_CONNECTION=sqlite">>.env.test
 
       - name: Run database migrations
         run: npm run build && node ace migration:run --force || echo "No migrations to run"

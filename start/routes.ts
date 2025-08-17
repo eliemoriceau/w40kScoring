@@ -50,6 +50,7 @@ router
     // Parties management
     router.get('/parties', [PartiesController, 'index']).as('parties.index')
     router.get('/parties/data', [PartiesController, 'data']).as('parties.data')
+    router.get('/parties/:id', [PartiesController, 'show']).as('parties.show')
   })
   .middleware([middleware.auth()])
 

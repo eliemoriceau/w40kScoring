@@ -34,17 +34,20 @@ export default class extends BaseSeeder {
     const users = await this.createDemoUsers()
     console.log(`👥 Created ${users.length} demo users`)
 
+    // Get existing user for test (user@example.com should be ID 7)
+    const testUser = await UserModel.findBy('email', 'user@example.com')
+    
     // Create multiple complete game scenarios
     const scenarios = [
       {
         name: 'Competitive Tournament Game',
         config: {
           gameId: new GameId(1),
-          userId: users[0].id,
+          userId: testUser?.id || users[0].id, // Use test user if available
           gameType: GameType.MATCHED_PLAY,
           pointsLimit: new PointsLimit(2000),
           players: [
-            { pseudo: 'ImperialCommander_VII', userId: users[0].id },
+            { pseudo: 'ImperialCommander_VII', userId: testUser?.id || users[0].id },
             { pseudo: 'Tau_Shadowsun', userId: users[1].id },
           ],
           scorePattern: 'realistic' as const,
@@ -91,6 +94,12 @@ export default class extends BaseSeeder {
     for (const scenario of scenarios) {
       console.log(`🎮 Creating scenario: ${scenario.name}`)
       await this.createCompleteGameScenario(scenario.config)
+    }
+
+    // Fix the first game to belong to test user if it exists
+    if (testUser) {
+      await GameModel.query().where('id', 1).update({ userId: testUser.id })
+      console.log(`🔧 Fixed game 1 to belong to test user ${testUser.email}`)
     }
 
     console.log('✅ Complete Game Seeder finished successfully!')

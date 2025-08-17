@@ -54,6 +54,7 @@ const hasPartiesInGroups = computed(() => {
 })
 
 const handleViewDetails = (partieId: string) => {
+  console.log('📋 PartieList: Transmission événement pour partie', partieId)
   emit('view-details', partieId)
 }
 

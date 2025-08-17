@@ -36,7 +36,7 @@ export default class extends BaseSeeder {
 
     // Get existing user for test (user@example.com should be ID 7)
     const testUser = await UserModel.findBy('email', 'user@example.com')
-    
+
     // Create multiple complete game scenarios
     const scenarios = [
       {

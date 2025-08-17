@@ -1,18 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GameService from '#application/services/game_service'
-import { GameDetailService } from '#application/services/game_detail_service'
 import LucidGameRepository from '#infrastructure/repositories/lucid_game_repository'
 import LucidPlayerRepository from '#infrastructure/repositories/lucid_player_repository'
 import LucidRoundRepository from '#infrastructure/repositories/lucid_round_repository'
 import LucidScoreRepository from '#infrastructure/repositories/lucid_score_repository'
-import LucidGameQueryRepository from '#infrastructure/repositories/lucid_game_query_repository'
-import LucidPlayerQueryRepository from '#infrastructure/repositories/lucid_player_query_repository'
-import LucidRoundQueryRepository from '#infrastructure/repositories/lucid_round_query_repository'
-import LucidScoreQueryRepository from '#infrastructure/repositories/lucid_score_query_repository'
 import UuidV7IdGenerator from '#infrastructure/services/uuid_v7_id_generator'
 import { PartieFilterDto } from '#application/dto/partie_filter_dto'
 import { partiesListValidator } from '#validators/parties_list_validator'
-import GameId from '#domain/value-objects/game_id'
 import PartiePolicy from '#policies/partie_policy'
 
 /**
@@ -25,7 +19,6 @@ import PartiePolicy from '#policies/partie_policy'
  */
 export default class PartiesController {
   private gameService: GameService
-  private gameDetailService: GameDetailService
 
   constructor() {
     // Instanciation manuelle des dépendances (workaround IoC)
@@ -42,19 +35,6 @@ export default class PartiesController {
       roundRepository,
       scoreRepository,
       idGenerator
-    )
-
-    // Services pour les requêtes (CQRS)
-    const gameQueryRepository = new LucidGameQueryRepository()
-    const playerQueryRepository = new LucidPlayerQueryRepository()
-    const roundQueryRepository = new LucidRoundQueryRepository()
-    const scoreQueryRepository = new LucidScoreQueryRepository()
-
-    this.gameDetailService = new GameDetailService(
-      gameQueryRepository,
-      playerQueryRepository,
-      roundQueryRepository,
-      scoreQueryRepository
     )
   }
 
@@ -158,7 +138,7 @@ export default class PartiesController {
 
       // 3. Récupération directe via modèles Lucid
       const db = await import('@adonisjs/lucid/services/db')
-      
+
       const game = await db.default.from('games').where('id', gameId).first()
       if (!game) {
         return response.status(404).json({

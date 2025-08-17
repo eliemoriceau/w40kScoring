@@ -183,20 +183,21 @@ export default class CompleteGameFactory {
         const scoreDifference = Math.abs(compPlayerTotal - compOpponentTotal)
 
         // Adjust scores if they don't meet criteria
-        if (scoreDifference > 15 || 
-            compPlayerTotal < 60 || compPlayerTotal > 95 ||
-            compOpponentTotal < 60 || compOpponentTotal > 95) {
-          
+        if (
+          scoreDifference > 15 ||
+          compPlayerTotal < 60 ||
+          compPlayerTotal > 95 ||
+          compOpponentTotal < 60 ||
+          compOpponentTotal > 95
+        ) {
           // Create predictable competitive scores
           const baseScore = 75 // Mid-range competitive score
           const playerScore = baseScore + 5
           const opponentScore = baseScore - 3 // 8 point difference (< 15)
 
-          const adjustedGame = GameFactory.createCompleted(
-            playerScore,
-            opponentScore,
-            { id: competitiveGame.game.id }
-          )
+          const adjustedGame = GameFactory.createCompleted(playerScore, opponentScore, {
+            id: competitiveGame.game.id,
+          })
 
           return {
             ...competitiveGame,

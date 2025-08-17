@@ -151,6 +151,8 @@ export default class GameFactory {
       playerScore: null,
       opponentScore: null,
       mission: null,
+      deployment: null,
+      primaryScoringMethod: null,
       notes: '',
       createdAt: new Date(),
       startedAt: null,

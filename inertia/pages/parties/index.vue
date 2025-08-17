@@ -86,7 +86,7 @@ const handleViewDetails = (partieId: string) => {
   console.log('🎯 Navigation vers partie:', partieId)
   const url = `/parties/${partieId}`
   console.log('🔗 URL générée:', url)
-  
+
   // Navigation vers la page de détails
   router.visit(url)
 }
@@ -162,7 +162,10 @@ if (import.meta.env.DEV) {
 // Lifecycle
 onMounted(() => {
   console.log('Parties page mounted with', props.parties.parties.length, 'parties')
-  console.log('🔍 Données des parties:', props.parties.parties.map(p => ({ id: p.id, status: p.status })))
+  console.log(
+    '🔍 Données des parties:',
+    props.parties.parties.map((p) => ({ id: p.id, status: p.status }))
+  )
 })
 </script>
 

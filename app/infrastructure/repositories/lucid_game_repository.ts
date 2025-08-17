@@ -192,6 +192,8 @@ export default class LucidGameRepository implements GameRepository {
       playerScore: model.playerScore,
       opponentScore: model.opponentScore,
       mission: model.mission,
+      deployment: model.deployment || null,
+      primaryScoringMethod: model.primaryScoringMethod || null,
       notes: model.notes || '',
       createdAt: model.createdAt.toJSDate(),
       startedAt: model.startedAt?.toJSDate() || null,

@@ -70,12 +70,12 @@ export default class AuthController {
       const data = await request.validateUsing(loginUserValidator)
 
       const user = await User.verifyCredentials(data.login, data.password)
-      
+
       if (!user) {
         session.flash('error', 'Identifiants invalides')
         return response.redirect().back()
       }
-      
+
       await auth.use('web').login(user, !!data.rememberMe)
 
       session.flash('success', `Bienvenue dans le Commandement, ${user.username}!`)

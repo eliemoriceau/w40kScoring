@@ -32,6 +32,12 @@ export default class Game extends BaseModel {
   declare mission: string | null
 
   @column()
+  declare deployment: string | null
+
+  @column({ columnName: 'primary_scoring_method' })
+  declare primaryScoringMethod: string | null
+
+  @column()
   declare notes: string | null
 
   @column.dateTime()

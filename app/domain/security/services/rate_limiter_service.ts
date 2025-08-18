@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { DateTime } from 'luxon'
+import logger from '@adonisjs/core/services/logger'
 import { IpAddress } from '../value_objects/ip_address.js'
 import { LoginAttemptRepositoryInterface } from '../repositories/login_attempt_repository_interface.js'
 import { AccountLockRepositoryInterface } from '../repositories/account_lock_repository_interface.js'
@@ -137,7 +138,7 @@ export class RateLimiterService {
     )
 
     // Note: Dans une implémentation complète, on utiliserait un event dispatcher
-    console.warn('🚨 Brute force detected:', event.getEventData())
+    logger.warn('🚨 Brute force detected', event.getEventData())
   }
 
   /**

@@ -1,3 +1,4 @@
+import logger from '@adonisjs/core/services/logger'
 import { LoginCredentials } from '../value_objects/login_credentials.js'
 import { UserRepositoryInterface } from '../../user/repositories/user_repository_interface.js'
 import { User } from '../../user/entities/user.js'
@@ -61,7 +62,7 @@ export class UserAuthenticationService {
       const hash = await import('@adonisjs/core/services/hash')
       return await hash.default.verify(hashedPassword, plainPassword)
     } catch (error) {
-      console.error('Error verifying password:', error)
+      logger.error({ err: error }, 'Error verifying password')
       return false
     }
   }

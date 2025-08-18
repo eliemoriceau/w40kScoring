@@ -8,6 +8,7 @@
  */
 
 import Database from '@adonisjs/lucid/services/db'
+import logger from '@adonisjs/core/services/logger'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 /**
@@ -73,7 +74,7 @@ export class TransactionService {
     let rollbackOccurred = false
 
     if (finalConfig.enableLogging) {
-      console.log(`[Transaction ${transactionId}] Starting transaction`)
+      logger.debug(`[Transaction ${transactionId}] Starting transaction`)
     }
 
     try {
@@ -89,7 +90,7 @@ export class TransactionService {
         }
 
         if (finalConfig.enableLogging) {
-          console.log(`[Transaction ${transactionId}] Executing operation`)
+          logger.debug(`[Transaction ${transactionId}] Executing operation`)
         }
 
         // Exécution de l'opération
@@ -100,7 +101,7 @@ export class TransactionService {
       const duration = endTime.getTime() - startTime.getTime()
 
       if (finalConfig.enableLogging) {
-        console.log(`[Transaction ${transactionId}] Committed successfully in ${duration}ms`)
+        logger.info(`[Transaction ${transactionId}] Committed successfully in ${duration}ms`)
       }
 
       return {
@@ -119,7 +120,10 @@ export class TransactionService {
       const duration = endTime.getTime() - startTime.getTime()
 
       if (finalConfig.enableLogging) {
-        console.error(`[Transaction ${transactionId}] Rolled back after ${duration}ms:`, error)
+        logger.error(
+          { err: error },
+          `[Transaction ${transactionId}] Rolled back after ${duration}ms`
+        )
       }
 
       // Encapsuler l'erreur avec contexte transactionnel

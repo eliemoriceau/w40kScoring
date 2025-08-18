@@ -605,7 +605,10 @@ export default class PartieCompleteService {
     )
 
     if (!success && error) {
-      logger.error({ err: error }, `[Orchestration ${context.transactionId}] Error: ${error.message}`)
+      logger.error(
+        { err: error },
+        `[Orchestration ${context.transactionId}] Error: ${error.message}`
+      )
     }
 
     // Log des étapes pour debugging

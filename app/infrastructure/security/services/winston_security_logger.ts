@@ -11,31 +11,42 @@ export class WinstonSecurityLogger implements SecurityLogger {
   }
 
   info(message: string, meta: Record<string, any>): void {
-    logger.info({
-      ...meta,
-      component: 'SECURITY',
-    }, message)
+    logger.info(
+      {
+        ...meta,
+        component: 'SECURITY',
+      },
+      message
+    )
   }
 
   warn(message: string, meta: Record<string, any>): void {
-    logger.warn({
-      ...meta,
-      component: 'SECURITY',
-    }, message)
+    logger.warn(
+      {
+        ...meta,
+        component: 'SECURITY',
+      },
+      message
+    )
   }
 
   error(message: string, meta: Record<string, any>): void {
-    logger.error({
-      ...meta,
-      component: 'SECURITY',
-    }, message)
+    logger.error(
+      {
+        ...meta,
+        component: 'SECURITY',
+      },
+      message
+    )
   }
 
   debug(message: string, meta: Record<string, any>): void {
-    logger.debug({
-      ...meta,
-      component: 'SECURITY',
-    }, message)
+    logger.debug(
+      {
+        ...meta,
+        component: 'SECURITY',
+      },
+      message
+    )
   }
-
 }

@@ -120,7 +120,10 @@ export class TransactionService {
       const duration = endTime.getTime() - startTime.getTime()
 
       if (finalConfig.enableLogging) {
-        logger.error({ err: error }, `[Transaction ${transactionId}] Rolled back after ${duration}ms`)
+        logger.error(
+          { err: error },
+          `[Transaction ${transactionId}] Rolled back after ${duration}ms`
+        )
       }
 
       // Encapsuler l'erreur avec contexte transactionnel

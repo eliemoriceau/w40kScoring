@@ -8,6 +8,7 @@
  * Pattern : Saga Orchestrator avec gestion transactionnelle
  */
 
+import logger from '@adonisjs/core/services/logger'
 import {
   CreatePartieCompleteDto,
   PartieCompleteResult,
@@ -599,22 +600,22 @@ export default class PartieCompleteService {
     const endTime = new Date()
     const totalDuration = endTime.getTime() - context.startTime.getTime()
 
-    console.log(
+    logger.info(
       `[Orchestration ${context.transactionId}] ${success ? 'SUCCESS' : 'FAILURE'} in ${totalDuration}ms`
     )
 
     if (!success && error) {
-      console.error(`[Orchestration ${context.transactionId}] Error:`, error.message)
+      logger.error({ err: error }, `[Orchestration ${context.transactionId}] Error: ${error.message}`)
     }
 
     // Log des étapes pour debugging
     context.steps.forEach((step, index) => {
       const stepDuration = step.endTime ? step.endTime.getTime() - step.startTime.getTime() : 0
-      console.log(
+      logger.info(
         `  Step ${index + 1}: ${step.step} - ${step.success ? 'SUCCESS' : 'FAILURE'} (${stepDuration}ms)`
       )
       if (!step.success && step.error) {
-        console.error(`    Error: ${step.error}`)
+        logger.error(`    Error: ${step.error}`)
       }
     })
   }

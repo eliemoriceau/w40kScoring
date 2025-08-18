@@ -27,7 +27,7 @@ test.group('Player Repository Integration', (group) => {
     await GameModel.query().delete()
 
     // Create test game in each test
-    await GameModel.create({
+    const game = await GameModel.create({
       id: 1,
       userId: 123,
       gameType: 'MATCHED_PLAY',
@@ -38,6 +38,9 @@ test.group('Player Repository Integration', (group) => {
       mission: null,
       notes: '',
     })
+
+    // Ensure game is properly persisted
+    await game.save()
   })
 
   group.each.teardown(async () => {
@@ -47,24 +50,23 @@ test.group('Player Repository Integration', (group) => {
   })
 
   test('Command Repository - should save and retrieve a registered player', async ({ assert }) => {
-    // Arrange - Create initial player
+    // Arrange - Create initial player (let DB generate ID)
     const initialPlayer = PlayerFactory.createRegisteredPlayer({
-      id: new PlayerId(1),
       gameId: new GameId(1),
       userId: 123,
       pseudo: new Pseudo('InitialPlayer'),
     })
 
     // Save initial player
-    await commandRepository.save(initialPlayer)
+    const savedInitialPlayer = await commandRepository.save(initialPlayer)
 
-    // Verify player was saved
-    const existingPlayer = await queryRepository.findById(new PlayerId(1))
+    // Verify player was saved with generated ID
+    const existingPlayer = await queryRepository.findById(savedInitialPlayer.id)
     assert.isNotNull(existingPlayer)
 
-    // Update player pseudo
+    // Update player pseudo using the generated ID
     const updatedPlayer = PlayerFactory.createRegisteredPlayer({
-      id: new PlayerId(1),
+      id: savedInitialPlayer.id,
       gameId: new GameId(1),
       userId: 123,
       pseudo: new Pseudo('UpdatedPlayer'),
@@ -74,7 +76,7 @@ test.group('Player Repository Integration', (group) => {
     const savedPlayer = await commandRepository.save(updatedPlayer)
 
     // Assert
-    assert.isTrue(savedPlayer.id.equals(new PlayerId(1)))
+    assert.isTrue(savedPlayer.id.equals(savedInitialPlayer.id))
     assert.isTrue(savedPlayer.gameId.equals(new GameId(1)))
     assert.equal(savedPlayer.userId, 123)
     assert.isTrue(savedPlayer.pseudo.equals(new Pseudo('UpdatedPlayer')))
@@ -82,24 +84,23 @@ test.group('Player Repository Integration', (group) => {
   })
 
   test('Command Repository - should save and retrieve a guest player', async ({ assert }) => {
-    // Arrange - Create initial guest player
+    // Arrange - Create initial guest player (let DB generate ID)
     const initialPlayer = PlayerFactory.createGuestPlayer({
-      id: new PlayerId(2),
       gameId: new GameId(1),
       pseudo: new Pseudo('InitialGuest'),
     })
 
     // Save initial guest player
-    await commandRepository.save(initialPlayer)
+    const savedInitialPlayer = await commandRepository.save(initialPlayer)
 
-    // Verify player was saved as guest
-    const existingPlayer = await queryRepository.findById(new PlayerId(2))
+    // Verify player was saved as guest with generated ID
+    const existingPlayer = await queryRepository.findById(savedInitialPlayer.id)
     assert.isNotNull(existingPlayer)
     assert.isTrue(existingPlayer!.isGuest)
 
-    // Update guest player
+    // Update guest player using the generated ID
     const updatedPlayer = PlayerFactory.createGuestPlayer({
-      id: new PlayerId(2),
+      id: savedInitialPlayer.id,
       gameId: new GameId(1),
       pseudo: new Pseudo('UpdatedGuest'),
     })
@@ -108,7 +109,7 @@ test.group('Player Repository Integration', (group) => {
     const savedPlayer = await commandRepository.save(updatedPlayer)
 
     // Assert
-    assert.isTrue(savedPlayer.id.equals(new PlayerId(2)))
+    assert.isTrue(savedPlayer.id.equals(savedInitialPlayer.id))
     assert.isTrue(savedPlayer.gameId.equals(new GameId(1)))
     assert.isNull(savedPlayer.userId)
     assert.isTrue(savedPlayer.pseudo.equals(new Pseudo('UpdatedGuest')))
@@ -116,23 +117,22 @@ test.group('Player Repository Integration', (group) => {
   })
 
   test('Query Repository - should find player by ID', async ({ assert }) => {
-    // Arrange - Create test player
+    // Arrange - Create test player (let DB generate ID)
     const testPlayer = PlayerFactory.createRegisteredPlayer({
-      id: new PlayerId(3),
       gameId: new GameId(1),
       userId: 456,
       pseudo: new Pseudo('FindablePlayer'),
     })
 
     // Save the test player
-    await commandRepository.save(testPlayer)
+    const savedPlayer = await commandRepository.save(testPlayer)
 
     // Act
-    const foundPlayer = await queryRepository.findById(new PlayerId(3))
+    const foundPlayer = await queryRepository.findById(savedPlayer.id)
 
     // Assert
     assert.isNotNull(foundPlayer)
-    assert.isTrue(foundPlayer!.id.equals(new PlayerId(3)))
+    assert.isTrue(foundPlayer!.id.equals(savedPlayer.id))
     assert.equal(foundPlayer!.userId, 456)
     assert.isTrue(foundPlayer!.pseudo.equals(new Pseudo('FindablePlayer')))
   })

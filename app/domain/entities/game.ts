@@ -22,6 +22,8 @@ export default class Game extends AggregateRoot {
     private _playerScore: number | null = null,
     private _opponentScore: number | null = null,
     private _mission: string | null = null,
+    private _deployment: string | null = null,
+    private _primaryScoringMethod: string | null = null,
     private _notes: string = '',
     private readonly _createdAt: Date,
     private _startedAt: Date | null = null,
@@ -41,6 +43,8 @@ export default class Game extends AggregateRoot {
       null,
       null,
       null,
+      null,
+      null,
       '',
       new Date()
     )
@@ -56,6 +60,8 @@ export default class Game extends AggregateRoot {
     playerScore: number | null
     opponentScore: number | null
     mission: string | null
+    deployment: string | null
+    primaryScoringMethod: string | null
     notes: string
     createdAt: Date
     startedAt: Date | null
@@ -71,6 +77,8 @@ export default class Game extends AggregateRoot {
       data.playerScore,
       data.opponentScore,
       data.mission,
+      data.deployment,
+      data.primaryScoringMethod,
       data.notes,
       data.createdAt,
       data.startedAt,
@@ -113,6 +121,14 @@ export default class Game extends AggregateRoot {
 
   get mission(): string | null {
     return this._mission
+  }
+
+  get deployment(): string | null {
+    return this._deployment
+  }
+
+  get primaryScoringMethod(): string | null {
+    return this._primaryScoringMethod
   }
 
   get notes(): string {

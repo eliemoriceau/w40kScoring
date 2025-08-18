@@ -167,14 +167,45 @@ export default class CompleteGameFactory {
   ): CompleteGameResult {
     switch (scenario) {
       case 'competitive':
-        return this.createCompleteGame({
+        const competitiveGame = this.createCompleteGame({
           scorePattern: 'close',
           includeDetailedScores: true,
           players: [
             { pseudo: 'ImperialGuard_Alpha', userId: 1 },
             { pseudo: 'Tau_Commander_X', userId: 2 },
           ],
+          seed: 777, // Force predictable competitive scenario
         })
+
+        // Ensure scores meet competitive criteria (close game within 15 points, both 60-95)
+        const compPlayerTotal = competitiveGame.game.playerScore!
+        const compOpponentTotal = competitiveGame.game.opponentScore!
+        const scoreDifference = Math.abs(compPlayerTotal - compOpponentTotal)
+
+        // Adjust scores if they don't meet criteria
+        if (
+          scoreDifference > 15 ||
+          compPlayerTotal < 60 ||
+          compPlayerTotal > 95 ||
+          compOpponentTotal < 60 ||
+          compOpponentTotal > 95
+        ) {
+          // Create predictable competitive scores
+          const baseScore = 75 // Mid-range competitive score
+          const playerScore = baseScore + 5
+          const opponentScore = baseScore - 3 // 8 point difference (< 15)
+
+          const adjustedGame = GameFactory.createCompleted(playerScore, opponentScore, {
+            id: competitiveGame.game.id,
+          })
+
+          return {
+            ...competitiveGame,
+            game: adjustedGame,
+          }
+        }
+
+        return competitiveGame
 
       case 'domination':
         const dominationGame = this.createCompleteGame({

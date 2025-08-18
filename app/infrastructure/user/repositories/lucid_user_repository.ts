@@ -108,8 +108,8 @@ export class LucidUserRepository implements UserRepositoryInterface {
       UserRole.fromString(userModel.role.name),
       userModel.newsletterConsent,
       userModel.termsAcceptedAt.toJSDate(),
-      userModel.createdAt,
-      userModel.updatedAt
+      userModel.createdAt, // Garder DateTime Luxon pour l'entité Domain
+      userModel.updatedAt || null // Garder DateTime Luxon pour l'entité Domain
     )
   }
 

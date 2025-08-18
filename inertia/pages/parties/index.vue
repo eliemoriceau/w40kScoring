@@ -66,7 +66,7 @@ const applyFilters = () => {
     Object.entries(filters.value).filter(([_, value]) => value && value.trim())
   )
 
-  router.get(route('parties.index'), params, {
+  router.get('/parties', params, {
     preserveState: true,
     preserveScroll: true,
     onFinish: () => {
@@ -83,12 +83,17 @@ const applyFilters = () => {
 }
 
 const handleViewDetails = (partieId: string) => {
+  console.log('🎯 Navigation vers partie:', partieId)
+  const url = `/parties/${partieId}`
+  console.log('🔗 URL générée:', url)
+
   // Navigation vers la page de détails
-  router.visit(route('partie.show', { id: partieId }))
+  router.visit(url)
 }
 
 const handleCreateNew = () => {
-  router.visit(route('partie.create'))
+  // TODO: Implémenter la création de partie
+  console.log('Create new party - not implemented yet')
 }
 
 const handleLoadMore = () => {
@@ -157,6 +162,10 @@ if (import.meta.env.DEV) {
 // Lifecycle
 onMounted(() => {
   console.log('Parties page mounted with', props.parties.parties.length, 'parties')
+  console.log(
+    '🔍 Données des parties:',
+    props.parties.parties.map((p) => ({ id: p.id, status: p.status }))
+  )
 })
 </script>
 

@@ -49,6 +49,7 @@ const gameTypeStyles = computed(() => {
 })
 
 const handleViewDetails = () => {
+  console.log('📌 PartieCard: Click détecté pour partie', props.partie.id)
   emit('view-details', props.partie.id)
 }
 

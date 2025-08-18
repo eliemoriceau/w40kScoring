@@ -24,4 +24,13 @@ yarn-error.log
 # Platform specific
 .DS_Store
 
+# Development and temporary files
 note.md
+cookies.txt
+*.tmp
+*.log
+
+# Development commands and test seeders
+commands/
+database/seeders/*_test_*.ts
+database/seeders/fix_*.ts

@@ -99,7 +99,7 @@ test.group('Wizard Integration', (group) => {
       // VineJS errors have different structure
       assert.isArray(error.messages || [])
       assert.isAbove((error.messages || []).length, 0)
-      
+
       // Check that validation failed with expected error types
       const allErrors = JSON.stringify(error.messages || error)
       assert.isTrue(allErrors.includes('gameType') || allErrors.includes('pointsLimit'))
@@ -138,12 +138,13 @@ test.group('Wizard Integration', (group) => {
     const errorMessages = errors.join(' ')
     // Just check that we have business validation errors
     assert.isAbove(errors.length, 0)
-    
+
     // Check for key validation issues (more flexible matching)
     const hasPointsError = errorMessages.includes('50') || errorMessages.includes('points')
-    const hasOpponentError = errorMessages.includes('opponentId') || errorMessages.includes('opponent')
+    const hasOpponentError =
+      errorMessages.includes('opponentId') || errorMessages.includes('opponent')
     const hasPseudoError = errorMessages.includes('pseudo') || errorMessages.includes('unique')
-    
+
     // At least one of these should be present
     assert.isTrue(hasPointsError || hasOpponentError || hasPseudoError)
   })

@@ -7,6 +7,13 @@ import LucidScoreRepository from '#infrastructure/repositories/lucid_score_repos
 import UuidV7IdGenerator from '#infrastructure/services/uuid_v7_id_generator'
 import { PartieFilterDto } from '#application/dto/partie_filter_dto'
 import { partiesListValidator } from '#validators/parties_list_validator'
+import {
+  gameCreationWizardValidator,
+  userSearchValidator,
+  GameCreationWizardValidationRules,
+  type GameCreationWizardRequest,
+} from '#validators/game_creation_wizard_validator'
+import { WizardGameMapper } from '#application/mappers/wizard_game_mapper'
 import PartiePolicy from '#policies/partie_policy'
 
 /**
@@ -223,5 +230,165 @@ export default class PartiesController {
       CANCELLED: 'Annulée',
     }
     return labels[status as keyof typeof labels] || status
+  }
+
+  /**
+   * Affiche le wizard de création de partie
+   *
+   * GET /parties/create
+   */
+  async create({ inertia, auth }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    // TODO: Récupérer la liste des amis de l'utilisateur
+    const userFriends: Array<{ id: number; pseudo: string; avatar?: string }> = []
+
+    // TODO: Récupérer la liste des missions disponibles
+    const availableMissions = [
+      { id: 1, name: 'Seize Ground', description: 'Contrôlez les objectifs' },
+      { id: 2, name: 'Annihilation', description: 'Éliminez les unités ennemies' },
+      { id: 3, name: 'Capture and Control', description: 'Maintenez votre position' },
+    ]
+
+    const gameTypes = [
+      { value: 'MATCHED_PLAY' as const, displayName: 'Jeu Équilibré' },
+      { value: 'NARRATIVE' as const, displayName: 'Narratif' },
+      { value: 'OPEN_PLAY' as const, displayName: 'Jeu Libre' },
+    ]
+
+    return inertia.render('parties/create/index', {
+      availableMissions,
+      gameTypes,
+      userFriends,
+      currentUser: {
+        id: user.id,
+        pseudo: user.fullName || user.username,
+        email: user.email,
+      },
+    })
+  }
+
+  /**
+   * Traite la création de partie via le wizard
+   *
+   * POST /parties/create
+   */
+  async store({ request, response, auth }: HttpContext) {
+    try {
+      // 1. Authentification requise
+      const user = auth.getUserOrFail()
+
+      // 2. Validation des données
+      const wizardData = (await request.validateUsing(gameCreationWizardValidator)) as GameCreationWizardRequest
+
+      // 3. Validation des règles métier spécifiques
+      const businessErrors = GameCreationWizardValidationRules.validateComplete(wizardData)
+      if (businessErrors.length > 0) {
+        return response.status(422).json({
+          error: 'Validation métier échouée',
+          message: 'Les données ne respectent pas les règles métier',
+          details: businessErrors,
+        })
+      }
+
+      // 4. Validation de la cohérence des données
+      WizardGameMapper.validateWizardData(wizardData)
+
+      // 5. Conversion vers les données de service
+      const completeGameData = WizardGameMapper.toCompleteGameData(wizardData, user.id)
+
+      // 6. Création de la partie via le service
+      const result = await this.gameService.createCompleteGame(completeGameData)
+
+      // 7. Réponse de succès avec redirection
+      return response.status(201).json({
+        success: true,
+        message: '⚔️ Bataille créée avec succès !',
+        data: {
+          gameId: result.game.id.value,
+          status: result.game.status.value,
+          gameType: result.game.gameType.value,
+          pointsLimit: result.game.pointsLimit.value,
+          playersCount: result.players.length,
+          roundsCount: result.rounds.length,
+          scoresCount: result.scores.length,
+        },
+        redirect: `/parties/${result.game.id.value}`,
+        meta: WizardGameMapper.extractGameMetadata(wizardData),
+      })
+    } catch (error) {
+      console.error('Erreur lors de la création de la partie:', error)
+
+      // Distinguer les erreurs de validation des erreurs système
+      if (error.message.includes('Validation') || error.message.includes('Invalid')) {
+        return response.status(422).json({
+          error: 'Données invalides',
+          message: error.message,
+          details: [error.message],
+        })
+      }
+
+      // Erreur système générique
+      return response.status(500).json({
+        error: 'Erreur interne',
+        message: 'Une erreur est survenue lors de la création de la partie',
+        details: ['Veuillez réessayer ou contacter le support'],
+      })
+    }
+  }
+
+  /**
+   * API de recherche d'utilisateurs pour le wizard
+   *
+   * GET /api/users/search
+   */
+  async searchUsers({ request, response, auth }: HttpContext) {
+    try {
+      // 1. Authentification requise
+      const user = auth.getUserOrFail()
+
+      // 2. Validation des paramètres
+      const { q, limit = 10 } = await request.validateUsing(userSearchValidator)
+
+      // 3. TODO: Implémenter la recherche d'utilisateurs
+      // Pour l'instant, retourner des données mockées
+      const mockUsers = [
+        {
+          id: 1,
+          pseudo: 'CommanderDante',
+          email: 'dante@bloodangels.w40k',
+          avatar: null,
+        },
+        {
+          id: 2,
+          pseudo: 'ChapterMaster',
+          email: 'calgar@ultramarines.w40k',
+          avatar: null,
+        },
+        {
+          id: 3,
+          pseudo: 'WolfLord',
+          email: 'ragnar@spacewolves.w40k',
+          avatar: null,
+        },
+      ].filter((mockUser) =>
+        mockUser.pseudo.toLowerCase().includes(q.toLowerCase()) && mockUser.id !== user.id
+      )
+
+      return response.json({
+        users: mockUsers.slice(0, limit),
+        query: q,
+        limit,
+        total: mockUsers.length,
+      })
+    } catch (error) {
+      console.error('Erreur lors de la recherche d\'utilisateurs:', error)
+
+      return response.status(500).json({
+        error: 'Erreur de recherche',
+        message: 'Une erreur est survenue lors de la recherche d\'utilisateurs',
+        users: [],
+      })
+    }
   }
 }

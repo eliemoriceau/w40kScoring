@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import logger from '@adonisjs/core/services/logger'
 import GameService from '#application/services/game_service'
 import LucidGameRepository from '#infrastructure/repositories/lucid_game_repository'
 import LucidPlayerRepository from '#infrastructure/repositories/lucid_player_repository'
@@ -14,7 +15,13 @@ import {
   type GameCreationWizardRequest,
 } from '#validators/game_creation_wizard_validator'
 import { WizardGameMapper } from '#application/mappers/wizard_game_mapper'
-import PartiePolicy from '#policies/partie_policy'
+import User from '#models/user'
+import { GameDetailService } from '#application/services/game_detail_service'
+import LucidGameQueryRepository from '#infrastructure/repositories/lucid_game_query_repository'
+import LucidPlayerQueryRepository from '#infrastructure/repositories/lucid_player_query_repository'
+import LucidRoundQueryRepository from '#infrastructure/repositories/lucid_round_query_repository'
+import LucidScoreQueryRepository from '#infrastructure/repositories/lucid_score_query_repository'
+import GameId from '#domain/value-objects/game_id'
 
 /**
  * PartiesController
@@ -26,6 +33,7 @@ import PartiePolicy from '#policies/partie_policy'
  */
 export default class PartiesController {
   private gameService: GameService
+  private gameDetailService: GameDetailService
 
   constructor() {
     // Instanciation manuelle des dépendances (workaround IoC)
@@ -35,6 +43,12 @@ export default class PartiesController {
     const scoreRepository = new LucidScoreRepository()
     const idGenerator = new UuidV7IdGenerator()
 
+    // Query repositories pour le GameDetailService
+    const gameQueryRepository = new LucidGameQueryRepository()
+    const playerQueryRepository = new LucidPlayerQueryRepository()
+    const roundQueryRepository = new LucidRoundQueryRepository()
+    const scoreQueryRepository = new LucidScoreQueryRepository()
+
     // Services pour les commandes (CQRS)
     this.gameService = new GameService(
       gameRepository,
@@ -42,6 +56,14 @@ export default class PartiesController {
       roundRepository,
       scoreRepository,
       idGenerator
+    )
+
+    // Service pour les requêtes de détail
+    this.gameDetailService = new GameDetailService(
+      gameQueryRepository,
+      playerQueryRepository,
+      roundQueryRepository,
+      scoreQueryRepository
     )
   }
 
@@ -129,77 +151,91 @@ export default class PartiesController {
    * @param auth - Service d'authentification
    * @param response - Response HTTP pour gestion d'erreurs
    */
-  async show({ params, inertia, auth, bouncer, response }: HttpContext) {
+  async show({ params, inertia, auth, response }: HttpContext) {
     try {
       // 1. Authentification requise
       const user = auth.getUserOrFail()
 
-      // 2. Validation de l'ID
-      const gameId = Number(params.id)
-      if (!gameId || Number.isNaN(gameId) || gameId <= 0) {
+      // 2. Validation de l'ID et création du value object
+      const gameIdNumber = Number(params.id)
+      if (!gameIdNumber || Number.isNaN(gameIdNumber) || gameIdNumber <= 0) {
         return response.status(400).json({
           error: 'Invalid game ID',
           message: "L'identifiant de la partie doit être un nombre valide",
         })
       }
 
-      // 3. Récupération directe via modèles Lucid
-      const db = await import('@adonisjs/lucid/services/db')
+      const gameId = new GameId(gameIdNumber)
 
-      const game = await db.default.from('games').where('id', gameId).first()
-      if (!game) {
+      // 3. Récupération via le service application (pattern CQRS)
+      const gameDetail = await this.gameDetailService.getGameDetail(gameId, user.id)
+
+      if (!gameDetail) {
         return response.status(404).json({
           error: 'Game not found',
           message: "Cette partie n'existe pas",
         })
       }
 
-      // 4. Vérification d'autorisation avec Policy AdonisJS
-      if (await bouncer.with(PartiePolicy).denies('view', game.user_id)) {
+      // 4. Rendu Inertia avec les données complètes
+      return inertia.render('parties/show', {
+        game: {
+          id: gameDetail.gameId,
+          userId: gameDetail.userId,
+          gameType: gameDetail.gameType,
+          pointsLimit: gameDetail.pointsLimit,
+          status: gameDetail.status,
+          opponentId: gameDetail.opponentId,
+          playerScore: gameDetail.playerScore,
+          opponentScore: gameDetail.opponentScore,
+          mission: gameDetail.mission,
+          deployment: gameDetail.deployment,
+          primaryScoringMethod: gameDetail.primaryScoringMethod,
+          notes: gameDetail.notes,
+          createdAt: gameDetail.createdAt,
+          startedAt: gameDetail.startedAt,
+          completedAt: gameDetail.completedAt,
+          winner: gameDetail.getWinner(),
+          isEditable: gameDetail.isEditable(),
+        },
+        players: gameDetail.players,
+        rounds: gameDetail.rounds,
+        secondaryScores: gameDetail.getSecondaryScoresForPlayer(
+          gameDetail.getMainPlayer()?.id || 0
+        ),
+        stats: {
+          totalRounds: gameDetail.rounds.length,
+          completedRounds: gameDetail.rounds.filter((r) => r.isCompleted).length,
+        },
+        user: {
+          id: user.id,
+          fullName: user.fullName || user.username,
+        },
+        meta: {
+          title: `Partie ${gameDetail.gameId} - ${gameDetail.gameType}`,
+          canEdit: gameDetail.isEditable(),
+          gameTypeLabel: this.getGameTypeLabel(gameDetail.gameType),
+          statusLabel: this.getStatusLabel(gameDetail.status),
+        },
+      })
+    } catch (error) {
+      logger.error('Game detail retrieval failed', {
+        error: error.message,
+        stack: error.stack,
+        userId: auth.user?.id,
+        gameId: params.id,
+        action: 'game_detail_view',
+      })
+
+      // Distinguer les erreurs d'autorisation
+      if (error.message.includes('access')) {
         return response.status(403).json({
           error: 'Forbidden',
           message: "Vous n'avez pas accès à cette partie",
         })
       }
 
-      // 5. Rendu Inertia avec données basiques (pour tester)
-      return inertia.render('parties/show', {
-        game: {
-          id: game.id,
-          userId: game.user_id,
-          gameType: game.game_type,
-          pointsLimit: game.points_limit,
-          status: game.status,
-          opponentId: game.opponent_id,
-          playerScore: game.player_score,
-          opponentScore: game.opponent_score,
-          mission: game.mission,
-          deployment: game.deployment,
-          primaryScoringMethod: game.primary_scoring_method,
-          notes: game.notes,
-          createdAt: game.created_at,
-          startedAt: game.started_at,
-          completedAt: game.completed_at,
-          winner: null,
-          isEditable: game.status === 'PLANNED' || game.status === 'IN_PROGRESS',
-        },
-        players: [], // Vide pour test
-        rounds: [], // Vide pour test
-        secondaryScores: [], // Vide pour test
-        stats: { totalRounds: 0, completedRounds: 0 }, // Basique pour test
-        user: {
-          id: user.id,
-          fullName: user.fullName || user.username,
-        },
-        meta: {
-          title: `Partie ${game.id} - ${game.game_type}`,
-          canEdit: game.status === 'PLANNED' || game.status === 'IN_PROGRESS',
-          gameTypeLabel: this.getGameTypeLabel(game.game_type),
-          statusLabel: this.getStatusLabel(game.status),
-        },
-      })
-    } catch (error) {
-      // Erreur générique - ne pas exposer les détails internes
+      // Erreur générique
       return response.status(500).json({
         error: 'Internal error',
         message: 'Une erreur est survenue lors de la récupération de la partie',
@@ -279,7 +315,9 @@ export default class PartiesController {
       const user = auth.getUserOrFail()
 
       // 2. Validation des données
-      const wizardData = (await request.validateUsing(gameCreationWizardValidator)) as GameCreationWizardRequest
+      const wizardData = (await request.validateUsing(
+        gameCreationWizardValidator
+      )) as GameCreationWizardRequest
 
       // 3. Validation des règles métier spécifiques
       const businessErrors = GameCreationWizardValidationRules.validateComplete(wizardData)
@@ -317,7 +355,12 @@ export default class PartiesController {
         meta: WizardGameMapper.extractGameMetadata(wizardData),
       })
     } catch (error) {
-      console.error('Erreur lors de la création de la partie:', error)
+      logger.error('Game creation failed', {
+        error: error.message,
+        stack: error.stack,
+        userId: auth.user?.id,
+        action: 'wizard_game_creation',
+      })
 
       // Distinguer les erreurs de validation des erreurs système
       if (error.message.includes('Validation') || error.message.includes('Invalid')) {
@@ -350,43 +393,46 @@ export default class PartiesController {
       // 2. Validation des paramètres
       const { q, limit = 10 } = await request.validateUsing(userSearchValidator)
 
-      // 3. TODO: Implémenter la recherche d'utilisateurs
-      // Pour l'instant, retourner des données mockées
-      const mockUsers = [
-        {
-          id: 1,
-          pseudo: 'CommanderDante',
-          email: 'dante@bloodangels.w40k',
-          avatar: null,
-        },
-        {
-          id: 2,
-          pseudo: 'ChapterMaster',
-          email: 'calgar@ultramarines.w40k',
-          avatar: null,
-        },
-        {
-          id: 3,
-          pseudo: 'WolfLord',
-          email: 'ragnar@spacewolves.w40k',
-          avatar: null,
-        },
-      ].filter((mockUser) =>
-        mockUser.pseudo.toLowerCase().includes(q.toLowerCase()) && mockUser.id !== user.id
-      )
+      // 3. Recherche d'utilisateurs en base de données
+      const users = await User.query()
+        .where('id', '!=', user.id) // Exclure l'utilisateur actuel
+        .where((query) => {
+          query
+            .whereILike('username', `%${q}%`)
+            .orWhereILike('fullName', `%${q}%`)
+            .orWhereILike('email', `%${q}%`)
+        })
+        .select('id', 'username', 'fullName', 'email')
+        .limit(Math.min(limit, 20)) // Limite max de sécurité
+        .orderBy('username', 'asc')
+
+      // 4. Formater la réponse pour le frontend
+      const formattedUsers = users.map((foundUser) => ({
+        id: foundUser.id,
+        pseudo: foundUser.fullName || foundUser.username,
+        email: foundUser.email,
+        username: foundUser.username,
+        avatar: null, // TODO: Implémenter les avatars
+      }))
 
       return response.json({
-        users: mockUsers.slice(0, limit),
+        users: formattedUsers,
         query: q,
         limit,
-        total: mockUsers.length,
+        total: formattedUsers.length,
       })
     } catch (error) {
-      console.error('Erreur lors de la recherche d\'utilisateurs:', error)
+      logger.error('User search failed', {
+        error: error.message,
+        stack: error.stack,
+        userId: auth.user?.id,
+        query: request.input('q'),
+        action: 'user_search',
+      })
 
       return response.status(500).json({
         error: 'Erreur de recherche',
-        message: 'Une erreur est survenue lors de la recherche d\'utilisateurs',
+        message: "Une erreur est survenue lors de la recherche d'utilisateurs",
         users: [],
       })
     }

@@ -53,7 +53,7 @@ router
     router.get('/parties/create', [PartiesController, 'create']).as('parties.create')
     router.post('/parties/create', [PartiesController, 'store']).as('parties.store')
     router.get('/parties/:id', [PartiesController, 'show']).as('parties.show')
-    
+
     // API routes for wizard
     router.get('/api/users/search', [PartiesController, 'searchUsers']).as('api.users.search')
   })

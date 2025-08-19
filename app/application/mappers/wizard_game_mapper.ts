@@ -27,7 +27,7 @@ export class WizardGameMapper {
     }))
 
     // Mapper les rounds si activés
-    let rounds: RoundData[] | undefined = undefined
+    let rounds: RoundData[] | undefined
     if (wizardData.enableRounds && wizardData.rounds && wizardData.rounds.length > 0) {
       rounds = wizardData.rounds.map((round) => ({
         roundNumber: round.roundNumber,

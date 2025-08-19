@@ -186,8 +186,8 @@ export class GameCreationWizardValidationRules {
 
       // Vérifier que les numéros de rounds sont consécutifs
       const roundNumbers = data.rounds.map((r) => r.roundNumber).sort()
-      for (let i = 0; i < roundNumbers.length; i++) {
-        if (roundNumbers[i] !== i + 1) {
+      for (const [index, roundNumber] of roundNumbers.entries()) {
+        if (roundNumber !== index + 1) {
           errors.push('Les numéros de rounds doivent être consécutifs à partir de 1')
           break
         }

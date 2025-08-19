@@ -3,9 +3,7 @@
     <!-- En-tête de l'étape -->
     <div class="step-header">
       <h2 class="step-title">⚡ Sélection de l'Adversaire</h2>
-      <p class="step-subtitle">
-        Choisissez votre adversaire pour cette bataille épique
-      </p>
+      <p class="step-subtitle">Choisissez votre adversaire pour cette bataille épique</p>
     </div>
 
     <!-- Contenu principal -->
@@ -16,13 +14,13 @@
         <p class="section-description">
           Sélectionnez comment vous souhaitez ajouter votre adversaire
         </p>
-        
+
         <div class="opponent-type-grid">
-          <div 
+          <div
             v-for="opponentType in opponentTypes"
             :key="opponentType.value"
             class="opponent-type-card"
-            :class="{ 'selected': data.opponentType === opponentType.value }"
+            :class="{ selected: data.opponentType === opponentType.value }"
             @click="selectOpponentType(opponentType.value)"
           >
             <div class="opponent-type-icon">
@@ -37,7 +35,7 @@
             </div>
           </div>
         </div>
-        
+
         <div v-if="errors?.opponentType" class="error-message">
           {{ errors.opponentType[0] }}
         </div>
@@ -48,22 +46,20 @@
         <!-- Adversaire existant -->
         <div v-if="data.opponentType === 'existing'" class="opponent-existing">
           <h3 class="section-title">Choisir un Ami</h3>
-          <p class="section-description">
-            Sélectionnez un ami dans votre liste de contacts
-          </p>
-          
+          <p class="section-description">Sélectionnez un ami dans votre liste de contacts</p>
+
           <div class="friends-grid">
             <div
               v-for="friend in props.userFriends"
               :key="friend.id"
               class="friend-card"
-              :class="{ 'selected': data.opponentId === friend.id }"
+              :class="{ selected: data.opponentId === friend.id }"
               @click="selectExistingOpponent(friend)"
             >
               <div class="friend-avatar">
-                <img 
-                  v-if="friend.avatar" 
-                  :src="friend.avatar" 
+                <img
+                  v-if="friend.avatar"
+                  :src="friend.avatar"
                   :alt="friend.pseudo"
                   class="avatar-img"
                 />
@@ -83,7 +79,7 @@
               </div>
             </div>
           </div>
-          
+
           <div v-if="props.userFriends.length === 0" class="no-friends-message">
             <div class="no-friends-icon">👥</div>
             <h4>Aucun ami trouvé</h4>
@@ -97,7 +93,7 @@
           <p class="section-description">
             L'adversaire recevra une invitation par email pour rejoindre la partie
           </p>
-          
+
           <div class="invite-form">
             <div class="form-group">
               <label class="input-label">Adresse email :</label>
@@ -107,13 +103,13 @@
                 class="email-input"
                 placeholder="adversaire@example.com"
                 @blur="validateEmail"
-                :class="{ 'error': errors?.opponentEmail }"
+                :class="{ error: errors?.opponentEmail }"
               />
               <div v-if="errors?.opponentEmail" class="error-message">
                 {{ errors.opponentEmail[0] }}
               </div>
             </div>
-            
+
             <div class="form-group">
               <label class="input-label">Pseudo (optionnel) :</label>
               <input
@@ -123,9 +119,7 @@
                 placeholder="Nom de votre adversaire"
                 maxlength="50"
               />
-              <div class="input-hint">
-                Si laissé vide, l'adversaire pourra choisir son pseudo
-              </div>
+              <div class="input-hint">Si laissé vide, l'adversaire pourra choisir son pseudo</div>
             </div>
           </div>
         </div>
@@ -136,7 +130,7 @@
           <p class="section-description">
             Créez une partie avec un adversaire sans compte utilisateur
           </p>
-          
+
           <div class="guest-form">
             <div class="form-group">
               <label class="input-label">Pseudo de l'adversaire :</label>
@@ -147,16 +141,14 @@
                 placeholder="Nom de votre adversaire"
                 maxlength="50"
                 @input="validateGuestPseudo"
-                :class="{ 'error': errors?.opponentPseudo }"
+                :class="{ error: errors?.opponentPseudo }"
               />
               <div v-if="errors?.opponentPseudo" class="error-message">
                 {{ errors.opponentPseudo[0] }}
               </div>
-              <div class="input-hint">
-                Ce nom sera affiché dans les résultats de la partie
-              </div>
+              <div class="input-hint">Ce nom sera affiché dans les résultats de la partie</div>
             </div>
-            
+
             <div class="guest-info-box">
               <div class="info-icon">💡</div>
               <div class="info-content">
@@ -177,18 +169,13 @@
 
     <!-- Navigation -->
     <div class="step-navigation">
-      <button 
-        @click="$emit('previous')"
-        class="btn-previous"
-      >
-        ⮜ Précédent
-      </button>
-      
-      <button 
+      <button @click="$emit('previous')" class="btn-previous">⮜ Précédent</button>
+
+      <button
         @click="$emit('next')"
         :disabled="!isValid || loading"
         class="btn-next"
-        :class="{ 'loading': loading }"
+        :class="{ loading: loading }"
       >
         <span v-if="loading" class="btn-spinner">⏳</span>
         <span v-else>Suivant ⮞</span>
@@ -224,13 +211,13 @@ const emit = defineEmits<{
 const opponentTypes = [
   { value: 'existing' as OpponentType, displayName: 'Ami Existant' },
   { value: 'invite' as OpponentType, displayName: 'Inviter par Email' },
-  { value: 'guest' as OpponentType, displayName: 'Adversaire Invité' }
+  { value: 'guest' as OpponentType, displayName: 'Adversaire Invité' },
 ]
 
 // Computed
 const isValid = computed(() => {
   if (!props.data.opponentType) return false
-  
+
   switch (props.data.opponentType) {
     case 'existing':
       return !!props.data.opponentId
@@ -247,7 +234,7 @@ const isValid = computed(() => {
 const selectOpponentType = (type: OpponentType) => {
   // Réinitialiser les données selon le type
   const updates: Partial<GameCreationWizardData> = { opponentType: type }
-  
+
   if (type === 'existing') {
     updates.opponentEmail = undefined
     updates.opponentPseudo = undefined
@@ -257,15 +244,15 @@ const selectOpponentType = (type: OpponentType) => {
     updates.opponentId = undefined
     updates.opponentEmail = undefined
   }
-  
+
   emit('update:data', updates)
   emit('validate')
 }
 
 const selectExistingOpponent = (friend: User) => {
-  emit('update:data', { 
+  emit('update:data', {
     opponentId: friend.id,
-    opponentPseudo: friend.pseudo
+    opponentPseudo: friend.pseudo,
   })
   emit('validate')
 }
@@ -287,7 +274,7 @@ const getOpponentTypeIcon = (type: OpponentType): string => {
   const icons = {
     existing: '👥',
     invite: '✉️',
-    guest: '👤'
+    guest: '👤',
   }
   return icons[type] || '⚔️'
 }
@@ -296,7 +283,7 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   const descriptions = {
     existing: 'Choisissez parmi vos amis déjà inscrits',
     invite: 'Envoyez une invitation par email à votre adversaire',
-    guest: 'Créez une partie avec un adversaire sans compte'
+    guest: 'Créez une partie avec un adversaire sans compte',
   }
   return descriptions[type] || ''
 }
@@ -308,7 +295,7 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   border: 2px solid #dc143c;
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 
+  box-shadow:
     0 0 30px rgba(220, 20, 60, 0.3),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -551,7 +538,8 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
 }
 
 /* Formulaires */
-.invite-form, .guest-form {
+.invite-form,
+.guest-form {
   background: rgba(0, 0, 0, 0.3);
   padding: 2rem;
   border-radius: 12px;
@@ -569,7 +557,8 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   margin-bottom: 0.5rem;
 }
 
-.email-input, .pseudo-input {
+.email-input,
+.pseudo-input {
   width: 100%;
   padding: 1rem;
   background: rgba(0, 0, 0, 0.5);
@@ -579,13 +568,15 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   font-size: 1rem;
 }
 
-.email-input:focus, .pseudo-input:focus {
+.email-input:focus,
+.pseudo-input:focus {
   outline: none;
   border-color: #ffd700;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
-.email-input.error, .pseudo-input.error {
+.email-input.error,
+.pseudo-input.error {
   border-color: #ff6b6b;
 }
 
@@ -642,7 +633,8 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.btn-previous, .btn-next {
+.btn-previous,
+.btn-next {
   padding: 1rem 2rem;
   border-radius: 10px;
   font-size: 1.1rem;
@@ -693,8 +685,12 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Messages d'erreur */
@@ -713,21 +709,23 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   .step-container {
     padding: 1.5rem;
   }
-  
+
   .step-title {
     font-size: 2rem;
   }
-  
-  .opponent-type-grid, .friends-grid {
+
+  .opponent-type-grid,
+  .friends-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .step-navigation {
     flex-direction: column-reverse;
     gap: 1rem;
   }
-  
-  .btn-previous, .btn-next {
+
+  .btn-previous,
+  .btn-next {
     width: 100%;
   }
 }
@@ -736,12 +734,12 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   .friend-card {
     padding: 1rem;
   }
-  
+
   .friend-avatar {
     width: 40px;
     height: 40px;
   }
-  
+
   .avatar-placeholder {
     font-size: 1rem;
   }

@@ -3,9 +3,7 @@
     <!-- En-tête de l'étape -->
     <div class="step-header">
       <h2 class="step-title">🏁 Récapitulatif Final</h2>
-      <p class="step-subtitle">
-        Vérifiez tous les détails avant de créer votre bataille épique
-      </p>
+      <p class="step-subtitle">Vérifiez tous les détails avant de créer votre bataille épique</p>
     </div>
 
     <!-- Contenu principal -->
@@ -15,11 +13,9 @@
         <div class="section-card game-config">
           <div class="card-header">
             <h3 class="card-title">⚔️ Configuration de la Bataille</h3>
-            <button @click="$emit('step-change', 1)" class="edit-btn">
-              ✏️ Modifier
-            </button>
+            <button @click="$emit('step-change', 1)" class="edit-btn">✏️ Modifier</button>
           </div>
-          
+
           <div class="config-details">
             <div class="detail-grid">
               <div class="detail-item">
@@ -52,13 +48,15 @@
               ✏️ Modifier Adversaire
             </button>
           </div>
-          
+
           <div class="players-summary">
             <!-- Joueur principal -->
             <div class="player-summary current-user">
               <div class="player-info">
                 <div class="player-avatar">
-                  <span class="avatar-text">{{ props.currentUser.pseudo.charAt(0).toUpperCase() }}</span>
+                  <span class="avatar-text">{{
+                    props.currentUser.pseudo.charAt(0).toUpperCase()
+                  }}</span>
                 </div>
                 <div class="player-details">
                   <h4 class="player-name">{{ props.currentUser.pseudo }}</h4>
@@ -88,9 +86,7 @@
                 <div class="player-details">
                   <h4 class="player-name">{{ getOpponentName() }}</h4>
                   <span class="player-role">{{ getOpponentRole() }}</span>
-                  <div v-if="getOpponentArmy()" class="player-army">
-                    🛡️ {{ getOpponentArmy() }}
-                  </div>
+                  <div v-if="getOpponentArmy()" class="player-army">🛡️ {{ getOpponentArmy() }}</div>
                 </div>
               </div>
               <div class="player-status">
@@ -100,22 +96,28 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Actions spéciales selon le type d'adversaire -->
           <div v-if="data.opponentType === 'invite'" class="invite-info">
             <div class="info-box">
               <div class="info-icon">📧</div>
               <div class="info-content">
-                <p>L'invitation sera envoyée à <strong>{{ data.opponentEmail }}</strong> après création de la partie.</p>
+                <p>
+                  L'invitation sera envoyée à <strong>{{ data.opponentEmail }}</strong> après
+                  création de la partie.
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div v-if="data.opponentType === 'guest'" class="guest-info">
             <div class="info-box">
               <div class="info-icon">👤</div>
               <div class="info-content">
-                <p>Vous gérerez tous les aspects de cette partie pour le compte de votre adversaire invité.</p>
+                <p>
+                  Vous gérerez tous les aspects de cette partie pour le compte de votre adversaire
+                  invité.
+                </p>
               </div>
             </div>
           </div>
@@ -127,11 +129,9 @@
         <div class="section-card rounds-config">
           <div class="card-header">
             <h3 class="card-title">🎯 Gestion des Scores</h3>
-            <button @click="$emit('step-change', 4)" class="edit-btn">
-              ✏️ Modifier
-            </button>
+            <button @click="$emit('step-change', 4)" class="edit-btn">✏️ Modifier</button>
           </div>
-          
+
           <div class="rounds-summary">
             <div v-if="data.enableRounds" class="rounds-enabled">
               <div class="rounds-info">
@@ -141,19 +141,21 @@
                 </div>
                 <div class="info-item">
                   <span class="info-icon">🎯</span>
-                  <span class="info-text">Objectifs Primaires (0-50 pts) et Secondaires (0-15 pts)</span>
+                  <span class="info-text"
+                    >Objectifs Primaires (0-50 pts) et Secondaires (0-15 pts)</span
+                  >
                 </div>
                 <div class="info-item">
                   <span class="info-icon">⚡</span>
                   <span class="info-text">Saisie des scores en temps réel</span>
                 </div>
               </div>
-              
+
               <!-- Prévisualisation des rounds si des scores sont déjà saisis -->
               <div v-if="hasPreConfiguredScores()" class="rounds-preview">
                 <h4>Scores pré-configurés :</h4>
                 <div class="preview-rounds">
-                  <div 
+                  <div
                     v-for="round in getPreConfiguredRounds()"
                     :key="round.roundNumber"
                     class="preview-round"
@@ -166,7 +168,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div v-else class="rounds-disabled">
               <div class="info-item">
                 <span class="info-icon">🏆</span>
@@ -187,7 +189,7 @@
           <div class="card-header">
             <h3 class="card-title">⚠️ Informations Importantes</h3>
           </div>
-          
+
           <div class="important-list">
             <div class="important-item">
               <div class="item-icon">🔒</div>
@@ -196,7 +198,7 @@
                 <p>{{ getPermissionsText() }}</p>
               </div>
             </div>
-            
+
             <div class="important-item">
               <div class="item-icon">💾</div>
               <div class="item-content">
@@ -204,7 +206,7 @@
                 <p>Tous les scores sont automatiquement sauvegardés en temps réel</p>
               </div>
             </div>
-            
+
             <div class="important-item">
               <div class="item-icon">📱</div>
               <div class="item-content">
@@ -212,7 +214,7 @@
                 <p>La partie sera accessible depuis n'importe quel appareil connecté</p>
               </div>
             </div>
-            
+
             <div class="important-item">
               <div class="item-icon">📊</div>
               <div class="item-content">
@@ -231,7 +233,7 @@
             <h3>🚀 Prêt à créer votre bataille ?</h3>
             <p>Une fois créée, la partie sera immédiatement disponible pour jouer.</p>
           </div>
-          
+
           <div class="create-options">
             <div class="option-card">
               <div class="option-icon">🎮</div>
@@ -240,7 +242,7 @@
                 <p>Créer la partie et commencer immédiatement</p>
               </div>
             </div>
-            
+
             <div class="option-card">
               <div class="option-icon">📅</div>
               <div class="option-content">
@@ -255,18 +257,13 @@
 
     <!-- Navigation -->
     <div class="step-navigation">
-      <button 
-        @click="$emit('previous')"
-        class="btn-previous"
-      >
-        ⮜ Précédent
-      </button>
-      
-      <button 
+      <button @click="$emit('previous')" class="btn-previous">⮜ Précédent</button>
+
+      <button
         @click="handleCreateGame"
         :disabled="loading"
         class="btn-create"
-        :class="{ 'loading': loading }"
+        :class="{ loading: loading }"
       >
         <span v-if="loading" class="btn-spinner">⏳</span>
         <span v-else>🚀 Créer la Bataille</span>
@@ -302,7 +299,7 @@ const getGameTypeDisplay = (gameType: GameType): string => {
   const displays = {
     MATCHED_PLAY: 'Jeu Équilibré (Matched Play)',
     NARRATIVE: 'Jeu Narratif (Narrative)',
-    OPEN_PLAY: 'Jeu Libre (Open Play)'
+    OPEN_PLAY: 'Jeu Libre (Open Play)',
   }
   return displays[gameType] || gameType
 }
@@ -318,20 +315,20 @@ const getEstimatedDuration = (): string => {
 
 // Méthodes pour les joueurs
 const getCurrentPlayerArmy = (): string => {
-  const player = props.data.players?.find(p => p.isCurrentUser)
+  const player = props.data.players?.find((p) => p.isCurrentUser)
   return player?.army || ''
 }
 
 const getOpponentName = (): string => {
   if (props.data.opponentType === 'existing' && props.data.opponentId) {
-    const friend = props.props.userFriends.find(f => f.id === props.data.opponentId)
+    const friend = props.props.userFriends.find((f) => f.id === props.data.opponentId)
     return friend?.pseudo || 'Adversaire'
   }
   return props.data.opponentPseudo || props.data.opponentEmail || 'Adversaire'
 }
 
 const getOpponentArmy = (): string => {
-  const opponent = props.data.players?.find(p => !p.isCurrentUser)
+  const opponent = props.data.players?.find((p) => !p.isCurrentUser)
   return opponent?.army || ''
 }
 
@@ -339,7 +336,7 @@ const getOpponentRole = (): string => {
   const roles: Record<OpponentType, string> = {
     existing: 'Ami',
     invite: 'Invité par Email',
-    guest: 'Joueur Invité'
+    guest: 'Joueur Invité',
   }
   return roles[props.data.opponentType] || 'Adversaire'
 }
@@ -383,12 +380,15 @@ const getOpponentStatusIcon = (): string => {
 
 // Méthodes pour les rounds
 const hasPreConfiguredScores = (): boolean => {
-  return props.data.rounds && props.data.rounds.length > 0 && 
-         props.data.rounds.some(r => (r.playerScore || 0) + (r.opponentScore || 0) > 0)
+  return (
+    props.data.rounds &&
+    props.data.rounds.length > 0 &&
+    props.data.rounds.some((r) => (r.playerScore || 0) + (r.opponentScore || 0) > 0)
+  )
 }
 
 const getPreConfiguredRounds = () => {
-  return props.data.rounds?.filter(r => (r.playerScore || 0) + (r.opponentScore || 0) > 0) || []
+  return props.data.rounds?.filter((r) => (r.playerScore || 0) + (r.opponentScore || 0) > 0) || []
 }
 
 // Autres méthodes
@@ -397,7 +397,7 @@ const getPermissionsText = (): string => {
     case 'existing':
       return 'Vous et votre ami pourrez modifier les scores et gérer la partie'
     case 'invite':
-      return 'Une fois l\'invitation acceptée, les deux joueurs pourront gérer la partie'
+      return "Une fois l'invitation acceptée, les deux joueurs pourront gérer la partie"
     case 'guest':
       return 'Vous seul pourrez modifier les scores et gérer la partie'
     default:
@@ -416,7 +416,7 @@ const handleCreateGame = () => {
   border: 2px solid #dc143c;
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 
+  box-shadow:
     0 0 30px rgba(220, 20, 60, 0.3),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -670,7 +670,8 @@ const handleCreateGame = () => {
 }
 
 @keyframes pulse-battle {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -681,7 +682,9 @@ const handleCreateGame = () => {
 }
 
 /* Boîtes d'information */
-.info-box, .invite-info, .guest-info {
+.info-box,
+.invite-info,
+.guest-info {
   margin-top: 1rem;
   padding: 1rem;
   border-radius: 8px;
@@ -874,7 +877,8 @@ const handleCreateGame = () => {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.btn-previous, .btn-create {
+.btn-previous,
+.btn-create {
   padding: 1rem 2rem;
   border-radius: 10px;
   font-size: 1.1rem;
@@ -908,7 +912,7 @@ const handleCreateGame = () => {
 
 .btn-create:hover:not(:disabled) {
   background: linear-gradient(135deg, #32cd32, #228b22);
-  box-shadow: 
+  box-shadow:
     0 0 25px rgba(34, 139, 34, 0.5),
     0 0 40px rgba(255, 215, 0, 0.3);
   transform: translateY(-2px);
@@ -929,8 +933,12 @@ const handleCreateGame = () => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive */
@@ -938,34 +946,35 @@ const handleCreateGame = () => {
   .step-container {
     padding: 1.5rem;
   }
-  
+
   .step-title {
     font-size: 2rem;
   }
-  
+
   .detail-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .players-summary {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .vs-container {
     order: -1;
   }
-  
+
   .create-options {
     grid-template-columns: 1fr;
   }
-  
+
   .step-navigation {
     flex-direction: column-reverse;
     gap: 1rem;
   }
-  
-  .btn-previous, .btn-create {
+
+  .btn-previous,
+  .btn-create {
     width: 100%;
     min-width: auto;
   }
@@ -977,18 +986,18 @@ const handleCreateGame = () => {
     gap: 1rem;
     align-items: flex-start;
   }
-  
+
   .player-summary {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
   }
-  
+
   .player-info {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .important-item {
     flex-direction: column;
     text-align: center;

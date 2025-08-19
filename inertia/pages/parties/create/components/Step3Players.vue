@@ -3,9 +3,7 @@
     <!-- En-tête de l'étape -->
     <div class="step-header">
       <h2 class="step-title">👥 Configuration des Joueurs</h2>
-      <p class="step-subtitle">
-        Configurez les détails des joueurs pour cette bataille
-      </p>
+      <p class="step-subtitle">Configurez les détails des joueurs pour cette bataille</p>
     </div>
 
     <!-- Contenu principal -->
@@ -13,10 +11,8 @@
       <!-- Liste des joueurs -->
       <div class="config-section">
         <h3 class="section-title">Joueurs de la Partie</h3>
-        <p class="section-description">
-          Vérifiez et complétez les informations des joueurs
-        </p>
-        
+        <p class="section-description">Vérifiez et complétez les informations des joueurs</p>
+
         <div class="players-list">
           <!-- Joueur principal (utilisateur actuel) -->
           <div class="player-card current-user">
@@ -30,7 +26,7 @@
                 <span class="status-badge confirmed">Confirmé</span>
               </div>
             </div>
-            
+
             <!-- Configuration de l'armée -->
             <div class="player-army-config">
               <div class="form-group">
@@ -43,9 +39,7 @@
                   maxlength="100"
                   @input="updateCurrentPlayerArmy"
                 />
-                <div class="input-hint">
-                  Saisissez le nom de votre armée (optionnel)
-                </div>
+                <div class="input-hint">Saisissez le nom de votre armée (optionnel)</div>
               </div>
             </div>
           </div>
@@ -64,7 +58,7 @@
                 </span>
               </div>
             </div>
-            
+
             <!-- Configuration de l'armée adversaire -->
             <div class="player-army-config">
               <div class="form-group">
@@ -107,7 +101,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="battle-preview">
             <div class="preview-icon">⚔️</div>
             <div class="versus-text">VS</div>
@@ -132,7 +126,9 @@
               <div class="rule-icon">🎯</div>
               <div class="rule-content">
                 <h4>Objectifs de Mission</h4>
-                <p>Les scores seront organisés par rounds avec objectifs primaires et secondaires</p>
+                <p>
+                  Les scores seront organisés par rounds avec objectifs primaires et secondaires
+                </p>
               </div>
             </div>
             <div class="rule-item">
@@ -172,18 +168,13 @@
 
     <!-- Navigation -->
     <div class="step-navigation">
-      <button 
-        @click="$emit('previous')"
-        class="btn-previous"
-      >
-        ⮜ Précédent
-      </button>
-      
-      <button 
+      <button @click="$emit('previous')" class="btn-previous">⮜ Précédent</button>
+
+      <button
         @click="$emit('next')"
         :disabled="!isValid || loading"
         class="btn-next"
-        :class="{ 'loading': loading }"
+        :class="{ loading: loading }"
       >
         <span v-if="loading" class="btn-spinner">⏳</span>
         <span v-else>Suivant ⮞</span>
@@ -229,7 +220,7 @@ const isValid = computed(() => {
 // Méthodes pour l'adversaire
 const getOpponentName = (): string => {
   if (props.data.opponentType === 'existing' && props.data.opponentId) {
-    const friend = props.props.userFriends.find(f => f.id === props.data.opponentId)
+    const friend = props.props.userFriends.find((f) => f.id === props.data.opponentId)
     return friend?.pseudo || 'Adversaire'
   }
   return props.data.opponentPseudo || props.data.opponentEmail || 'Adversaire'
@@ -239,7 +230,7 @@ const getOpponentIcon = (): string => {
   const icons = {
     existing: '👤',
     invite: '✉️',
-    guest: '🤖'
+    guest: '🤖',
   }
   return icons[props.data.opponentType] || '👤'
 }
@@ -248,27 +239,29 @@ const getOpponentRole = (): string => {
   const roles = {
     existing: 'Ami',
     invite: 'Invité par Email',
-    guest: 'Joueur Invité'
+    guest: 'Joueur Invité',
   }
   return roles[props.data.opponentType] || 'Adversaire'
 }
 
 const getOpponentStatus = (): string => {
   if (props.data.opponentType === 'existing') return 'Confirmé'
-  if (props.data.opponentType === 'invite') return isOpponentConfirmed.value ? 'Confirmé' : 'En Attente'
+  if (props.data.opponentType === 'invite')
+    return isOpponentConfirmed.value ? 'Confirmé' : 'En Attente'
   return 'Prêt'
 }
 
 const getOpponentStatusClass = (): string => {
-  if (props.data.opponentType === 'existing' || props.data.opponentType === 'guest') return 'confirmed'
+  if (props.data.opponentType === 'existing' || props.data.opponentType === 'guest')
+    return 'confirmed'
   return isOpponentConfirmed.value ? 'confirmed' : 'pending'
 }
 
 const getOpponentArmyHint = (): string => {
   if (props.data.opponentType === 'invite' && !isOpponentConfirmed.value) {
-    return 'L\'adversaire pourra définir son armée après avoir accepté l\'invitation'
+    return "L'adversaire pourra définir son armée après avoir accepté l'invitation"
   }
-  return 'Saisissez le nom de l\'armée adversaire (optionnel)'
+  return "Saisissez le nom de l'armée adversaire (optionnel)"
 }
 
 const getScoreManagementText = (): string => {
@@ -276,7 +269,7 @@ const getScoreManagementText = (): string => {
     return 'Vous gérerez tous les scores de la partie (vous et votre adversaire invité)'
   }
   if (props.data.opponentType === 'invite') {
-    return 'Les deux joueurs pourront saisir et modifier les scores une fois l\'invitation acceptée'
+    return "Les deux joueurs pourront saisir et modifier les scores une fois l'invitation acceptée"
   }
   return 'Les deux joueurs pourront saisir et modifier les scores pendant la partie'
 }
@@ -286,7 +279,7 @@ const getGameTypeDisplay = (gameType: GameType): string => {
   const displays = {
     MATCHED_PLAY: 'Jeu Équilibré',
     NARRATIVE: 'Jeu Narratif',
-    OPEN_PLAY: 'Jeu Libre'
+    OPEN_PLAY: 'Jeu Libre',
   }
   return displays[gameType] || gameType
 }
@@ -310,7 +303,7 @@ const updateOpponentArmy = () => {
     updatePlayerArmy(props.data.opponentId, opponentArmy.value)
   } else {
     // Pour les invités, on met à jour directement le pseudo/army
-    const opponentPlayer = props.data.players.find(p => !p.isCurrentUser)
+    const opponentPlayer = props.data.players.find((p) => !p.isCurrentUser)
     if (opponentPlayer) {
       opponentPlayer.army = opponentArmy.value
       emit('update:data', { players: [...props.data.players] })
@@ -319,13 +312,13 @@ const updateOpponentArmy = () => {
 }
 
 const updatePlayerArmy = (playerId: number, army: string) => {
-  const updatedPlayers = props.data.players.map(player => {
+  const updatedPlayers = props.data.players.map((player) => {
     if (player.userId === playerId) {
       return { ...player, army }
     }
     return player
   })
-  
+
   emit('update:data', { players: updatedPlayers })
   emit('validate')
 }
@@ -333,7 +326,7 @@ const updatePlayerArmy = (playerId: number, army: string) => {
 // Actions spéciales
 const resendInvitation = () => {
   // Logique pour renvoyer l'invitation
-  console.log('Renvoi de l\'invitation à', props.data.opponentEmail)
+  console.log("Renvoi de l'invitation à", props.data.opponentEmail)
 }
 
 const copyInviteLink = () => {
@@ -352,26 +345,26 @@ onMounted(() => {
         pseudo: props.props.currentUser.pseudo,
         army: '',
         userId: props.props.currentUser.id,
-        isCurrentUser: true
+        isCurrentUser: true,
       },
       {
         pseudo: getOpponentName(),
         army: '',
         userId: props.data.opponentId,
-        isCurrentUser: false
-      }
+        isCurrentUser: false,
+      },
     ]
-    
+
     emit('update:data', { players })
   }
-  
+
   // Initialiser les valeurs des armées
-  const currentPlayer = props.data.players?.find(p => p.isCurrentUser)
-  const opponent = props.data.players?.find(p => !p.isCurrentUser)
-  
+  const currentPlayer = props.data.players?.find((p) => p.isCurrentUser)
+  const opponent = props.data.players?.find((p) => !p.isCurrentUser)
+
   if (currentPlayer?.army) currentPlayerArmy.value = currentPlayer.army
   if (opponent?.army) opponentArmy.value = opponent.army
-  
+
   emit('validate')
 })
 </script>
@@ -382,7 +375,7 @@ onMounted(() => {
   border: 2px solid #dc143c;
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 
+  box-shadow:
     0 0 30px rgba(220, 20, 60, 0.3),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -619,7 +612,11 @@ onMounted(() => {
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {
@@ -737,7 +734,8 @@ onMounted(() => {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.btn-previous, .btn-next {
+.btn-previous,
+.btn-next {
   padding: 1rem 2rem;
   border-radius: 10px;
   font-size: 1.1rem;
@@ -788,8 +786,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive */
@@ -797,30 +799,31 @@ onMounted(() => {
   .step-container {
     padding: 1.5rem;
   }
-  
+
   .step-title {
     font-size: 2rem;
   }
-  
+
   .points-summary {
     grid-template-columns: 1fr;
     text-align: center;
   }
-  
+
   .action-buttons {
     flex-direction: column;
   }
-  
+
   .btn-action {
     justify-content: center;
   }
-  
+
   .step-navigation {
     flex-direction: column-reverse;
     gap: 1rem;
   }
-  
-  .btn-previous, .btn-next {
+
+  .btn-previous,
+  .btn-next {
     width: 100%;
   }
 }
@@ -831,15 +834,15 @@ onMounted(() => {
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .player-status {
     align-self: flex-end;
   }
-  
+
   .rules-list {
     gap: 0.5rem;
   }
-  
+
   .rule-item {
     flex-direction: column;
     text-align: center;

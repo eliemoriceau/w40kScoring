@@ -1,8 +1,8 @@
 <template>
   <div class="step-indicator">
     <div class="steps-container">
-      <div 
-        v-for="step in totalSteps" 
+      <div
+        v-for="step in totalSteps"
         :key="`step-${step}`"
         class="step-item"
         :class="getStepClass(step)"
@@ -12,24 +12,22 @@
           <span v-if="validation[`step${step}` as keyof StepValidation]" class="completed-icon">
             ✅
           </span>
-          <span v-else-if="step === currentStep" class="current-icon">
-            ⚔️
-          </span>
+          <span v-else-if="step === currentStep" class="current-icon"> ⚔️ </span>
           <span v-else class="step-number">
             {{ step }}
           </span>
         </div>
-        
+
         <!-- Label de l'étape -->
         <div class="step-label">
           {{ getStepLabel(step) }}
         </div>
-        
+
         <!-- Ligne de connexion vers l'étape suivante -->
-        <div 
-          v-if="step < totalSteps" 
+        <div
+          v-if="step < totalSteps"
           class="step-connector"
-          :class="{ 'completed': validation[`step${step}` as keyof StepValidation] }"
+          :class="{ completed: validation[`step${step}` as keyof StepValidation] }"
         />
       </div>
     </div>
@@ -49,12 +47,13 @@ defineProps<Props>()
 
 const getStepClass = (step: number) => {
   const props = getCurrentInstance()?.props as Props
-  
+
   return {
-    'completed': props.validation[`step${step}` as keyof StepValidation],
-    'current': step === props.currentStep,
-    'pending': step > props.currentStep && !props.validation[`step${step}` as keyof StepValidation],
-    'accessible': step <= props.currentStep || props.validation[`step${step - 1}` as keyof StepValidation]
+    completed: props.validation[`step${step}` as keyof StepValidation],
+    current: step === props.currentStep,
+    pending: step > props.currentStep && !props.validation[`step${step}` as keyof StepValidation],
+    accessible:
+      step <= props.currentStep || props.validation[`step${step - 1}` as keyof StepValidation],
   }
 }
 
@@ -64,7 +63,7 @@ const getStepLabel = (step: number): string => {
     2: 'Adversaire',
     3: 'Joueurs',
     4: 'Rounds',
-    5: 'Récapitulatif'
+    5: 'Récapitulatif',
   }
   return labels[step as keyof typeof labels] || `Étape ${step}`
 }
@@ -125,7 +124,7 @@ import { getCurrentInstance } from 'vue'
 .step-item.current .step-icon {
   background: linear-gradient(135deg, #dc143c, #8b0000);
   color: #ffd700;
-  box-shadow: 
+  box-shadow:
     0 0 25px rgba(220, 20, 60, 0.6),
     0 0 40px rgba(220, 20, 60, 0.3);
   border-color: #ffd700;
@@ -188,13 +187,14 @@ import { getCurrentInstance } from 'vue'
 
 /* Animations */
 @keyframes pulse-current {
-  0%, 100% {
-    box-shadow: 
+  0%,
+  100% {
+    box-shadow:
       0 0 25px rgba(220, 20, 60, 0.6),
       0 0 40px rgba(220, 20, 60, 0.3);
   }
   50% {
-    box-shadow: 
+    box-shadow:
       0 0 35px rgba(220, 20, 60, 0.8),
       0 0 50px rgba(220, 20, 60, 0.5);
   }
@@ -206,21 +206,21 @@ import { getCurrentInstance } from 'vue'
     flex-wrap: wrap;
     gap: 1rem;
   }
-  
+
   .step-item {
     min-width: 80px;
   }
-  
+
   .step-icon {
     width: 50px;
     height: 50px;
     font-size: 1rem;
   }
-  
+
   .step-label {
     font-size: 0.8rem;
   }
-  
+
   .step-connector {
     display: none; /* Masquer les connecteurs sur mobile */
   }
@@ -230,17 +230,17 @@ import { getCurrentInstance } from 'vue'
   .steps-container {
     justify-content: space-around;
   }
-  
+
   .step-item {
     min-width: 60px;
   }
-  
+
   .step-icon {
     width: 40px;
     height: 40px;
     font-size: 0.9rem;
   }
-  
+
   .step-label {
     font-size: 0.75rem;
     margin-top: 0.5rem;

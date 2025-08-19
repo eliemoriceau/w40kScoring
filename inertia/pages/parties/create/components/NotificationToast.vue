@@ -1,10 +1,6 @@
 <template>
   <Transition name="notification" appear>
-    <div 
-      class="notification-toast"
-      :class="notificationClass"
-      @click="handleClick"
-    >
+    <div class="notification-toast" :class="notificationClass" @click="handleClick">
       <!-- Icône selon le type -->
       <div class="notification-icon">
         <span v-if="notification.type === 'success'">✅</span>
@@ -17,28 +13,18 @@
       <div class="notification-content">
         <h4 class="notification-title">{{ notification.title }}</h4>
         <p class="notification-message">{{ notification.message }}</p>
-        
+
         <!-- Action optionnelle -->
-        <button 
-          v-if="notification.action"
-          @click.stop="handleAction"
-          class="notification-action"
-        >
+        <button v-if="notification.action" @click.stop="handleAction" class="notification-action">
           {{ notification.action.label }}
         </button>
       </div>
 
       <!-- Bouton de fermeture -->
-      <button 
-        @click.stop="$emit('dismiss')"
-        class="notification-close"
-        title="Fermer"
-      >
-        ✕
-      </button>
+      <button @click.stop="$emit('dismiss')" class="notification-close" title="Fermer">✕</button>
 
       <!-- Barre de progression si durée définie -->
-      <div 
+      <div
         v-if="notification.duration"
         class="notification-progress"
         :style="{ animationDuration: `${notification.duration}ms` }"
@@ -62,7 +48,7 @@ const emit = defineEmits<{
 
 const notificationClass = computed(() => ({
   [`notification-${props.notification.type}`]: true,
-  'has-action': !!props.notification.action
+  'has-action': !!props.notification.action,
 }))
 
 const handleClick = () => {
@@ -85,7 +71,7 @@ const handleAction = () => {
   background: rgba(0, 0, 0, 0.9);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 
+  box-shadow:
     0 10px 25px rgba(0, 0, 0, 0.5),
     0 0 20px rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
@@ -103,7 +89,7 @@ const handleAction = () => {
 
 .notification-toast:hover {
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 15px 30px rgba(0, 0, 0, 0.6),
     0 0 25px rgba(255, 255, 255, 0.15);
 }
@@ -249,11 +235,11 @@ const handleAction = () => {
     min-width: 280px;
     margin: 0 1rem;
   }
-  
+
   .notification-title {
     font-size: 1rem;
   }
-  
+
   .notification-message {
     font-size: 0.85rem;
   }
@@ -265,7 +251,8 @@ const handleAction = () => {
 }
 
 @keyframes pulse-action {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 rgba(220, 20, 60, 0.7);
   }
   50% {

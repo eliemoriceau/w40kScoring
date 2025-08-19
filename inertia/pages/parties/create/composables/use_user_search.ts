@@ -26,7 +26,7 @@ export const useUserSearch = () => {
     try {
       // Utiliser Inertia pour la recherche avec préservation de l'état
       const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}&limit=10`)
-      
+
       if (!response.ok) {
         throw new Error('Search failed')
       }
@@ -69,12 +69,12 @@ export const useUserSearch = () => {
   const handleSearchInput = (query: string) => {
     searchQuery.value = query
     selectedUser.value = null
-    
+
     if (query.length < 2) {
       searchResults.value = []
       return
     }
-    
+
     debouncedSearch(query)
   }
 
@@ -89,6 +89,6 @@ export const useUserSearch = () => {
     searchUsers,
     selectUser,
     clearSearch,
-    handleSearchInput
+    handleSearchInput,
   }
 }

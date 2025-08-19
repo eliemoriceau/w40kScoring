@@ -14,7 +14,7 @@ export const useGameValidation = () => {
     opponentPseudo: 'Le pseudo doit contenir au moins 3 caractères',
     playersRequired: 'Deux joueurs sont requis pour une partie',
     playerPseudo: 'Le pseudo doit contenir entre 3 et 20 caractères',
-    playerArmy: 'Le nom d\'armée ne peut pas dépasser 50 caractères'
+    playerArmy: "Le nom d'armée ne peut pas dépasser 50 caractères",
   }
 
   // Validation des types de jeu
@@ -25,10 +25,7 @@ export const useGameValidation = () => {
 
   // Validation des limites de points
   const validatePointsLimit = (points: number): boolean => {
-    return points >= 500 && 
-           points <= 5000 && 
-           points % 50 === 0 &&
-           Number.isInteger(points)
+    return points >= 500 && points <= 5000 && points % 50 === 0 && Number.isInteger(points)
   }
 
   // Validation email
@@ -54,9 +51,12 @@ export const useGameValidation = () => {
   }
 
   // Validation complète d'une étape
-  const validateStep = (stepNumber: number, data: GameCreationWizardData): { 
-    isValid: boolean; 
-    errors: Record<string, string[]> 
+  const validateStep = (
+    stepNumber: number,
+    data: GameCreationWizardData
+  ): {
+    isValid: boolean
+    errors: Record<string, string[]>
   } => {
     const errors: Record<string, string[]> = {}
 
@@ -90,7 +90,7 @@ export const useGameValidation = () => {
         if (data.players.length !== 2) {
           errors.players = [errorMessages.playersRequired]
         }
-        
+
         data.players.forEach((player, index) => {
           if (!validatePseudo(player.pseudo)) {
             errors[`player${index}Pseudo`] = [errorMessages.playerPseudo]
@@ -121,19 +121,21 @@ export const useGameValidation = () => {
         const step2 = validateStep(2, data)
         const step3 = validateStep(3, data)
         const step4 = validateStep(4, data)
-        
+
         Object.assign(errors, step1.errors, step2.errors, step3.errors, step4.errors)
         break
     }
 
     return {
       isValid: Object.keys(errors).length === 0,
-      errors
+      errors,
     }
   }
 
   // Validation de données complètes pour soumission
-  const validateForSubmission = (data: GameCreationWizardData): {
+  const validateForSubmission = (
+    data: GameCreationWizardData
+  ): {
     isValid: boolean
     errors: Record<string, string[]>
     warnings: string[]
@@ -154,8 +156,8 @@ export const useGameValidation = () => {
       warnings.push('Aucune mission sélectionnée - une mission aléatoire sera assignée')
     }
 
-    if (data.players.some(p => !p.army || p.army.trim() === '')) {
-      warnings.push('Certains joueurs n\'ont pas d\'armée spécifiée')
+    if (data.players.some((p) => !p.army || p.army.trim() === '')) {
+      warnings.push("Certains joueurs n'ont pas d'armée spécifiée")
     }
 
     if (!data.enableRounds) {
@@ -165,7 +167,7 @@ export const useGameValidation = () => {
     return {
       isValid: Object.keys(allErrors).length === 0,
       errors: allErrors,
-      warnings
+      warnings,
     }
   }
 
@@ -184,9 +186,9 @@ export const useGameValidation = () => {
 
     // Suggestions d'armées
     if (data.players.length === 2) {
-      const armies = data.players.map(p => p.army?.toLowerCase().trim()).filter(Boolean)
+      const armies = data.players.map((p) => p.army?.toLowerCase().trim()).filter(Boolean)
       const hasDuplicateArmies = armies.length !== new Set(armies).size
-      
+
       if (hasDuplicateArmies) {
         suggestions.push('Considérez des armées différentes pour plus de variété')
       }
@@ -205,7 +207,7 @@ export const useGameValidation = () => {
     maxPseudoLength: 20,
     maxArmyLength: 50,
     maxRounds: 5,
-    maxRoundScore: 50
+    maxRoundScore: 50,
   }
 
   return {
@@ -222,6 +224,6 @@ export const useGameValidation = () => {
     // Utilitaires
     getSuggestions,
     errorMessages,
-    constants
+    constants,
   }
 }

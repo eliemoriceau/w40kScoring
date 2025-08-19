@@ -3,26 +3,21 @@
     <!-- Header du wizard avec indicateur de progression -->
     <div class="wizard-header">
       <div class="max-w-4xl mx-auto px-4">
-        <h1 class="wizard-title">
-          ⚔️ Créer une Nouvelle Bataille
-        </h1>
+        <h1 class="wizard-title">⚔️ Créer une Nouvelle Bataille</h1>
         <p class="wizard-subtitle">
           Configurez votre partie Warhammer 40K en {{ totalSteps }} étapes
         </p>
-        
+
         <!-- Indicateur de progression -->
-        <StepIndicator 
-          :current-step="currentStep" 
+        <StepIndicator
+          :current-step="currentStep"
           :total-steps="totalSteps"
           :validation="validation"
         />
-        
+
         <!-- Barre de progression -->
         <div class="progress-bar">
-          <div 
-            class="progress-fill" 
-            :style="{ width: `${completionProgress}%` }"
-          />
+          <div class="progress-fill" :style="{ width: `${completionProgress}%` }" />
         </div>
       </div>
     </div>
@@ -32,8 +27,8 @@
       <div class="max-w-4xl mx-auto px-4">
         <Transition name="wizard-transition" mode="out-in">
           <KeepAlive>
-            <component 
-              :is="currentStepComponent" 
+            <component
+              :is="currentStepComponent"
               :data="wizardData"
               :props="stepProps"
               :errors="wizardState.errors"
@@ -54,25 +49,21 @@
       <div class="max-w-4xl mx-auto px-4">
         <div class="footer-content">
           <div class="step-info">
-            Étape {{ currentStep }} sur {{ totalSteps }} 
+            Étape {{ currentStep }} sur {{ totalSteps }}
             <span v-if="completionProgress > 0">({{ completionProgress }}% complété)</span>
           </div>
-          
+
           <div class="shortcuts">
-            <button 
-              v-if="canGoPrevious" 
+            <button
+              v-if="canGoPrevious"
               @click="handlePrevious"
               class="shortcut-btn"
               title="Précédent (Alt + ←)"
             >
               ← Précédent
             </button>
-            
-            <button 
-              @click="handleSaveProgress"
-              class="shortcut-btn"
-              title="Sauvegarder (Ctrl + S)"
-            >
+
+            <button @click="handleSaveProgress" class="shortcut-btn" title="Sauvegarder (Ctrl + S)">
               💾 Sauvegarder
             </button>
           </div>
@@ -82,10 +73,7 @@
 
     <!-- Notifications toast -->
     <div v-if="notification" class="notification-container">
-      <NotificationToast 
-        :notification="notification"
-        @dismiss="notification = null"
-      />
+      <NotificationToast :notification="notification" @dismiss="notification = null" />
     </div>
 
     <!-- Modal de confirmation de sortie -->
@@ -104,8 +92,8 @@
 <script setup lang="ts">
 import { ref, computed, defineAsyncComponent, onMounted, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { useGameWizard } from './composables/useGameWizard'
-import { useGameValidation } from './composables/useGameValidation'
+import { useGameWizard } from './composables/use_game_wizard'
+import { useGameValidation } from './composables/use_game_validation'
 import type { WizardProps, NotificationData } from './types/wizard'
 
 // Import des composants
@@ -134,7 +122,7 @@ const {
   setLoading,
   initialize,
   saveToStorage,
-  clearStorage
+  clearStorage,
 } = useGameWizard()
 
 const { validateForSubmission } = useGameValidation()
@@ -151,32 +139,32 @@ const currentStepComponent = computed(() => {
     2: defineAsyncComponent(() => import('./components/Step2Opponent.vue')),
     3: defineAsyncComponent(() => import('./components/Step3Players.vue')),
     4: defineAsyncComponent(() => import('./components/Step4Rounds.vue')),
-    5: defineAsyncComponent(() => import('./components/Step5Summary.vue'))
+    5: defineAsyncComponent(() => import('./components/Step5Summary.vue')),
   }
-  
+
   return components[currentStep.value]
 })
 
 // Props spécifiques à chaque étape
 const stepProps = computed(() => {
   const baseProps = { ...props }
-  
+
   // Ajouter des props spécifiques selon l'étape
   switch (currentStep.value) {
     case 1:
       return {
         ...baseProps,
-        defaultPointsLimit: 2000
+        defaultPointsLimit: 2000,
       }
     case 2:
       return {
         ...baseProps,
-        userFriends: props.userFriends
+        userFriends: props.userFriends,
       }
     case 3:
       return {
         ...baseProps,
-        currentUser: props.currentUser
+        currentUser: props.currentUser,
       }
     default:
       return baseProps
@@ -205,13 +193,13 @@ const handleComplete = async () => {
 
   // Validation finale
   const validation = validateForSubmission(wizardData.value)
-  
+
   if (!validation.isValid) {
     showNotification({
       type: 'error',
       title: '❌ Validation échouée',
       message: 'Veuillez corriger les erreurs avant de créer la partie.',
-      duration: 5000
+      duration: 5000,
     })
     return
   }
@@ -222,12 +210,12 @@ const handleComplete = async () => {
       type: 'warning',
       title: '⚠️ Avertissements',
       message: validation.warnings.join('. '),
-      duration: 6000
+      duration: 6000,
     })
   }
 
   setLoading(true)
-  
+
   try {
     // Soumettre au serveur via Inertia
     router.post('/parties/create', wizardData.value, {
@@ -236,8 +224,8 @@ const handleComplete = async () => {
         showNotification({
           type: 'success',
           title: '⚔️ Bataille Créée !',
-          message: 'Que l\'Empereur guide vos actions dans cette bataille !',
-          duration: 5000
+          message: "Que l'Empereur guide vos actions dans cette bataille !",
+          duration: 5000,
         })
       },
       onError: (errors) => {
@@ -246,12 +234,12 @@ const handleComplete = async () => {
           type: 'error',
           title: '💀 Échec de Création',
           message: 'Les forces du Chaos ont perturbé la création de la bataille.',
-          duration: 8000
+          duration: 8000,
         })
       },
       onFinish: () => {
         setLoading(false)
-      }
+      },
     })
   } catch (error) {
     console.error('Unexpected error:', error)
@@ -259,8 +247,8 @@ const handleComplete = async () => {
     showNotification({
       type: 'error',
       title: '💀 Erreur Inattendue',
-      message: 'Une erreur inattendue s\'est produite.',
-      duration: 8000
+      message: "Une erreur inattendue s'est produite.",
+      duration: 8000,
     })
   }
 }
@@ -275,7 +263,7 @@ const handleSaveProgress = () => {
     type: 'success',
     title: '💾 Progression Sauvegardée',
     message: 'Vos données ont été sauvegardées.',
-    duration: 3000
+    duration: 3000,
   })
 }
 
@@ -287,7 +275,7 @@ const handleExit = () => {
 // Notifications
 const showNotification = (notif: NotificationData) => {
   notification.value = notif
-  
+
   if (notif.duration) {
     setTimeout(() => {
       notification.value = null
@@ -307,13 +295,13 @@ const handleKeydown = (event: KeyboardEvent) => {
       handleNext()
     }
   }
-  
+
   // Sauvegarde avec Ctrl + S
   if (event.ctrlKey && event.key === 's') {
     event.preventDefault()
     handleSaveProgress()
   }
-  
+
   // Échap pour confirmation de sortie
   if (event.key === 'Escape') {
     showExitConfirmation.value = true
@@ -337,13 +325,13 @@ onMounted(() => {
       {
         pseudo: props.currentUser.pseudo,
         userId: props.currentUser.id,
-        isCurrentUser: true
-      }
-    ]
+        isCurrentUser: true,
+      },
+    ],
   }
-  
+
   initialize(initialData)
-  
+
   // Ajouter les gestionnaires d'événements
   window.addEventListener('keydown', handleKeydown)
   window.addEventListener('beforeunload', handleBeforeUnload)
@@ -367,12 +355,14 @@ export default {
 <style scoped>
 /* Container principal avec thème W40K */
 .w40k-wizard-container {
-  background: linear-gradient(135deg, 
-    #000000 0%, 
-    #1a0000 25%, 
-    #000000 50%, 
-    #1a0000 75%, 
-    #000000 100%);
+  background: linear-gradient(
+    135deg,
+    #000000 0%,
+    #1a0000 25%,
+    #000000 50%,
+    #1a0000 75%,
+    #000000 100%
+  );
   min-height: 100vh;
   position: relative;
 }
@@ -385,7 +375,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
+  background-image:
     radial-gradient(circle at 20% 50%, rgba(220, 20, 60, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
     radial-gradient(circle at 40% 80%, rgba(139, 0, 0, 0.08) 0%, transparent 50%);
@@ -519,16 +509,16 @@ export default {
   .wizard-title {
     font-size: 2rem;
   }
-  
+
   .wizard-main {
     padding: 2rem 0;
   }
-  
+
   .footer-content {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .notification-container {
     top: 1rem;
     right: 1rem;
@@ -538,11 +528,12 @@ export default {
 
 /* Animations */
 @keyframes pulse-w40k {
-  0%, 100% { 
-    box-shadow: 0 0 20px rgba(220, 20, 60, 0.3); 
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(220, 20, 60, 0.3);
   }
-  50% { 
-    box-shadow: 0 0 30px rgba(220, 20, 60, 0.6); 
+  50% {
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.6);
   }
 }
 

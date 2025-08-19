@@ -3,13 +3,13 @@
  */
 
 import { ref, computed, readonly } from 'vue'
-import type { 
-  WizardState, 
-  WizardStep, 
-  GameCreationWizardData, 
+import type {
+  WizardState,
+  WizardStep,
+  GameCreationWizardData,
   StepValidation,
   GameType,
-  OpponentType
+  OpponentType,
 } from '../types/wizard'
 
 const STORAGE_KEY = 'w40k_game_wizard_data'
@@ -21,24 +21,24 @@ export const useGameWizard = () => {
     gameType: 'MATCHED_PLAY' as GameType,
     pointsLimit: 2000,
     mission: undefined,
-    
+
     // Étape 2
     opponentType: 'existing' as OpponentType,
     opponentId: undefined,
     opponentEmail: undefined,
     opponentPseudo: undefined,
-    
+
     // Étape 3
     players: [],
-    
+
     // Étape 4
     enableRounds: true,
     rounds: Array.from({ length: 5 }, (_, index) => ({
       roundNumber: index + 1,
       playerScore: 0,
       opponentScore: 0,
-      scores: []
-    }))
+      scores: [],
+    })),
   })
 
   const getInitialValidation = (): StepValidation => ({
@@ -46,7 +46,7 @@ export const useGameWizard = () => {
     step2: false,
     step3: false,
     step4: true, // Toujours valide car optionnel
-    step5: false
+    step5: false,
   })
 
   // État réactif du wizard
@@ -55,7 +55,7 @@ export const useGameWizard = () => {
     data: getInitialData(),
     validation: getInitialValidation(),
     errors: {},
-    loading: false
+    loading: false,
   })
 
   // Computed properties
@@ -74,8 +74,7 @@ export const useGameWizard = () => {
   const isLastStep = computed(() => wizardState.value.currentStep === 5)
 
   const completionProgress = computed(() => {
-    const completed = Object.values(wizardState.value.validation)
-      .filter(Boolean).length
+    const completed = Object.values(wizardState.value.validation).filter(Boolean).length
     return Math.round((completed / 5) * 100)
   })
 
@@ -119,36 +118,30 @@ export const useGameWizard = () => {
   // Validation des étapes
   const validateStep1 = (): boolean => {
     const { gameType, pointsLimit } = wizardState.value.data
-    return !!(
-      gameType && 
-      pointsLimit >= 500 && 
-      pointsLimit <= 5000 && 
-      pointsLimit % 50 === 0
-    )
+    return !!(gameType && pointsLimit >= 500 && pointsLimit <= 5000 && pointsLimit % 50 === 0)
   }
 
   const validateStep2 = (): boolean => {
     const { opponentType, opponentId, opponentEmail, opponentPseudo } = wizardState.value.data
-    
+
     if (opponentType === 'existing') {
       return !!opponentId && opponentId > 0
     }
-    
+
     if (opponentType === 'invite') {
       return !!opponentEmail && opponentEmail.includes('@')
     }
-    
+
     if (opponentType === 'guest') {
       return !!opponentPseudo && opponentPseudo.trim().length >= 3
     }
-    
+
     return false
   }
 
   const validateStep3 = (): boolean => {
     const { players } = wizardState.value.data
-    return players.length === 2 && 
-           players.every(p => p.pseudo && p.pseudo.trim().length >= 3)
+    return players.length === 2 && players.every((p) => p.pseudo && p.pseudo.trim().length >= 3)
   }
 
   const validateStep4 = (): boolean => {
@@ -167,14 +160,14 @@ export const useGameWizard = () => {
       2: validateStep2,
       3: validateStep3,
       4: validateStep4,
-      5: validateStep5
+      5: validateStep5,
     }
 
     const currentStepNumber = wizardState.value.currentStep
     const isValid = validators[currentStepNumber]()
-    
+
     wizardState.value.validation[`step${currentStepNumber}` as keyof StepValidation] = isValid
-    
+
     // Mettre à jour la validation de l'étape 5 si on n'y est pas encore
     if (currentStepNumber !== 5) {
       wizardState.value.validation.step5 = validateStep5()
@@ -187,7 +180,7 @@ export const useGameWizard = () => {
       step2: validateStep2(),
       step3: validateStep3(),
       step4: validateStep4(),
-      step5: validateStep5()
+      step5: validateStep5(),
     }
   }
 
@@ -210,7 +203,7 @@ export const useGameWizard = () => {
       const dataToSave = {
         currentStep: wizardState.value.currentStep,
         data: wizardState.value.data,
-        validation: wizardState.value.validation
+        validation: wizardState.value.validation,
       }
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
     } catch (error) {
@@ -284,6 +277,6 @@ export const useGameWizard = () => {
     // Storage
     saveToStorage,
     loadFromStorage,
-    clearStorage
+    clearStorage,
   }
 }

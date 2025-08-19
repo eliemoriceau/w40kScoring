@@ -6,35 +6,21 @@
           <!-- Header -->
           <div class="modal-header">
             <h3 class="modal-title">{{ title }}</h3>
-            <button 
-              @click="$emit('cancel')"
-              class="modal-close"
-              title="Fermer"
-            >
-              ✕
-            </button>
+            <button @click="$emit('cancel')" class="modal-close" title="Fermer">✕</button>
           </div>
 
           <!-- Contenu -->
           <div class="modal-body">
-            <div class="modal-icon">
-              ⚠️
-            </div>
+            <div class="modal-icon">⚠️</div>
             <p class="modal-message">{{ message }}</p>
           </div>
 
           <!-- Actions -->
           <div class="modal-actions">
-            <button 
-              @click="$emit('cancel')"
-              class="btn-cancel"
-            >
+            <button @click="$emit('cancel')" class="btn-cancel">
               {{ cancelLabel }}
             </button>
-            <button 
-              @click="$emit('confirm')"
-              class="btn-confirm"
-            >
+            <button @click="$emit('confirm')" class="btn-confirm">
               {{ confirmLabel }}
             </button>
           </div>
@@ -54,7 +40,7 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   confirmLabel: 'Confirmer',
-  cancelLabel: 'Annuler'
+  cancelLabel: 'Annuler',
 })
 
 defineEmits<{
@@ -87,7 +73,7 @@ defineEmits<{
   border-radius: 12px;
   max-width: 500px;
   width: 100%;
-  box-shadow: 
+  box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.7),
     0 0 20px rgba(220, 20, 60, 0.3);
   overflow: hidden;
@@ -208,7 +194,8 @@ defineEmits<{
 
 /* Animations */
 @keyframes pulse-warning {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -242,29 +229,29 @@ defineEmits<{
   .modal-container {
     margin: 1rem;
   }
-  
+
   .modal-header {
     padding: 1rem 1rem 0 1rem;
   }
-  
+
   .modal-title {
     font-size: 1.25rem;
   }
-  
+
   .modal-body {
     padding: 1.5rem 1rem;
   }
-  
+
   .modal-message {
     font-size: 1rem;
   }
-  
+
   .modal-actions {
     padding: 0 1rem 1rem 1rem;
     flex-direction: column-reverse;
     gap: 0.5rem;
   }
-  
+
   .btn-cancel,
   .btn-confirm {
     width: 100%;

@@ -3,9 +3,7 @@
     <!-- En-tête de l'étape -->
     <div class="step-header">
       <h2 class="step-title">⚔️ Configuration de la Bataille</h2>
-      <p class="step-subtitle">
-        Définissez les paramètres de base de votre partie Warhammer 40K
-      </p>
+      <p class="step-subtitle">Définissez les paramètres de base de votre partie Warhammer 40K</p>
     </div>
 
     <!-- Contenu principal -->
@@ -16,13 +14,13 @@
         <p class="section-description">
           Choisissez le format de votre partie selon les règles officielles
         </p>
-        
+
         <div class="game-type-grid">
-          <div 
+          <div
             v-for="gameType in gameTypes"
             :key="gameType.value"
             class="game-type-card"
-            :class="{ 'selected': data.gameType === gameType.value }"
+            :class="{ selected: data.gameType === gameType.value }"
             @click="selectGameType(gameType.value)"
           >
             <div class="game-type-icon">
@@ -37,7 +35,7 @@
             </div>
           </div>
         </div>
-        
+
         <div v-if="errors?.gameType" class="error-message">
           {{ errors.gameType[0] }}
         </div>
@@ -49,7 +47,7 @@
         <p class="section-description">
           Définissez la taille de votre armée (entre 500 et 5000 points, multiples de 50)
         </p>
-        
+
         <!-- Presets de points populaires -->
         <div class="points-presets">
           <button
@@ -57,13 +55,13 @@
             :key="preset"
             @click="selectPointsPreset(preset)"
             class="preset-btn"
-            :class="{ 'active': data.pointsLimit === preset }"
+            :class="{ active: data.pointsLimit === preset }"
           >
             {{ preset }} pts
             <span v-if="preset === 2000" class="recommended-badge">Recommandé</span>
           </button>
         </div>
-        
+
         <!-- Input personnalisé -->
         <div class="points-input-container">
           <label class="input-label">Points personnalisés :</label>
@@ -81,12 +79,10 @@
             <span class="points-unit">pts</span>
           </div>
           <div class="points-info">
-            <span class="duration-estimate">
-              ⏱️ Durée estimée : {{ estimatedDuration }}
-            </span>
+            <span class="duration-estimate"> ⏱️ Durée estimée : {{ estimatedDuration }} </span>
           </div>
         </div>
-        
+
         <div v-if="errors?.pointsLimit" class="error-message">
           {{ errors.pointsLimit[0] }}
         </div>
@@ -98,23 +94,15 @@
         <p class="section-description">
           Sélectionnez une mission spécifique ou laissez vide pour une sélection aléatoire
         </p>
-        
+
         <div class="mission-selector">
-          <select
-            v-model="data.mission"
-            class="mission-select"
-            @change="handleMissionChange"
-          >
+          <select v-model="data.mission" class="mission-select" @change="handleMissionChange">
             <option value="">Mission aléatoire</option>
-            <option 
-              v-for="mission in availableMissions"
-              :key="mission.id"
-              :value="mission.name"
-            >
+            <option v-for="mission in availableMissions" :key="mission.id" :value="mission.name">
               {{ mission.name }}
             </option>
           </select>
-          
+
           <!-- Description de la mission sélectionnée -->
           <div v-if="selectedMissionDescription" class="mission-description">
             <h4>Description :</h4>
@@ -126,11 +114,11 @@
 
     <!-- Navigation -->
     <div class="step-navigation">
-      <button 
+      <button
         @click="$emit('next')"
         :disabled="!isValid || loading"
         class="btn-next"
-        :class="{ 'loading': loading }"
+        :class="{ loading: loading }"
       >
         <span v-if="loading" class="btn-spinner">⏳</span>
         <span v-else>Suivant ⮞</span>
@@ -178,7 +166,7 @@ const isValid = computed(() => {
 
 const selectedMissionDescription = computed(() => {
   if (!props.data.mission) return null
-  const mission = props.props.availableMissions.find(m => m.name === props.data.mission)
+  const mission = props.props.availableMissions.find((m) => m.name === props.data.mission)
   return mission?.description || null
 })
 
@@ -221,7 +209,7 @@ const getGameTypeIcon = (type: GameType): string => {
   const icons = {
     MATCHED_PLAY: '⚖️',
     NARRATIVE: '📖',
-    OPEN_PLAY: '🎲'
+    OPEN_PLAY: '🎲',
   }
   return icons[type] || '⚔️'
 }
@@ -230,7 +218,7 @@ const getGameTypeDescription = (type: GameType): string => {
   const descriptions = {
     MATCHED_PLAY: 'Parties équilibrées et compétitives avec règles strictes',
     NARRATIVE: 'Parties thématiques avec scénarios et histoires immersives',
-    OPEN_PLAY: 'Parties libres et décontractées pour tous les niveaux'
+    OPEN_PLAY: 'Parties libres et décontractées pour tous les niveaux',
   }
   return descriptions[type] || ''
 }
@@ -254,7 +242,7 @@ onMounted(() => {
   border: 2px solid #dc143c;
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 
+  box-shadow:
     0 0 30px rgba(220, 20, 60, 0.3),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -579,8 +567,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Messages d'erreur */
@@ -599,19 +591,19 @@ onMounted(() => {
   .step-container {
     padding: 1.5rem;
   }
-  
+
   .step-title {
     font-size: 2rem;
   }
-  
+
   .game-type-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .points-presets {
     justify-content: center;
   }
-  
+
   .preset-btn {
     flex: 1;
     min-width: 0;
@@ -622,7 +614,7 @@ onMounted(() => {
   .points-presets {
     flex-direction: column;
   }
-  
+
   .step-navigation {
     justify-content: center;
   }

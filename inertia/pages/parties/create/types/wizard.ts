@@ -13,13 +13,13 @@ export interface GameCreationWizardData {
   gameType: GameType
   pointsLimit: number
   mission?: string
-  
+
   // Étape 2: Adversaire
   opponentType: OpponentType
   opponentId?: number
   opponentEmail?: string
   opponentPseudo?: string
-  
+
   // Étape 3: Joueurs
   players: Array<{
     pseudo: string
@@ -27,7 +27,7 @@ export interface GameCreationWizardData {
     userId?: number
     isCurrentUser?: boolean
   }>
-  
+
   // Étape 4: Rounds
   enableRounds: boolean
   rounds: Array<{

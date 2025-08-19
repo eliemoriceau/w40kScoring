@@ -3,9 +3,7 @@
     <!-- En-tête de l'étape -->
     <div class="step-header">
       <h2 class="step-title">🎯 Configuration des Rounds</h2>
-      <p class="step-subtitle">
-        Préparez les 5 rounds de bataille avec les objectifs de scoring
-      </p>
+      <p class="step-subtitle">Préparez les 5 rounds de bataille avec les objectifs de scoring</p>
     </div>
 
     <!-- Contenu principal -->
@@ -16,9 +14,13 @@
         <p class="section-description">
           Configurez comment vous souhaitez gérer le scoring des rounds
         </p>
-        
+
         <div class="rounds-options">
-          <div class="option-card" :class="{ 'selected': data.enableRounds }" @click="toggleRounds(true)">
+          <div
+            class="option-card"
+            :class="{ selected: data.enableRounds }"
+            @click="toggleRounds(true)"
+          >
             <div class="option-icon">📊</div>
             <div class="option-info">
               <h4>Scoring par Rounds</h4>
@@ -29,8 +31,12 @@
               <span class="feature-tag">✅ Objectifs multiples</span>
             </div>
           </div>
-          
-          <div class="option-card" :class="{ 'selected': !data.enableRounds }" @click="toggleRounds(false)">
+
+          <div
+            class="option-card"
+            :class="{ selected: !data.enableRounds }"
+            @click="toggleRounds(false)"
+          >
             <div class="option-icon">🏆</div>
             <div class="option-info">
               <h4>Score Final Seulement</h4>
@@ -50,13 +56,13 @@
         <p class="section-description">
           Chaque partie se déroule sur exactement 5 rounds avec différents types d'objectifs
         </p>
-        
+
         <div class="rounds-grid">
-          <div 
+          <div
             v-for="round in rounds"
             :key="round.roundNumber"
             class="round-card"
-            :class="{ 'configured': isRoundConfigured(round.roundNumber) }"
+            :class="{ configured: isRoundConfigured(round.roundNumber) }"
           >
             <div class="round-header">
               <div class="round-number">
@@ -64,11 +70,13 @@
                 <span class="round-digit">{{ round.roundNumber }}</span>
               </div>
               <div class="round-status">
-                <span v-if="isRoundConfigured(round.roundNumber)" class="status-icon configured">✅</span>
+                <span v-if="isRoundConfigured(round.roundNumber)" class="status-icon configured"
+                  >✅</span
+                >
                 <span v-else class="status-icon pending">⏳</span>
               </div>
             </div>
-            
+
             <div class="round-content">
               <!-- Scores par type -->
               <div class="score-types">
@@ -77,7 +85,7 @@
                   <div class="score-inputs">
                     <div class="player-score">
                       <label>{{ getPlayerName(true) }}</label>
-                      <input 
+                      <input
                         v-model.number="round.scores.primary.player"
                         type="number"
                         min="0"
@@ -89,7 +97,7 @@
                     <div class="vs-separator">VS</div>
                     <div class="player-score">
                       <label>{{ getPlayerName(false) }}</label>
-                      <input 
+                      <input
                         v-model.number="round.scores.primary.opponent"
                         type="number"
                         min="0"
@@ -100,13 +108,13 @@
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="score-type secondary">
                   <h5>Objectifs Secondaires</h5>
                   <div class="score-inputs">
                     <div class="player-score">
                       <label>{{ getPlayerName(true) }}</label>
-                      <input 
+                      <input
                         v-model.number="round.scores.secondary.player"
                         type="number"
                         min="0"
@@ -118,7 +126,7 @@
                     <div class="vs-separator">VS</div>
                     <div class="player-score">
                       <label>{{ getPlayerName(false) }}</label>
-                      <input 
+                      <input
                         v-model.number="round.scores.secondary.opponent"
                         type="number"
                         min="0"
@@ -130,7 +138,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <!-- Total du round -->
               <div class="round-total">
                 <div class="total-player">
@@ -149,7 +157,7 @@
       <div v-if="data.enableRounds" class="config-section">
         <div class="score-summary">
           <h3 class="section-title">Récapitulatif des Scores</h3>
-          
+
           <div class="summary-grid">
             <div class="player-summary">
               <h4 class="player-name">{{ getPlayerName(true) }}</h4>
@@ -160,7 +168,9 @@
                 </div>
                 <div class="score-item">
                   <span>Objectifs Secondaires:</span>
-                  <span class="score-value secondary">{{ getTotalScores().player.secondary }} pts</span>
+                  <span class="score-value secondary"
+                    >{{ getTotalScores().player.secondary }} pts</span
+                  >
                 </div>
                 <div class="score-item total">
                   <span>Score Total:</span>
@@ -168,22 +178,26 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="vs-divider">
               <div class="vs-icon">⚔️</div>
               <div class="vs-text">VS</div>
             </div>
-            
+
             <div class="player-summary">
               <h4 class="player-name">{{ getPlayerName(false) }}</h4>
               <div class="score-breakdown">
                 <div class="score-item">
                   <span>Objectifs Primaires:</span>
-                  <span class="score-value primary">{{ getTotalScores().opponent.primary }} pts</span>
+                  <span class="score-value primary"
+                    >{{ getTotalScores().opponent.primary }} pts</span
+                  >
                 </div>
                 <div class="score-item">
                   <span>Objectifs Secondaires:</span>
-                  <span class="score-value secondary">{{ getTotalScores().opponent.secondary }} pts</span>
+                  <span class="score-value secondary"
+                    >{{ getTotalScores().opponent.secondary }} pts</span
+                  >
                 </div>
                 <div class="score-item total">
                   <span>Score Total:</span>
@@ -192,7 +206,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Résultat actuel -->
           <div class="current-result">
             <div class="result-icon">{{ getResultIcon() }}</div>
@@ -234,18 +248,13 @@
 
     <!-- Navigation -->
     <div class="step-navigation">
-      <button 
-        @click="$emit('previous')"
-        class="btn-previous"
-      >
-        ⮜ Précédent
-      </button>
-      
-      <button 
+      <button @click="$emit('previous')" class="btn-previous">⮜ Précédent</button>
+
+      <button
         @click="$emit('next')"
         :disabled="!isValid || loading"
         class="btn-next"
-        :class="{ 'loading': loading }"
+        :class="{ loading: loading }"
       >
         <span v-if="loading" class="btn-spinner">⏳</span>
         <span v-else>Suivant ⮞</span>
@@ -293,7 +302,7 @@ const isValid = computed(() => {
   if (!props.data.enableRounds) {
     return true // Si pas de rounds détaillés, toujours valide
   }
-  
+
   // Pour les rounds détaillés, on accepte des scores à 0 (pas encore joués)
   return rounds.value.length === 5
 })
@@ -303,22 +312,22 @@ const getPlayerName = (isCurrentUser: boolean): string => {
   if (isCurrentUser) {
     return props.props.currentUser.pseudo
   }
-  
-  const opponent = props.data.players?.find(p => !p.isCurrentUser)
+
+  const opponent = props.data.players?.find((p) => !p.isCurrentUser)
   return opponent?.pseudo || 'Adversaire'
 }
 
 // Gestion des rounds
 const toggleRounds = (enabled: boolean) => {
   emit('update:data', { enableRounds: enabled })
-  
+
   if (enabled) {
     initializeRounds()
   } else {
     rounds.value = []
     emit('update:data', { rounds: [] })
   }
-  
+
   emit('validate')
 }
 
@@ -328,61 +337,71 @@ const initializeRounds = () => {
       roundNumber: index + 1,
       scores: {
         primary: { player: 0, opponent: 0 },
-        secondary: { player: 0, opponent: 0 }
-      }
+        secondary: { player: 0, opponent: 0 },
+      },
     }))
   }
 }
 
 const updateRoundScore = (roundNumber: number) => {
-  const updatedRounds = rounds.value.map(round => {
+  const updatedRounds = rounds.value.map((round) => {
     if (round.roundNumber === roundNumber) {
       return {
         roundNumber: round.roundNumber,
         playerScore: round.scores.primary.player + round.scores.secondary.player,
         opponentScore: round.scores.primary.opponent + round.scores.secondary.opponent,
-        scores: [{
-          playerId: 'player',
-          scoreType: 'PRIMARY' as const,
-          scoreValue: round.scores.primary.player
-        }, {
-          playerId: 'player', 
-          scoreType: 'SECONDARY' as const,
-          scoreValue: round.scores.secondary.player
-        }, {
-          playerId: 'opponent',
-          scoreType: 'PRIMARY' as const,
-          scoreValue: round.scores.primary.opponent
-        }, {
-          playerId: 'opponent',
-          scoreType: 'SECONDARY' as const,
-          scoreValue: round.scores.secondary.opponent
-        }]
+        scores: [
+          {
+            playerId: 'player',
+            scoreType: 'PRIMARY' as const,
+            scoreValue: round.scores.primary.player,
+          },
+          {
+            playerId: 'player',
+            scoreType: 'SECONDARY' as const,
+            scoreValue: round.scores.secondary.player,
+          },
+          {
+            playerId: 'opponent',
+            scoreType: 'PRIMARY' as const,
+            scoreValue: round.scores.primary.opponent,
+          },
+          {
+            playerId: 'opponent',
+            scoreType: 'SECONDARY' as const,
+            scoreValue: round.scores.secondary.opponent,
+          },
+        ],
       }
     }
     return {
       roundNumber: round.roundNumber,
       playerScore: round.scores.primary.player + round.scores.secondary.player,
-      opponentScore: round.scores.primary.opponent + round.scores.secondary.opponent
+      opponentScore: round.scores.primary.opponent + round.scores.secondary.opponent,
     }
   })
-  
+
   emit('update:data', { rounds: updatedRounds })
   emit('validate')
 }
 
 const isRoundConfigured = (roundNumber: number): boolean => {
-  const round = rounds.value.find(r => r.roundNumber === roundNumber)
+  const round = rounds.value.find((r) => r.roundNumber === roundNumber)
   if (!round) return false
-  
-  return (round.scores.primary.player + round.scores.primary.opponent + 
-          round.scores.secondary.player + round.scores.secondary.opponent) > 0
+
+  return (
+    round.scores.primary.player +
+      round.scores.primary.opponent +
+      round.scores.secondary.player +
+      round.scores.secondary.opponent >
+    0
+  )
 }
 
 const getRoundTotal = (roundNumber: number, isPlayer: boolean): number => {
-  const round = rounds.value.find(r => r.roundNumber === roundNumber)
+  const round = rounds.value.find((r) => r.roundNumber === roundNumber)
   if (!round) return 0
-  
+
   if (isPlayer) {
     return round.scores.primary.player + round.scores.secondary.player
   } else {
@@ -394,25 +413,25 @@ const getRoundTotal = (roundNumber: number, isPlayer: boolean): number => {
 const getTotalScores = () => {
   const totals = {
     player: { primary: 0, secondary: 0, total: 0 },
-    opponent: { primary: 0, secondary: 0, total: 0 }
+    opponent: { primary: 0, secondary: 0, total: 0 },
   }
-  
-  rounds.value.forEach(round => {
+
+  rounds.value.forEach((round) => {
     totals.player.primary += round.scores.primary.player
     totals.player.secondary += round.scores.secondary.player
     totals.opponent.primary += round.scores.primary.opponent
     totals.opponent.secondary += round.scores.secondary.opponent
   })
-  
+
   totals.player.total = totals.player.primary + totals.player.secondary
   totals.opponent.total = totals.opponent.primary + totals.opponent.secondary
-  
+
   return totals
 }
 
 const getCurrentResult = (): string => {
   const totals = getTotalScores()
-  
+
   if (totals.player.total === totals.opponent.total) {
     return 'Égalité parfaite!'
   } else if (totals.player.total > totals.opponent.total) {
@@ -426,7 +445,7 @@ const getCurrentResult = (): string => {
 
 const getResultIcon = (): string => {
   const totals = getTotalScores()
-  
+
   if (totals.player.total === totals.opponent.total) {
     return '🤝'
   } else if (totals.player.total > totals.opponent.total) {
@@ -468,7 +487,7 @@ onMounted(() => {
   border: 2px solid #dc143c;
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 
+  box-shadow:
     0 0 30px rgba(220, 20, 60, 0.3),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -649,8 +668,13 @@ onMounted(() => {
 }
 
 @keyframes pulse-success {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* Types de scores */
@@ -735,7 +759,8 @@ onMounted(() => {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.total-player, .total-opponent {
+.total-player,
+.total-opponent {
   text-align: center;
   font-weight: bold;
   color: #ffd700;
@@ -820,8 +845,12 @@ onMounted(() => {
 }
 
 @keyframes rotate-battle {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Résultat actuel */
@@ -894,7 +923,8 @@ onMounted(() => {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.btn-previous, .btn-next {
+.btn-previous,
+.btn-next {
   padding: 1rem 2rem;
   border-radius: 10px;
   font-size: 1.1rem;
@@ -945,8 +975,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive */
@@ -954,40 +988,41 @@ onMounted(() => {
   .step-container {
     padding: 1.5rem;
   }
-  
+
   .step-title {
     font-size: 2rem;
   }
-  
+
   .rounds-options {
     grid-template-columns: 1fr;
   }
-  
+
   .score-inputs {
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
-  
+
   .vs-separator {
     display: none;
   }
-  
+
   .summary-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
     text-align: center;
   }
-  
+
   .vs-divider {
     order: -1;
   }
-  
+
   .step-navigation {
     flex-direction: column-reverse;
     gap: 1rem;
   }
-  
-  .btn-previous, .btn-next {
+
+  .btn-previous,
+  .btn-next {
     width: 100%;
   }
 }
@@ -998,16 +1033,16 @@ onMounted(() => {
     gap: 0.5rem;
     text-align: center;
   }
-  
+
   .score-input {
     width: 100%;
     max-width: 120px;
   }
-  
+
   .info-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .info-item {
     flex-direction: column;
     text-align: center;

@@ -8,6 +8,7 @@ import LucidScoreRepository from '#infrastructure/repositories/lucid_score_repos
 import UuidV7IdGenerator from '#infrastructure/services/uuid_v7_id_generator'
 import { PartieFilterDto } from '#application/dto/partie_filter_dto'
 import { partiesListValidator } from '#validators/parties_list_validator'
+import { updateRoundScoreValidator } from '#validators/update_round_score_validator'
 import {
   gameCreationWizardValidator,
   userSearchValidator,
@@ -22,6 +23,7 @@ import LucidPlayerQueryRepository from '#infrastructure/repositories/lucid_playe
 import LucidRoundQueryRepository from '#infrastructure/repositories/lucid_round_query_repository'
 import LucidScoreQueryRepository from '#infrastructure/repositories/lucid_score_query_repository'
 import GameId from '#domain/value-objects/game_id'
+import UpdateRoundScoreCommand from '#application/commands/update_round_score_command'
 
 /**
  * PartiesController
@@ -338,22 +340,8 @@ export default class PartiesController {
       // 6. Création de la partie via le service
       const result = await this.gameService.createCompleteGame(completeGameData)
 
-      // 7. Réponse de succès avec redirection
-      return response.status(201).json({
-        success: true,
-        message: '⚔️ Bataille créée avec succès !',
-        data: {
-          gameId: result.game.id.value,
-          status: result.game.status.value,
-          gameType: result.game.gameType.value,
-          pointsLimit: result.game.pointsLimit.value,
-          playersCount: result.players.length,
-          roundsCount: result.rounds.length,
-          scoresCount: result.scores.length,
-        },
-        redirect: `/parties/${result.game.id.value}`,
-        meta: WizardGameMapper.extractGameMetadata(wizardData),
-      })
+      // 7. Redirection vers la page de détails de la partie
+      return response.redirect(`/parties/${result.game.id.value}`)
     } catch (error) {
       logger.error('Game creation failed', {
         error: error.message,
@@ -434,6 +422,106 @@ export default class PartiesController {
         error: 'Erreur de recherche',
         message: "Une erreur est survenue lors de la recherche d'utilisateurs",
         users: [],
+      })
+    }
+  }
+
+  /**
+   * Met à jour le score d'un round spécifique
+   *
+   * PUT /parties/:gameId/rounds/:roundId/score
+   *
+   * Utilisé pour l'édition inline des scores dans l'interface de détail
+   */
+  async updateRoundScore({ params, request, response, auth }: HttpContext) {
+    try {
+      // 1. Authentification requise
+      const user = auth.getUserOrFail()
+      
+      // 2. Validation des paramètres de route
+      const gameIdNumber = Number(params.gameId)
+      const roundIdNumber = Number(params.roundId)
+      
+      if (!gameIdNumber || Number.isNaN(gameIdNumber) || gameIdNumber <= 0) {
+        return response.status(400).json({
+          error: 'Invalid game ID',
+          message: "L'identifiant de la partie doit être un nombre valide"
+        })
+      }
+      
+      if (!roundIdNumber || Number.isNaN(roundIdNumber) || roundIdNumber <= 0) {
+        return response.status(400).json({
+          error: 'Invalid round ID',
+          message: "L'identifiant du round doit être un nombre valide"
+        })
+      }
+      
+      // 3. Validation du body de la requête
+      const { playerId, score } = await request.validateUsing(updateRoundScoreValidator)
+      
+      // 4. Vérifier l'accès à la partie
+      const gameId = new GameId(gameIdNumber)
+      const hasAccess = await this.gameService.userHasAccessToGame(gameId, user.id)
+      if (!hasAccess) {
+        return response.status(403).json({
+          error: 'Forbidden',
+          message: "Vous n'avez pas accès à cette partie"
+        })
+      }
+
+      // 5. Créer la command et mettre à jour le score
+      const command = UpdateRoundScoreCommand.fromPrimitives(
+        gameIdNumber, 
+        roundIdNumber, 
+        playerId, 
+        score
+      )
+      
+      const updatedRound = await this.gameService.updateRoundScore(command)
+
+      // 6. Retourner le round mis à jour
+      return response.json({
+        success: true,
+        round: {
+          id: updatedRound.id.value,
+          roundNumber: updatedRound.roundNumber.value,
+          playerScore: updatedRound.playerScore,
+          opponentScore: updatedRound.opponentScore,
+          isCompleted: updatedRound.isCompleted,
+          gameId: updatedRound.gameId.value,
+        },
+      })
+      
+    } catch (error) {
+      logger.error('Round score update failed', {
+        error: error.message,
+        stack: error.stack,
+        gameId: params.gameId,
+        roundId: params.roundId,
+        userId: auth.user?.id,
+        action: 'update_round_score',
+      })
+
+      // Erreurs de validation
+      if (error.message.includes('Score must be between') || error.message.includes('must be')) {
+        return response.status(422).json({
+          error: 'Validation Error',
+          message: error.message
+        })
+      }
+
+      // Erreurs métier (round non trouvé, etc.)
+      if (error.message.includes('not found') || error.message.includes('not belong')) {
+        return response.status(404).json({
+          error: 'Resource not found',
+          message: error.message
+        })
+      }
+
+      // Erreur générique
+      return response.status(500).json({
+        error: 'Internal error',
+        message: 'Erreur lors de la mise à jour du score'
       })
     }
   }

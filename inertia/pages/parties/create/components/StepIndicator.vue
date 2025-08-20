@@ -62,8 +62,7 @@ const getStepLabel = (step: number): string => {
     1: 'Configuration',
     2: 'Adversaire',
     3: 'Joueurs',
-    4: 'Rounds',
-    5: 'Récapitulatif',
+    4: 'Récapitulatif',
   }
   return labels[step as keyof typeof labels] || `Étape ${step}`
 }

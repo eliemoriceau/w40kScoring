@@ -17,7 +17,7 @@
 
         <div class="game-type-grid">
           <div
-            v-for="gameType in gameTypes"
+            v-for="gameType in props.gameTypes"
             :key="gameType.value"
             class="game-type-card"
             :class="{ selected: data.gameType === gameType.value }"
@@ -98,7 +98,11 @@
         <div class="mission-selector">
           <select v-model="data.mission" class="mission-select" @change="handleMissionChange">
             <option value="">Mission aléatoire</option>
-            <option v-for="mission in availableMissions" :key="mission.id" :value="mission.name">
+            <option
+              v-for="mission in props.availableMissions"
+              :key="mission.id"
+              :value="mission.name"
+            >
               {{ mission.name }}
             </option>
           </select>
@@ -133,11 +137,9 @@ import type { GameCreationWizardData, GameType } from '../types/wizard'
 
 interface Props {
   data: GameCreationWizardData
-  props: {
-    availableMissions: Array<{ id: number; name: string; description: string }>
-    gameTypes: Array<{ value: GameType; displayName: string }>
-    defaultPointsLimit?: number
-  }
+  availableMissions: Array<{ id: number; name: string; description: string }>
+  gameTypes: Array<{ value: GameType; displayName: string }>
+  defaultPointsLimit?: number
   errors?: Record<string, string[]>
   loading?: boolean
 }
@@ -166,7 +168,7 @@ const isValid = computed(() => {
 
 const selectedMissionDescription = computed(() => {
   if (!props.data.mission) return null
-  const mission = props.props.availableMissions.find((m) => m.name === props.data.mission)
+  const mission = props.availableMissions.find((m) => m.name === props.data.mission)
   return mission?.description || null
 })
 
@@ -230,7 +232,7 @@ onMounted(() => {
     emit('update:data', { gameType: 'MATCHED_PLAY' as GameType })
   }
   if (!props.data.pointsLimit) {
-    emit('update:data', { pointsLimit: props.props.defaultPointsLimit || 2000 })
+    emit('update:data', { pointsLimit: props.defaultPointsLimit || 2000 })
   }
   emit('validate')
 })

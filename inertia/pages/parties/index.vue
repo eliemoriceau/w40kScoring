@@ -77,23 +77,21 @@ const applyFilters = () => {
         loading: false,
         error: 'Erreur lors du filtrage des parties',
       }
-      console.error('Filter error:', errors)
+      // Erreur lors du filtrage
     },
   })
 }
 
 const handleViewDetails = (partieId: string) => {
-  console.log('🎯 Navigation vers partie:', partieId)
   const url = `/parties/${partieId}`
-  console.log('🔗 URL générée:', url)
 
   // Navigation vers la page de détails
   router.visit(url)
 }
 
 const handleCreateNew = () => {
-  // TODO: Implémenter la création de partie
-  console.log('Create new party - not implemented yet')
+  // Redirection vers création
+  router.visit('/parties/create')
 }
 
 const handleLoadMore = () => {
@@ -149,11 +147,7 @@ if (import.meta.env.DEV) {
   watch(
     () => props.parties,
     (newParties) => {
-      console.log('Parties data updated:', {
-        count: newParties.parties.length,
-        hasMore: newParties.pagination.hasMore,
-        filters: newParties.filters?.applied,
-      })
+      // Données des parties mises à jour
     },
     { deep: true }
   )
@@ -161,11 +155,7 @@ if (import.meta.env.DEV) {
 
 // Lifecycle
 onMounted(() => {
-  console.log('Parties page mounted with', props.parties.parties.length, 'parties')
-  console.log(
-    '🔍 Données des parties:',
-    props.parties.parties.map((p) => ({ id: p.id, status: p.status }))
-  )
+  // Page des parties montée
 })
 </script>
 

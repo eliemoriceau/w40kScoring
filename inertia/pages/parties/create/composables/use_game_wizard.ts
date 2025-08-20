@@ -31,22 +31,16 @@ export const useGameWizard = () => {
     // Étape 3
     players: [],
 
-    // Étape 4
-    enableRounds: true,
-    rounds: Array.from({ length: 5 }, (_, index) => ({
-      roundNumber: index + 1,
-      playerScore: 0,
-      opponentScore: 0,
-      scores: [],
-    })),
+    // Rounds supprimés du wizard - seront ajoutés après création
+    enableRounds: false,
+    rounds: [],
   })
 
   const getInitialValidation = (): StepValidation => ({
     step1: false,
     step2: false,
     step3: false,
-    step4: true, // Toujours valide car optionnel
-    step5: false,
+    step4: false, // Step4 devient summary (anciennement step5)
   })
 
   // État réactif du wizard
@@ -71,16 +65,16 @@ export const useGameWizard = () => {
   })
 
   const canGoPrevious = computed(() => wizardState.value.currentStep > 1)
-  const isLastStep = computed(() => wizardState.value.currentStep === 5)
+  const isLastStep = computed(() => wizardState.value.currentStep === 4)
 
   const completionProgress = computed(() => {
     const completed = Object.values(wizardState.value.validation).filter(Boolean).length
-    return Math.round((completed / 5) * 100)
+    return Math.round((completed / 4) * 100)
   })
 
   // Actions de navigation
   const goToStep = (step: WizardStep) => {
-    if (step >= 1 && step <= 5) {
+    if (step >= 1 && step <= 4) {
       wizardState.value.currentStep = step
       saveToStorage()
     }
@@ -88,7 +82,7 @@ export const useGameWizard = () => {
 
   const goToNextStep = () => {
     if (canGoNext.value && !isLastStep.value) {
-      wizardState.value.currentStep = Math.min(5, wizardState.value.currentStep + 1) as WizardStep
+      wizardState.value.currentStep = Math.min(4, wizardState.value.currentStep + 1) as WizardStep
       saveToStorage()
     }
   }
@@ -145,13 +139,8 @@ export const useGameWizard = () => {
   }
 
   const validateStep4 = (): boolean => {
-    // Toujours valide car optionnel
-    return true
-  }
-
-  const validateStep5 = (): boolean => {
-    // Valide si toutes les étapes précédentes sont valides
-    return validateStep1() && validateStep2() && validateStep3() && validateStep4()
+    // Step4 devient summary - valide si toutes les étapes précédentes sont valides
+    return validateStep1() && validateStep2() && validateStep3()
   }
 
   const validateCurrentStep = () => {
@@ -160,7 +149,6 @@ export const useGameWizard = () => {
       2: validateStep2,
       3: validateStep3,
       4: validateStep4,
-      5: validateStep5,
     }
 
     const currentStepNumber = wizardState.value.currentStep
@@ -168,9 +156,9 @@ export const useGameWizard = () => {
 
     wizardState.value.validation[`step${currentStepNumber}` as keyof StepValidation] = isValid
 
-    // Mettre à jour la validation de l'étape 5 si on n'y est pas encore
-    if (currentStepNumber !== 5) {
-      wizardState.value.validation.step5 = validateStep5()
+    // Mettre à jour la validation de l'étape 4 si on n'y est pas encore
+    if (currentStepNumber !== 4) {
+      wizardState.value.validation.step4 = validateStep4()
     }
   }
 
@@ -180,7 +168,6 @@ export const useGameWizard = () => {
       step2: validateStep2(),
       step3: validateStep3(),
       step4: validateStep4(),
-      step5: validateStep5(),
     }
   }
 

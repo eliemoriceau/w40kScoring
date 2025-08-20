@@ -102,27 +102,12 @@ export const useGameValidation = () => {
         break
 
       case 4:
-        // Validation optionnelle des rounds
-        if (data.enableRounds && data.rounds.length > 0) {
-          data.rounds.forEach((round, index) => {
-            if (round.playerScore !== undefined && !validateRoundScore(round.playerScore)) {
-              errors[`round${index}PlayerScore`] = ['Score invalide (0-50)']
-            }
-            if (round.opponentScore !== undefined && !validateRoundScore(round.opponentScore)) {
-              errors[`round${index}OpponentScore`] = ['Score invalide (0-50)']
-            }
-          })
-        }
-        break
-
-      case 5:
-        // Validation finale : toutes les étapes précédentes
+        // Validation finale : toutes les étapes précédentes (Step4 est maintenant Summary)
         const step1 = validateStep(1, data)
         const step2 = validateStep(2, data)
         const step3 = validateStep(3, data)
-        const step4 = validateStep(4, data)
 
-        Object.assign(errors, step1.errors, step2.errors, step3.errors, step4.errors)
+        Object.assign(errors, step1.errors, step2.errors, step3.errors)
         break
     }
 
@@ -143,8 +128,8 @@ export const useGameValidation = () => {
     const warnings: string[] = []
     let allErrors: Record<string, string[]> = {}
 
-    // Valider toutes les étapes
-    for (let step = 1; step <= 5; step++) {
+    // Valider toutes les étapes (4 étapes maintenant)
+    for (let step = 1; step <= 4; step++) {
       const stepValidation = validateStep(step, data)
       if (!stepValidation.isValid) {
         Object.assign(allErrors, stepValidation.errors)

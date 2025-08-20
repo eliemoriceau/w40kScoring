@@ -45,45 +45,63 @@
       <div v-if="data.opponentType" class="config-section">
         <!-- Adversaire existant -->
         <div v-if="data.opponentType === 'existing'" class="opponent-existing">
-          <h3 class="section-title">Choisir un Ami</h3>
-          <p class="section-description">Sélectionnez un ami dans votre liste de contacts</p>
+          <h3 class="section-title">Rechercher un Utilisateur</h3>
+          <p class="section-description">Recherchez et sélectionnez un utilisateur existant</p>
 
-          <div class="friends-grid">
+          <!-- Barre de recherche -->
+          <div class="search-container">
+            <div class="search-input-wrapper">
+              <input
+                v-model="searchQuery"
+                type="text"
+                class="search-input"
+                placeholder="Rechercher par nom, pseudo ou email..."
+                @input="performSearch"
+                :disabled="loading"
+              />
+              <div class="search-icon">
+                <span v-if="!isSearching">🔍</span>
+                <span v-else class="spinner">⏳</span>
+              </div>
+            </div>
             <div
-              v-for="friend in props.userFriends"
-              :key="friend.id"
-              class="friend-card"
-              :class="{ selected: data.opponentId === friend.id }"
-              @click="selectExistingOpponent(friend)"
+              v-if="searchQuery && searchResults.length === 0 && !isSearching"
+              class="search-hint"
             >
-              <div class="friend-avatar">
-                <img
-                  v-if="friend.avatar"
-                  :src="friend.avatar"
-                  :alt="friend.pseudo"
-                  class="avatar-img"
-                />
+              Aucun utilisateur trouvé pour "{{ searchQuery }}"
+            </div>
+          </div>
+
+          <!-- Résultats de recherche -->
+          <div v-if="searchResults.length > 0" class="search-results">
+            <div
+              v-for="user in searchResults"
+              :key="user.id"
+              class="user-result"
+              :class="{ selected: data.opponentId === user.id }"
+              @click="selectSearchedUser(user)"
+            >
+              <div class="user-avatar">
+                <img v-if="user.avatar" :src="user.avatar" :alt="user.pseudo" class="avatar-img" />
                 <span v-else class="avatar-placeholder">
-                  {{ friend.pseudo.charAt(0).toUpperCase() }}
+                  {{ user.pseudo.charAt(0).toUpperCase() }}
                 </span>
               </div>
-              <div class="friend-info">
-                <h4 class="friend-name">{{ friend.pseudo }}</h4>
-                <div class="friend-status">
-                  <span class="status-indicator online"></span>
-                  Disponible
-                </div>
+              <div class="user-info">
+                <h4 class="user-name">{{ user.pseudo }}</h4>
+                <p class="user-email">{{ user.email }}</p>
               </div>
               <div class="selection-indicator">
-                <span v-if="data.opponentId === friend.id" class="selected-check">✓</span>
+                <span v-if="data.opponentId === user.id" class="selected-check">✓</span>
               </div>
             </div>
           </div>
 
-          <div v-if="props.userFriends.length === 0" class="no-friends-message">
-            <div class="no-friends-icon">👥</div>
-            <h4>Aucun ami trouvé</h4>
-            <p>Vous n'avez pas encore d'amis dans votre liste. Invitez quelqu'un par email !</p>
+          <!-- Message par défaut -->
+          <div v-if="!searchQuery" class="search-prompt">
+            <div class="search-prompt-icon">🔍</div>
+            <h4>Rechercher un adversaire</h4>
+            <p>Tapez le nom, pseudo ou email de votre adversaire pour le trouver.</p>
           </div>
         </div>
 
@@ -186,6 +204,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import axios from 'axios'
 import type { GameCreationWizardData, OpponentType, User } from '../types/wizard'
 
 interface Props {
@@ -207,9 +226,15 @@ const emit = defineEmits<{
   'validate': []
 }>()
 
+// État pour la recherche d'utilisateurs
+const searchQuery = ref('')
+const searchResults = ref<User[]>([])
+const isSearching = ref(false)
+let searchTimeout: NodeJS.Timeout | null = null
+
 // Types d'adversaires disponibles
 const opponentTypes = [
-  { value: 'existing' as OpponentType, displayName: 'Ami Existant' },
+  { value: 'existing' as OpponentType, displayName: 'Utilisateur Existant' },
   { value: 'invite' as OpponentType, displayName: 'Inviter par Email' },
   { value: 'guest' as OpponentType, displayName: 'Adversaire Invité' },
 ]
@@ -257,6 +282,47 @@ const selectExistingOpponent = (friend: User) => {
   emit('validate')
 }
 
+// Fonctions de recherche d'utilisateurs
+const performSearch = () => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+
+  searchTimeout = setTimeout(async () => {
+    if (searchQuery.value.trim().length < 2) {
+      searchResults.value = []
+      return
+    }
+
+    isSearching.value = true
+
+    try {
+      const response = await axios.get('/api/users/search', {
+        params: {
+          q: searchQuery.value.trim(),
+          limit: 10,
+        },
+      })
+
+      searchResults.value = response.data.users || []
+    } catch (error) {
+      console.error('Erreur lors de la recherche:', error)
+      searchResults.value = []
+    } finally {
+      isSearching.value = false
+    }
+  }, 300) // Debounce de 300ms
+}
+
+const selectSearchedUser = (user: User) => {
+  emit('update:data', {
+    opponentId: user.id,
+    opponentPseudo: user.pseudo,
+    opponentEmail: user.email,
+  })
+  emit('validate')
+}
+
 const validateEmail = () => {
   emit('validate')
 }
@@ -281,7 +347,7 @@ const getOpponentTypeIcon = (type: OpponentType): string => {
 
 const getOpponentTypeDescription = (type: OpponentType): string => {
   const descriptions = {
-    existing: 'Choisissez parmi vos amis déjà inscrits',
+    existing: 'Recherchez et sélectionnez un utilisateur déjà inscrit',
     invite: 'Envoyez une invitation par email à votre adversaire',
     guest: 'Créez une partie avec un adversaire sans compte',
   }
@@ -431,18 +497,69 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   font-size: 0.8rem;
 }
 
-/* Liste d'amis */
-.friends-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
+/* Recherche d'utilisateurs */
+.search-container {
+  margin-bottom: 2rem;
 }
 
-.friend-card {
+.search-input-wrapper {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem 3rem 1rem 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.search-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.search-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.search-hint {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+/* Résultats de recherche */
+.search-results {
+  display: grid;
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.user-result {
   background: rgba(0, 0, 0, 0.3);
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
-  padding: 1.5rem;
+  padding: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -451,20 +568,21 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   gap: 1rem;
 }
 
-.friend-card:hover {
+.user-result:hover {
   border-color: #dc143c;
   background: rgba(220, 20, 60, 0.1);
+  transform: translateY(-1px);
 }
 
-.friend-card.selected {
+.user-result.selected {
   border-color: #ffd700;
   background: rgba(255, 215, 0, 0.1);
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
 }
 
-.friend-avatar {
-  width: 50px;
-  height: 50px;
+.user-avatar {
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -484,55 +602,47 @@ const getOpponentTypeDescription = (type: OpponentType): string => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
   color: white;
 }
 
-.friend-info {
+.user-info {
   flex: 1;
 }
 
-.friend-name {
+.user-name {
   font-size: 1rem;
   font-weight: 600;
   color: #ffffff;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.3rem 0;
 }
 
-.friend-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
+.user-email {
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
+  margin: 0;
 }
 
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #32cd32;
-}
-
-/* Message aucun ami */
-.no-friends-message {
+/* Message de recherche */
+.search-prompt {
   text-align: center;
   padding: 3rem 2rem;
   color: rgba(255, 255, 255, 0.7);
 }
 
-.no-friends-icon {
-  font-size: 4rem;
+.search-prompt-icon {
+  font-size: 3rem;
   margin-bottom: 1rem;
 }
 
-.no-friends-message h4 {
+.search-prompt h4 {
   color: #ffffff;
   margin: 0 0 1rem 0;
+  font-size: 1.2rem;
 }
 
-.no-friends-message p {
+.search-prompt p {
   margin: 0;
   line-height: 1.4;
 }

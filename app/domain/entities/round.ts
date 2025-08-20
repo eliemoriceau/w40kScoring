@@ -3,6 +3,8 @@ import RoundId from '#domain/value-objects/round_id'
 import GameId from '#domain/value-objects/game_id'
 import RoundNumber from '#domain/value-objects/round_number'
 import RoundCompletedEvent from '#domain/events/round_completed_event'
+import RoundCreatedEvent from '#domain/events/round_created_event'
+import RoundScoresUpdatedEvent from '#domain/events/round_scores_updated_event'
 
 /**
  * Round Entity
@@ -32,6 +34,28 @@ export default class Round extends AggregateRoot {
       false, // Not completed initially
       new Date()
     )
+  }
+
+  /**
+   * Crée un round vide pour une nouvelle partie avec scores par défaut à 0
+   * Utilisé dans le contexte de création automatique des 5 rounds
+   * Émet un événement RoundCreatedEvent pour le tracking
+   */
+  static createEmpty(id: RoundId, gameId: GameId, roundNumber: RoundNumber): Round {
+    const round = new Round(
+      id,
+      gameId,
+      roundNumber,
+      0, // Initial player score
+      0, // Initial opponent score
+      false, // Not completed initially
+      new Date()
+    )
+    
+    // Émettre l'événement de création uniquement pour les rounds créés automatiquement
+    round.addDomainEvent(new RoundCreatedEvent(id, gameId, roundNumber))
+    
+    return round
   }
 
   static reconstruct(data: {
@@ -118,6 +142,9 @@ export default class Round extends AggregateRoot {
 
     this._playerScore = playerScore
     this._opponentScore = opponentScore
+    
+    // Émettre l'événement de mise à jour des scores
+    this.addDomainEvent(new RoundScoresUpdatedEvent(this._id, playerScore, opponentScore))
   }
 
   getWinner(): 'PLAYER' | 'OPPONENT' | 'DRAW' | null {

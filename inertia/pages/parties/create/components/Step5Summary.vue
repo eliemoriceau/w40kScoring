@@ -278,10 +278,8 @@ import type { GameCreationWizardData, GameType, OpponentType } from '../types/wi
 
 interface Props {
   data: GameCreationWizardData
-  props: {
-    userFriends: Array<{ id: number; pseudo: string; avatar?: string }>
-    currentUser: { id: number; pseudo: string; email: string }
-  }
+  userFriends: Array<{ id: number; pseudo: string; avatar?: string }>
+  currentUser: { id: number; pseudo: string; email: string }
   errors?: Record<string, string[]>
   loading?: boolean
 }
@@ -291,7 +289,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   'previous': []
   'step-change': [number]
-  'create-game': []
+  'complete': []
 }>()
 
 // Computed pour les détails du jeu
@@ -321,7 +319,7 @@ const getCurrentPlayerArmy = (): string => {
 
 const getOpponentName = (): string => {
   if (props.data.opponentType === 'existing' && props.data.opponentId) {
-    const friend = props.props.userFriends.find((f) => f.id === props.data.opponentId)
+    const friend = props.userFriends.find((f) => f.id === props.data.opponentId)
     return friend?.pseudo || 'Adversaire'
   }
   return props.data.opponentPseudo || props.data.opponentEmail || 'Adversaire'
@@ -406,7 +404,7 @@ const getPermissionsText = (): string => {
 }
 
 const handleCreateGame = () => {
-  emit('create-game')
+  emit('complete')
 }
 </script>
 

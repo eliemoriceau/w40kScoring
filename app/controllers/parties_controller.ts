@@ -443,17 +443,11 @@ export default class PartiesController {
       const roundIdNumber = Number(params.roundId)
 
       if (!gameIdNumber || Number.isNaN(gameIdNumber) || gameIdNumber <= 0) {
-        return response.status(400).json({
-          error: 'Invalid game ID',
-          message: "L'identifiant de la partie doit être un nombre valide",
-        })
+        return response.status(400).send("L'identifiant de la partie doit être un nombre valide")
       }
 
       if (!roundIdNumber || Number.isNaN(roundIdNumber) || roundIdNumber <= 0) {
-        return response.status(400).json({
-          error: 'Invalid round ID',
-          message: "L'identifiant du round doit être un nombre valide",
-        })
+        return response.status(400).send("L'identifiant du round doit être un nombre valide")
       }
 
       // 3. Validation du body de la requête
@@ -463,10 +457,7 @@ export default class PartiesController {
       const gameId = new GameId(gameIdNumber)
       const hasAccess = await this.gameService.userHasAccessToGame(gameId, user.id)
       if (!hasAccess) {
-        return response.status(403).json({
-          error: 'Forbidden',
-          message: "Vous n'avez pas accès à cette partie",
-        })
+        return response.status(403).send("Vous n'avez pas accès à cette partie")
       }
 
       // 5. Créer la command et mettre à jour le score
@@ -477,20 +468,11 @@ export default class PartiesController {
         score
       )
 
-      const updatedRound = await this.gameService.updateRoundScore(command)
+      await this.gameService.updateRoundScore(command)
 
-      // 6. Retourner le round mis à jour
-      return response.json({
-        success: true,
-        round: {
-          id: updatedRound.id.value,
-          roundNumber: updatedRound.roundNumber.value,
-          playerScore: updatedRound.playerScore,
-          opponentScore: updatedRound.opponentScore,
-          isCompleted: updatedRound.isCompleted,
-          gameId: updatedRound.gameId.value,
-        },
-      })
+      // 6. Retourner une réponse Inertia.js vide avec succès
+      // Les composants frontend gèrent l'état local via optimistic updates
+      return response.status(200).send('')
     } catch (error) {
       logger.error('Round score update failed', {
         error: error.message,
@@ -501,27 +483,18 @@ export default class PartiesController {
         action: 'update_round_score',
       })
 
-      // Erreurs de validation
+      // Erreurs de validation - retourner erreur compatible Inertia
       if (error.message.includes('Score must be between') || error.message.includes('must be')) {
-        return response.status(422).json({
-          error: 'Validation Error',
-          message: error.message,
-        })
+        return response.status(422).send(error.message)
       }
 
-      // Erreurs métier (round non trouvé, etc.)
+      // Erreurs métier (round non trouvé, etc.) - retourner erreur compatible Inertia
       if (error.message.includes('not found') || error.message.includes('not belong')) {
-        return response.status(404).json({
-          error: 'Resource not found',
-          message: error.message,
-        })
+        return response.status(404).send(error.message)
       }
 
-      // Erreur générique
-      return response.status(500).json({
-        error: 'Internal error',
-        message: 'Erreur lors de la mise à jour du score',
-      })
+      // Erreur générique - retourner erreur compatible Inertia
+      return response.status(500).send('Erreur lors de la mise à jour du score')
     }
   }
 }

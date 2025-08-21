@@ -12,7 +12,20 @@ import type {
   OpponentType,
 } from '../types/wizard'
 
+// Configuration constantes
 const STORAGE_KEY = 'w40k_game_wizard_data'
+const POINTS_LIMIT = {
+  MIN: 500,
+  MAX: 5000,
+  STEP: 50,
+} as const
+
+const MIN_PSEUDO_LENGTH = 3
+const TOTAL_STEPS = 4
+const REQUIRED_PLAYERS_COUNT = 2
+
+// Regex de validation email simplifiée mais robuste
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export const useGameWizard = () => {
   // État initial du wizard
@@ -65,16 +78,16 @@ export const useGameWizard = () => {
   })
 
   const canGoPrevious = computed(() => wizardState.value.currentStep > 1)
-  const isLastStep = computed(() => wizardState.value.currentStep === 4)
+  const isLastStep = computed(() => wizardState.value.currentStep === TOTAL_STEPS)
 
   const completionProgress = computed(() => {
     const completed = Object.values(wizardState.value.validation).filter(Boolean).length
-    return Math.round((completed / 4) * 100)
+    return Math.round((completed / TOTAL_STEPS) * 100)
   })
 
   // Actions de navigation
   const goToStep = (step: WizardStep) => {
-    if (step >= 1 && step <= 4) {
+    if (step >= 1 && step <= TOTAL_STEPS) {
       wizardState.value.currentStep = step
       saveToStorage()
     }
@@ -82,7 +95,10 @@ export const useGameWizard = () => {
 
   const goToNextStep = () => {
     if (canGoNext.value && !isLastStep.value) {
-      wizardState.value.currentStep = Math.min(4, wizardState.value.currentStep + 1) as WizardStep
+      wizardState.value.currentStep = Math.min(
+        TOTAL_STEPS,
+        wizardState.value.currentStep + 1
+      ) as WizardStep
       saveToStorage()
     }
   }
@@ -112,7 +128,12 @@ export const useGameWizard = () => {
   // Validation des étapes
   const validateStep1 = (): boolean => {
     const { gameType, pointsLimit } = wizardState.value.data
-    return !!(gameType && pointsLimit >= 500 && pointsLimit <= 5000 && pointsLimit % 50 === 0)
+    return !!(
+      gameType &&
+      pointsLimit >= POINTS_LIMIT.MIN &&
+      pointsLimit <= POINTS_LIMIT.MAX &&
+      pointsLimit % POINTS_LIMIT.STEP === 0
+    )
   }
 
   const validateStep2 = (): boolean => {
@@ -123,11 +144,11 @@ export const useGameWizard = () => {
     }
 
     if (opponentType === 'invite') {
-      return !!opponentEmail && opponentEmail.includes('@')
+      return !!opponentEmail && EMAIL_REGEX.test(opponentEmail)
     }
 
     if (opponentType === 'guest') {
-      return !!opponentPseudo && opponentPseudo.trim().length >= 3
+      return !!opponentPseudo && opponentPseudo.trim().length >= MIN_PSEUDO_LENGTH
     }
 
     return false
@@ -135,7 +156,10 @@ export const useGameWizard = () => {
 
   const validateStep3 = (): boolean => {
     const { players } = wizardState.value.data
-    return players.length === 2 && players.every((p) => p.pseudo && p.pseudo.trim().length >= 3)
+    return (
+      players.length === REQUIRED_PLAYERS_COUNT &&
+      players.every((p) => p.pseudo && p.pseudo.trim().length >= MIN_PSEUDO_LENGTH)
+    )
   }
 
   const validateStep4 = (): boolean => {
@@ -186,37 +210,66 @@ export const useGameWizard = () => {
 
   // Persistance en session storage
   const saveToStorage = () => {
+    if (typeof window === 'undefined' || !window.sessionStorage) {
+      return false
+    }
+
     try {
       const dataToSave = {
         currentStep: wizardState.value.currentStep,
         data: wizardState.value.data,
         validation: wizardState.value.validation,
+        timestamp: Date.now(),
       }
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
+      return true
     } catch (error) {
       console.warn('Failed to save wizard data to storage:', error)
+      return false
     }
   }
 
   const loadFromStorage = () => {
+    if (typeof window === 'undefined' || !window.sessionStorage) {
+      return false
+    }
+
     try {
       const savedData = sessionStorage.getItem(STORAGE_KEY)
       if (savedData) {
         const parsed = JSON.parse(savedData)
-        wizardState.value.currentStep = parsed.currentStep || 1
-        wizardState.value.data = { ...getInitialData(), ...parsed.data }
-        wizardState.value.validation = { ...getInitialValidation(), ...parsed.validation }
+
+        // Vérifier la validité des données
+        if (parsed && typeof parsed === 'object' && parsed.currentStep) {
+          wizardState.value.currentStep = Math.max(
+            1,
+            Math.min(TOTAL_STEPS, parsed.currentStep || 1)
+          )
+          wizardState.value.data = { ...getInitialData(), ...parsed.data }
+          wizardState.value.validation = { ...getInitialValidation(), ...parsed.validation }
+          return true
+        }
       }
+      return false
     } catch (error) {
       console.warn('Failed to load wizard data from storage:', error)
+      // En cas d'erreur, nettoyer les données corrompues
+      clearStorage()
+      return false
     }
   }
 
   const clearStorage = () => {
+    if (typeof window === 'undefined' || !window.sessionStorage) {
+      return false
+    }
+
     try {
       sessionStorage.removeItem(STORAGE_KEY)
+      return true
     } catch (error) {
       console.warn('Failed to clear wizard storage:', error)
+      return false
     }
   }
 

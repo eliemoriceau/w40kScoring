@@ -161,6 +161,10 @@ import type {
 
 const props = defineProps<GameScoreBoardProps>()
 
+// Configuration des notifications
+const NOTIFICATION_TIMEOUT = 3000
+const MAX_OPTIMISTIC_UPDATES = 50
+
 // État local pour optimistic updates
 const localRounds = ref<RoundDto[]>([...props.rounds])
 const optimisticUpdates = ref<OptimisticUpdate[]>([])
@@ -211,56 +215,90 @@ const gameStatusClasses = computed(() => {
   }
 })
 
-// Calculs des scores
+// Calculs des scores avec mise en cache
+const playerScores = computed(() => {
+  const scores = new Map<number, { primary: number; secondary: number; total: number }>()
+  
+  props.players.forEach(player => {
+    if (!player) return
+    
+    // Score primaire
+    const primary = localRounds.value.reduce((total, round) => {
+      const score = player.isMainPlayer ? round.playerScore : round.opponentScore
+      return total + (score || 0)
+    }, 0)
+    
+    // Score secondaire
+    const secondary = props.secondaryScores
+      .filter((score) => score.playerId === player.id)
+      .reduce((total, score) => total + score.scoreValue, 0)
+    
+    scores.set(player.id, {
+      primary,
+      secondary,
+      total: primary + secondary
+    })
+  })
+  
+  return scores
+})
+
 const getPlayerTotalScore = (player?: PlayerDto) => {
   if (!player) return 0
-  return getPrimaryScore(player) + getSecondaryScore(player)
+  return playerScores.value.get(player.id)?.total || 0
 }
 
 const getPrimaryScore = (player?: PlayerDto) => {
   if (!player) return 0
-  return localRounds.value.reduce((total, round) => {
-    const score = player.isMainPlayer ? round.playerScore : round.opponentScore
-    return total + (score || 0)
-  }, 0)
+  return playerScores.value.get(player.id)?.primary || 0
 }
 
 const getSecondaryScore = (player?: PlayerDto) => {
   if (!player) return 0
-  return props.secondaryScores
-    .filter((score) => score.playerId === player.id)
-    .reduce((total, score) => total + score.scoreValue, 0)
+  return playerScores.value.get(player.id)?.secondary || 0
 }
 
-// Calculs de progression
-const getCompletedRounds = () => {
-  return localRounds.value.filter((round) => round.isCompleted).length
-}
-
-const getCompletionPercentage = () => {
-  if (localRounds.value.length === 0) return 0
-  return Math.round((getCompletedRounds() / localRounds.value.length) * 100)
-}
-
-const getEnteredScores = () => {
-  return localRounds.value.reduce((count, round) => {
-    let roundScores = 0
-    if (round.playerScore !== null && round.playerScore !== undefined) roundScores++
-    if (round.opponentScore !== null && round.opponentScore !== undefined) roundScores++
-    return count + roundScores
-  }, 0)
-}
-
-const getTotalPossibleScores = () => {
+// Calculs de progression optimisés
+const progressStats = computed(() => {
+  const totalRounds = localRounds.value.length
   const playersCount = props.players.filter((p) => p).length
-  return localRounds.value.length * playersCount
-}
+  
+  if (totalRounds === 0) {
+    return {
+      completedRounds: 0,
+      completionPercentage: 0,
+      enteredScores: 0,
+      totalPossibleScores: 0,
+      scoreEntryPercentage: 0
+    }
+  }
+  
+  let completedRounds = 0
+  let enteredScores = 0
+  
+  localRounds.value.forEach(round => {
+    if (round.isCompleted) completedRounds++
+    
+    if (round.playerScore !== null && round.playerScore !== undefined) enteredScores++
+    if (round.opponentScore !== null && round.opponentScore !== undefined) enteredScores++
+  })
+  
+  const totalPossibleScores = totalRounds * playersCount
+  
+  return {
+    completedRounds,
+    completionPercentage: Math.round((completedRounds / totalRounds) * 100),
+    enteredScores,
+    totalPossibleScores,
+    scoreEntryPercentage: totalPossibleScores > 0 ? Math.round((enteredScores / totalPossibleScores) * 100) : 0
+  }
+})
 
-const getScoreEntryPercentage = () => {
-  const total = getTotalPossibleScores()
-  if (total === 0) return 0
-  return Math.round((getEnteredScores() / total) * 100)
-}
+const getCompletedRounds = () => progressStats.value.completedRounds
+const getCompletionPercentage = () => progressStats.value.completionPercentage
+const getEnteredScores = () => progressStats.value.enteredScores
+const getTotalPossibleScores = () => progressStats.value.totalPossibleScores
+const getScoreEntryPercentage = () => progressStats.value.scoreEntryPercentage
 
 const showProgressIndicators = computed(() => {
   return localRounds.value.length > 0 && props.game.status === 'IN_PROGRESS'
@@ -298,7 +336,7 @@ const winnerClasses = computed(() => {
   return isMainPlayerWin ? 'text-green-400 font-bold' : 'text-red-400 font-bold'
 })
 
-// Mise à jour optimiste
+// Mise à jour optimiste avec nettoyage automatique
 const updateLocalRound = (roundId: number, playerId: number, score: number) => {
   const round = localRounds.value.find((r) => r.id === roundId)
   if (!round) return
@@ -317,7 +355,7 @@ const updateLocalRound = (roundId: number, playerId: number, score: number) => {
   // Mettre à jour le statut de complétion
   round.isCompleted = round.playerScore !== null && round.opponentScore !== null
 
-  // Enregistrer pour rollback potentiel
+  // Enregistrer pour rollback potentiel avec nettoyage automatique
   optimisticUpdates.value.push({
     roundId,
     playerId,
@@ -325,6 +363,11 @@ const updateLocalRound = (roundId: number, playerId: number, score: number) => {
     newValue: score,
     timestamp: Date.now(),
   })
+  
+  // Nettoyer les anciennes mises à jour optimistes
+  if (optimisticUpdates.value.length > MAX_OPTIMISTIC_UPDATES) {
+    optimisticUpdates.value = optimisticUpdates.value.slice(-MAX_OPTIMISTIC_UPDATES)
+  }
 }
 
 const revertLocalRound = (roundId: number, playerId: number) => {
@@ -368,22 +411,29 @@ const handleSecondaryScoreUpdate = (event: SecondaryScoreUpdateEvent) => {
   showNotificationMessage('Score secondaire mis à jour', 'success')
 }
 
-// Système de notifications
+// Système de notifications optimisé
 const showNotificationMessage = (
   message: string,
   type: 'success' | 'error' | 'info' = 'success'
 ) => {
+  // Éviter les notifications en double
+  if (notification.show && notification.message === message) {
+    return
+  }
+  
   notification.message = message
   notification.type = type
   notification.show = true
 
-  // Auto-hide après 3 secondes
+  // Nettoyer le timeout précédent
   if (notification.timeout) {
     clearTimeout(notification.timeout)
   }
+  
+  // Auto-hide avec constante configurée
   notification.timeout = setTimeout(() => {
     notification.show = false
-  }, 3000)
+  }, NOTIFICATION_TIMEOUT)
 }
 
 const showNotification = computed(() => notification.show)

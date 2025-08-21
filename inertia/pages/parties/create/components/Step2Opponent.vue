@@ -230,12 +230,20 @@ const searchResults = ref<User[]>([])
 const isSearching = ref(false)
 let searchTimeout: NodeJS.Timeout | null = null
 
-// Types d'adversaires disponibles
-const opponentTypes = [
+// Configuration des types d'adversaires
+const OPPONENT_TYPES = [
   { value: 'existing' as OpponentType, displayName: 'Utilisateur Existant' },
   { value: 'invite' as OpponentType, displayName: 'Inviter par Email' },
   { value: 'guest' as OpponentType, displayName: 'Adversaire Invité' },
-]
+] as const
+
+const SEARCH_CONFIG = {
+  MIN_QUERY_LENGTH: 2,
+  DEBOUNCE_DELAY: 300,
+  MAX_RESULTS: 10,
+} as const
+
+const opponentTypes = OPPONENT_TYPES
 
 // Computed
 const isValid = computed(() => {
@@ -280,14 +288,16 @@ const selectExistingOpponent = (friend: User) => {
   emit('validate')
 }
 
-// Fonctions de recherche d'utilisateurs
+// Fonctions de recherche d'utilisateurs optimisées
 const performSearch = () => {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
 
   searchTimeout = setTimeout(async () => {
-    if (searchQuery.value.trim().length < 2) {
+    const query = searchQuery.value.trim()
+    
+    if (query.length < SEARCH_CONFIG.MIN_QUERY_LENGTH) {
       searchResults.value = []
       return
     }
@@ -297,8 +307,8 @@ const performSearch = () => {
     try {
       const response = await axios.get('/api/users/search', {
         params: {
-          q: searchQuery.value.trim(),
-          limit: 10,
+          q: query,
+          limit: SEARCH_CONFIG.MAX_RESULTS,
         },
       })
 
@@ -306,10 +316,11 @@ const performSearch = () => {
     } catch (error) {
       console.error('Erreur lors de la recherche:', error)
       searchResults.value = []
+      // TODO: Afficher une notification d'erreur à l'utilisateur
     } finally {
       isSearching.value = false
     }
-  }, 300) // Debounce de 300ms
+  }, SEARCH_CONFIG.DEBOUNCE_DELAY)
 }
 
 const selectSearchedUser = (user: User) => {
@@ -329,27 +340,33 @@ const validateGuestPseudo = () => {
   emit('validate')
 }
 
-const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-const getOpponentTypeIcon = (type: OpponentType): string => {
-  const icons = {
+// Configuration des icônes et descriptions
+const OPPONENT_CONFIG = {
+  icons: {
     existing: '👥',
     invite: '✉️',
     guest: '👤',
-  }
-  return icons[type] || '⚔️'
-}
-
-const getOpponentTypeDescription = (type: OpponentType): string => {
-  const descriptions = {
+  },
+  descriptions: {
     existing: 'Recherchez et sélectionnez un utilisateur déjà inscrit',
     invite: 'Envoyez une invitation par email à votre adversaire',
     guest: 'Créez une partie avec un adversaire sans compte',
-  }
-  return descriptions[type] || ''
+  },
+} as const
+
+// Regex de validation email réutilisable
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const isValidEmail = (email: string): boolean => {
+  return EMAIL_REGEX.test(email)
+}
+
+const getOpponentTypeIcon = (type: OpponentType): string => {
+  return OPPONENT_CONFIG.icons[type] || '⚔️'
+}
+
+const getOpponentTypeDescription = (type: OpponentType): string => {
+  return OPPONENT_CONFIG.descriptions[type] || ''
 }
 </script>
 

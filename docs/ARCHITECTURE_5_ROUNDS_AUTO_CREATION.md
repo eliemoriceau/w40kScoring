@@ -15,10 +15,10 @@ Modifier l'architecture pour que **chaque nouvelle partie génère automatiqueme
 
 async createCompleteGame(data: CompleteGameData): Promise<CompleteGameResult> {
   // ... création de la partie et des joueurs existante ...
-  
+
   // NOUVEAU : Créer automatiquement 5 rounds vides
   const rounds = await this.createInitialRounds(savedGame.id);
-  
+
   return {
     game: savedGame,
     players: savedPlayers,
@@ -31,7 +31,7 @@ async createCompleteGame(data: CompleteGameData): Promise<CompleteGameResult> {
  */
 private async createInitialRounds(gameId: GameId): Promise<Round[]> {
   const rounds: Round[] = [];
-  
+
   for (let i = 1; i <= 5; i++) {
     const roundId = this.idGenerator.generateRoundId();
     const round = Round.createEmpty(
@@ -39,11 +39,11 @@ private async createInitialRounds(gameId: GameId): Promise<Round[]> {
       gameId,
       new RoundNumber(i)
     );
-    
+
     const savedRound = await this.roundRepository.save(round);
     rounds.push(savedRound);
   }
-  
+
   return rounds;
 }
 ```
@@ -61,22 +61,18 @@ export default class Round extends AggregateRoot {
   /**
    * Crée un round vide pour une nouvelle partie
    */
-  static createEmpty(
-    id: RoundId,
-    gameId: GameId,
-    roundNumber: RoundNumber
-  ): Round {
-    const round = new Round(id, gameId, roundNumber);
-    
+  static createEmpty(id: RoundId, gameId: GameId, roundNumber: RoundNumber): Round {
+    const round = new Round(id, gameId, roundNumber)
+
     // Les scores restent undefined pour un round vide
-    round.playerScore = undefined;
-    round.opponentScore = undefined;
-    round.isCompleted = false;
-    
+    round.playerScore = undefined
+    round.opponentScore = undefined
+    round.isCompleted = false
+
     // Événement de création
-    round.addDomainEvent(new RoundCreatedEvent(id, gameId, roundNumber));
-    
-    return round;
+    round.addDomainEvent(new RoundCreatedEvent(id, gameId, roundNumber))
+
+    return round
   }
 
   /**
@@ -84,19 +80,19 @@ export default class Round extends AggregateRoot {
    */
   updateScores(playerScore?: number, opponentScore?: number): void {
     if (this.isCompleted) {
-      throw new RoundAlreadyCompletedError(this.id);
+      throw new RoundAlreadyCompletedError(this.id)
     }
 
-    this.playerScore = playerScore;
-    this.opponentScore = opponentScore;
-    
+    this.playerScore = playerScore
+    this.opponentScore = opponentScore
+
     // Marquer comme complété si les deux scores sont renseignés
     if (playerScore !== undefined && opponentScore !== undefined) {
-      this.isCompleted = true;
-      this.addDomainEvent(new RoundCompletedEvent(this.id, this.gameId));
+      this.isCompleted = true
+      this.addDomainEvent(new RoundCompletedEvent(this.id, this.gameId))
     }
 
-    this.addDomainEvent(new RoundScoresUpdatedEvent(this.id, playerScore, opponentScore));
+    this.addDomainEvent(new RoundScoresUpdatedEvent(this.id, playerScore, opponentScore))
   }
 }
 ```
@@ -109,10 +105,10 @@ export default class Round extends AggregateRoot {
 // app/application/dto/update_round_score_dto.ts
 
 export interface UpdateRoundScoreDto {
-  gameId: number;
-  roundId: number;
-  playerId: number;
-  score: number;
+  gameId: number
+  roundId: number
+  playerId: number
+  score: number
 }
 
 export class UpdateRoundScoreCommand {
@@ -124,7 +120,7 @@ export class UpdateRoundScoreCommand {
   ) {
     // Validation
     if (score < 0 || score > 50) {
-      throw new Error('Score must be between 0 and 50');
+      throw new Error('Score must be between 0 and 50')
     }
   }
 }
@@ -144,14 +140,14 @@ export class UpdateRoundScoreCommand {
 async updateRoundScore({ params, request, response, auth }: HttpContext) {
   try {
     const user = auth.getUserOrFail();
-    
+
     // Validation des paramètres
     const gameId = new GameId(Number(params.gameId));
     const roundId = new RoundId(Number(params.roundId));
-    
+
     // Validation du body
     const { playerId, score } = await request.validateUsing(updateRoundScoreValidator);
-    
+
     // Vérifier que l'utilisateur a accès à cette partie
     const hasAccess = await this.gameService.userHasAccessToGame(gameId, user.id);
     if (!hasAccess) {
@@ -169,7 +165,7 @@ async updateRoundScore({ params, request, response, auth }: HttpContext) {
       success: true,
       round: RoundMapper.toDto(updatedRound),
     });
-    
+
   } catch (error) {
     logger.error('Round score update failed', {
       error: error.message,
@@ -191,9 +187,9 @@ async updateRoundScore({ params, request, response, auth }: HttpContext) {
 ### 1. Création de Partie
 
 ```
-Wizard → PartiesController.store() 
+Wizard → PartiesController.store()
       → GameService.createCompleteGame()
-      → GameService.createInitialRounds() 
+      → GameService.createInitialRounds()
       → 5 x Round.createEmpty()
       → Database persistence
       → Redirect to /parties/:id (avec 5 rounds vides)
@@ -220,7 +216,7 @@ Aucune modification de schéma nécessaire. Les rounds existants avec `playerSco
 
 ```sql
 -- Récupérer une partie avec tous ses rounds (vides et complétés)
-SELECT 
+SELECT
   g.*,
   r.id as round_id,
   r.round_number,
@@ -229,12 +225,12 @@ SELECT
   r.is_completed
 FROM games g
 LEFT JOIN rounds r ON g.id = r.game_id
-WHERE g.id = ? 
+WHERE g.id = ?
 ORDER BY r.round_number;
 
 -- Mettre à jour un score de round spécifique
-UPDATE rounds 
-SET 
+UPDATE rounds
+SET
   player_score = CASE WHEN ? = 'player' THEN ? ELSE player_score END,
   opponent_score = CASE WHEN ? = 'opponent' THEN ? ELSE opponent_score END,
   is_completed = (player_score IS NOT NULL AND opponent_score IS NOT NULL),
@@ -250,39 +246,38 @@ WHERE id = ? AND game_id = ?;
 // inertia/pages/parties/show.vue - Gestion des rounds vides
 
 interface Round {
-  id: number;
-  roundNumber: number;
-  playerScore?: number;
-  opponentScore?: number;
-  isCompleted: boolean;
-  isEmpty: boolean; // Calculé côté frontend
+  id: number
+  roundNumber: number
+  playerScore?: number
+  opponentScore?: number
+  isCompleted: boolean
+  isEmpty: boolean // Calculé côté frontend
 }
 
 // Computed pour identifier les rounds vides
 const roundsWithStatus = computed(() => {
-  return props.rounds.map(round => ({
+  return props.rounds.map((round) => ({
     ...round,
     isEmpty: round.playerScore === null && round.opponentScore === null,
-    isPartial: (round.playerScore === null) !== (round.opponentScore === null)
-  }));
-});
+    isPartial: (round.playerScore === null) !== (round.opponentScore === null),
+  }))
+})
 
 // Méthode de mise à jour optimisée
 const updateRoundScore = async (roundId: number, playerId: number, score: number) => {
   try {
     const response = await router.put(`/parties/${props.game.id}/rounds/${roundId}/score`, {
       playerId,
-      score
-    });
-    
+      score,
+    })
+
     // Mise à jour optimiste de l'état local
-    updateLocalRoundScore(roundId, playerId, score);
-    
+    updateLocalRoundScore(roundId, playerId, score)
   } catch (error) {
     // Rollback en cas d'erreur
-    revertLocalRoundScore(roundId, playerId);
+    revertLocalRoundScore(roundId, playerId)
   }
-};
+}
 ```
 
 ## 🚦 Tests
@@ -292,25 +287,25 @@ const updateRoundScore = async (roundId: number, playerId: number, score: number
 ```typescript
 describe('Game Service - Initial Rounds Creation', () => {
   it('should create 5 empty rounds when creating a new game', async () => {
-    const gameData = createTestGameData();
-    const result = await gameService.createCompleteGame(gameData);
-    
-    expect(result.rounds).toHaveLength(5);
-    expect(result.rounds[0].roundNumber.value).toBe(1);
-    expect(result.rounds[4].roundNumber.value).toBe(5);
-    expect(result.rounds.every(r => !r.isCompleted)).toBe(true);
-  });
-});
+    const gameData = createTestGameData()
+    const result = await gameService.createCompleteGame(gameData)
+
+    expect(result.rounds).toHaveLength(5)
+    expect(result.rounds[0].roundNumber.value).toBe(1)
+    expect(result.rounds[4].roundNumber.value).toBe(5)
+    expect(result.rounds.every((r) => !r.isCompleted)).toBe(true)
+  })
+})
 
 describe('Round Entity - Empty Round Creation', () => {
   it('should create an empty round with undefined scores', () => {
-    const round = Round.createEmpty(roundId, gameId, new RoundNumber(1));
-    
-    expect(round.playerScore).toBeUndefined();
-    expect(round.opponentScore).toBeUndefined();
-    expect(round.isCompleted).toBe(false);
-  });
-});
+    const round = Round.createEmpty(roundId, gameId, new RoundNumber(1))
+
+    expect(round.playerScore).toBeUndefined()
+    expect(round.opponentScore).toBeUndefined()
+    expect(round.isCompleted).toBe(false)
+  })
+})
 ```
 
 ### Tests d'Intégration
@@ -319,42 +314,44 @@ describe('Round Entity - Empty Round Creation', () => {
 describe('Parties Controller - Round Score Update', () => {
   it('should update round score and mark as completed when both scores present', async () => {
     // Créer une partie avec 5 rounds vides
-    const game = await createTestGame();
-    const round = game.rounds[0];
-    
+    const game = await createTestGame()
+    const round = game.rounds[0]
+
     // Mettre à jour le score du joueur 1
     await request(app)
       .put(`/parties/${game.id}/rounds/${round.id}/score`)
       .send({ playerId: player1.id, score: 15 })
-      .expect(200);
-    
+      .expect(200)
+
     // Mettre à jour le score du joueur 2
     await request(app)
       .put(`/parties/${game.id}/rounds/${round.id}/score`)
       .send({ playerId: player2.id, score: 12 })
-      .expect(200);
-    
+      .expect(200)
+
     // Vérifier que le round est complété
-    const updatedRound = await roundRepository.findById(round.id);
-    expect(updatedRound.isCompleted).toBe(true);
-  });
-});
+    const updatedRound = await roundRepository.findById(round.id)
+    expect(updatedRound.isCompleted).toBe(true)
+  })
+})
 ```
 
 ## 📋 Migration Strategy
 
 ### 1. Parties Existantes
+
 - Script de migration pour créer les rounds manquants
 - Backward compatibility maintenue
 
 ### 2. Déploiement
+
 - Feature flag pour activer progressivement
 - Rollback plan si nécessaire
 
 ```sql
 -- Script de migration pour parties existantes
 INSERT INTO rounds (game_id, round_number, is_completed, created_at, updated_at)
-SELECT 
+SELECT
   g.id,
   generate_series(1, 5) as round_number,
   false,
@@ -362,8 +359,8 @@ SELECT
   NOW()
 FROM games g
 WHERE NOT EXISTS (
-  SELECT 1 FROM rounds r 
-  WHERE r.game_id = g.id 
+  SELECT 1 FROM rounds r
+  WHERE r.game_id = g.id
   AND r.round_number = generate_series(1, 5)
 );
 ```

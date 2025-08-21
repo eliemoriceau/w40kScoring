@@ -5,7 +5,7 @@ import RoundNumber from '#domain/value-objects/round_number'
 
 /**
  * Event émis lors de la création d'un nouveau round
- * 
+ *
  * Déclenché quand un round vide est créé automatiquement
  * lors de la création d'une partie
  */

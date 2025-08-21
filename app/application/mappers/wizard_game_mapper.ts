@@ -26,7 +26,7 @@ export class WizardGameMapper {
       userId: player.userId || null,
     }))
 
-    // Ne plus inclure les rounds - ils seront créés automatiquement 
+    // Ne plus inclure les rounds - ils seront créés automatiquement
     // Les rounds sont désormais créés automatiquement lors de la création de partie
     const rounds: RoundData[] | undefined = undefined
 

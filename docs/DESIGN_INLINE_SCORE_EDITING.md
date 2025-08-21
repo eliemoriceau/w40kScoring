@@ -45,17 +45,20 @@
 ## 🔄 États de l'Interface
 
 ### 1. Mode Lecture (par défaut)
+
 - Scores affichés en texte statique
 - Hover effects sur les scores éditables
 - Indicateur d'édition (crayon) au survol
 
 ### 2. Mode Édition (score sélectionné)
+
 - Input numérique avec focus automatique
 - Validation en temps réel (0-50 pour primaire, 0-15 pour secondaire)
 - Boutons de validation/annulation
 - Indicateur de sauvegarde en cours
 
 ### 3. Mode Sauvegarde
+
 - Spinner de chargement discret
 - Désactivation temporaire de l'input
 - Feedback visuel de confirmation
@@ -63,17 +66,20 @@
 ## 📱 Responsive Design
 
 ### Mobile (< 768px)
+
 - Stack vertical des joueurs
 - Champs de score plus larges
 - Boutons tactiles plus grands
 - Navigation par swipe entre rounds
 
 ### Tablet (768px - 1024px)
+
 - Grille 2 colonnes maintenue
 - Taille des champs adaptée
 - Touch targets optimisés
 
 ### Desktop (> 1024px)
+
 - Grille complète avec tous les détails
 - Raccourcis clavier visibles
 - Tooltips informatifs
@@ -84,19 +90,19 @@
 
 ```scss
 // États des rounds
-$round-completed: #10B981;     // Vert - Terminé
-$round-current: #F59E0B;       // Orange - En cours
-$round-pending: #6B7280;       // Gris - À venir
-$round-editing: #EF4444;       // Rouge - En édition
+$round-completed: #10b981; // Vert - Terminé
+$round-current: #f59e0b; // Orange - En cours
+$round-pending: #6b7280; // Gris - À venir
+$round-editing: #ef4444; // Rouge - En édition
 
 // Scores
-$score-primary: #F3F4F6;       // Blanc cassé - Score principal
-$score-secondary: #9CA3AF;     // Gris clair - Score secondaire
-$score-total: #FCD34D;         // Doré - Total
+$score-primary: #f3f4f6; // Blanc cassé - Score principal
+$score-secondary: #9ca3af; // Gris clair - Score secondaire
+$score-total: #fcd34d; // Doré - Total
 
 // Interactions
 $hover-bg: rgba(239, 68, 68, 0.1);
-$focus-ring: #DC2626;
+$focus-ring: #dc2626;
 $success-flash: rgba(16, 185, 129, 0.2);
 ```
 
@@ -116,26 +122,29 @@ $success-flash: rgba(16, 185, 129, 0.2);
 }
 
 @keyframes success-flash {
-  0% { background-color: transparent; }
-  50% { background-color: $success-flash; }
-  100% { background-color: transparent; }
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: $success-flash;
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 ```
 
 ## 🛠️ Composants Techniques
 
 ### ScoreCell.vue
+
 ```vue
 <template>
-  <div 
-    :class="scoreClasses"
-    @click="startEditing"
-    @keydown="handleKeyboard"
-  >
+  <div :class="scoreClasses" @click="startEditing" @keydown="handleKeyboard">
     <span v-if="!isEditing" class="score-display">
       {{ displayValue }}
     </span>
-    <input 
+    <input
       v-else
       v-model.number="editValue"
       :min="minValue"
@@ -153,6 +162,7 @@ $success-flash: rgba(16, 185, 129, 0.2);
 ```
 
 ### RoundRow.vue
+
 ```vue
 <template>
   <div :class="roundClasses">
@@ -160,9 +170,9 @@ $success-flash: rgba(16, 185, 129, 0.2);
       <span class="round-number">Round {{ round.roundNumber }}</span>
       <RoundStatus :status="round.status" />
     </div>
-    
+
     <div class="scores-grid">
-      <ScoreCell 
+      <ScoreCell
         v-for="player in players"
         :key="player.id"
         :round="round"
@@ -176,15 +186,16 @@ $success-flash: rgba(16, 185, 129, 0.2);
 ```
 
 ### GameScoreBoard.vue (composant principal)
+
 ```vue
 <template>
   <div class="score-board">
     <!-- En-tête avec totaux -->
     <ScoreSummary :players="players" />
-    
+
     <!-- Grille des rounds -->
     <div class="rounds-grid">
-      <RoundRow 
+      <RoundRow
         v-for="round in rounds"
         :key="round.id"
         :round="round"
@@ -193,7 +204,7 @@ $success-flash: rgba(16, 185, 129, 0.2);
         @round-updated="handleRoundUpdate"
       />
     </div>
-    
+
     <!-- Scores secondaires -->
     <SecondaryScores :players="players" />
   </div>

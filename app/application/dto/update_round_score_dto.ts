@@ -1,6 +1,6 @@
 /**
  * DTO pour la mise à jour du score d'un round
- * 
+ *
  * Utilisé par l'API endpoint PUT /parties/:gameId/rounds/:roundId/score
  */
 export interface UpdateRoundScoreDto {

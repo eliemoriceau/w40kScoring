@@ -55,16 +55,16 @@ sequenceDiagram
     participant GS as GameService
     participant R as Round Entity
     parameter DB as Database
-    
+
     W->>C: POST /parties/create
     C->>GS: createCompleteGame(data)
     GS->>DB: save Game + Players
-    
+
     loop 5 rounds
         GS->>R: Round.createEmpty(i)
         R->>DB: save Round
     end
-    
+
     GS->>C: CompleteGameResult + 5 rounds
     C->>W: redirect /parties/:id
 ```
@@ -78,7 +78,7 @@ sequenceDiagram
     participant C as Controller
     participant GDS as GameDetailService
     participant DB as Database
-    
+
     U->>V: Visit /parties/:id
     V->>C: GET /parties/:id
     C->>GDS: getGameDetail(gameId)
@@ -99,7 +99,7 @@ sequenceDiagram
     participant C as Controller
     participant GS as GameService
     participant R as Round
-    
+
     U->>SC: Click on score
     SC->>SC: Enter edit mode
     U->>SC: Input new score
@@ -122,12 +122,8 @@ sequenceDiagram
 <template>
   <div class="game-score-board">
     <!-- En-tête avec résumé -->
-    <ScoreSummary 
-      :players="players" 
-      :game="game"
-      class="mb-6" 
-    />
-    
+    <ScoreSummary :players="players" :game="game" class="mb-6" />
+
     <!-- Grille des rounds -->
     <div class="rounds-container">
       <div class="rounds-header">
@@ -138,7 +134,7 @@ sequenceDiagram
           <span class="legend-item pending">📋 À venir</span>
         </div>
       </div>
-      
+
       <div class="rounds-grid">
         <RoundRow
           v-for="round in rounds"
@@ -153,9 +149,9 @@ sequenceDiagram
         />
       </div>
     </div>
-    
+
     <!-- Scores secondaires -->
-    <SecondaryScores 
+    <SecondaryScores
       :players="players"
       :secondary-scores="secondaryScores"
       :can-edit="canEdit"
@@ -183,24 +179,28 @@ const localRounds = ref([...props.rounds])
 
 // Round en cours (premier round non complété)
 const getCurrentRound = () => {
-  return localRounds.value.find(r => !r.isCompleted)?.roundNumber || 6
+  return localRounds.value.find((r) => !r.isCompleted)?.roundNumber || 6
 }
 
 // Mise à jour optimiste
 const handleScoreUpdate = async (roundId: number, playerId: number, score: number) => {
   // 1. Mise à jour immédiate de l'UI
   updateLocalRound(roundId, playerId, score)
-  
+
   try {
     // 2. Sauvegarde serveur
-    await router.put(`/parties/${props.game.id}/rounds/${roundId}/score`, {
-      playerId,
-      score
-    }, {
-      preserveState: true,
-      preserveScroll: true,
-      only: ['rounds'] // Recharger seulement les rounds
-    })
+    await router.put(
+      `/parties/${props.game.id}/rounds/${roundId}/score`,
+      {
+        playerId,
+        score,
+      },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['rounds'], // Recharger seulement les rounds
+      }
+    )
   } catch (error) {
     // 3. Rollback en cas d'erreur
     revertLocalRound(roundId, playerId)
@@ -209,18 +209,18 @@ const handleScoreUpdate = async (roundId: number, playerId: number, score: numbe
 }
 
 const updateLocalRound = (roundId: number, playerId: number, score: number) => {
-  const round = localRounds.value.find(r => r.id === roundId)
+  const round = localRounds.value.find((r) => r.id === roundId)
   if (!round) return
-  
+
   // Identifier si c'est le joueur principal ou l'adversaire
-  const isMainPlayer = props.players.find(p => p.id === playerId)?.isMainPlayer
-  
+  const isMainPlayer = props.players.find((p) => p.id === playerId)?.isMainPlayer
+
   if (isMainPlayer) {
     round.playerScore = score
   } else {
     round.opponentScore = score
   }
-  
+
   // Mettre à jour le statut de complétion
   round.isCompleted = round.playerScore !== null && round.opponentScore !== null
 }
@@ -236,7 +236,7 @@ const updateLocalRound = (roundId: number, playerId: number, score: number) => {
       <span class="round-number">Round {{ round.roundNumber }}</span>
       <RoundStatus :round="round" :is-current="isCurrent" />
     </div>
-    
+
     <div class="scores-row">
       <ScoreCell
         v-for="player in players"
@@ -274,9 +274,7 @@ const emit = defineEmits<{
 
 const isEditing = ref(false)
 
-const isCurrent = computed(() => 
-  props.round.roundNumber === props.currentRound
-)
+const isCurrent = computed(() => props.round.roundNumber === props.currentRound)
 
 const roundClasses = computed(() => [
   'round-row',
@@ -284,8 +282,8 @@ const roundClasses = computed(() => [
     'round-completed': props.round.isCompleted,
     'round-current': isCurrent.value,
     'round-pending': !props.round.isCompleted && !isCurrent.value,
-    'round-editing': isEditing.value
-  }
+    'round-editing': isEditing.value,
+  },
 ])
 
 const handleEditingStarted = () => {
@@ -334,7 +332,7 @@ const handleEditingEnded = () => {
       <span class="score-value">{{ displayScore }}</span>
       <EditIcon v-if="showEditIcon" class="edit-icon" />
     </div>
-    
+
     <!-- Mode édition -->
     <div v-else class="score-edit">
       <input
@@ -356,7 +354,7 @@ const handleEditingEnded = () => {
         <button @click="cancelEdit" class="cancel-btn">✕</button>
       </div>
     </div>
-    
+
     <!-- Indicateur de sauvegarde -->
     <LoadingSpinner v-if="isSaving" class="saving-indicator" />
   </div>
@@ -376,7 +374,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  scoreType: 'primary'
+  scoreType: 'primary',
 })
 
 const emit = defineEmits<{
@@ -391,32 +389,28 @@ const isSaving = ref(false)
 const scoreInput = ref<HTMLInputElement>()
 
 // Score maximum selon le type
-const maxScore = computed(() => 
-  props.scoreType === 'primary' ? 50 : 15
-)
+const maxScore = computed(() => (props.scoreType === 'primary' ? 50 : 15))
 
 // Score actuel à afficher (défaut 0)
 const currentScore = computed(() => {
   if (props.scoreType === 'secondary') {
     // Gestion des 2 scores secondaires par round
-    const secondaryScores = props.round.secondaryScores?.find(s => s.playerId === props.player.id)
-    return props.secondaryIndex === 1 
+    const secondaryScores = props.round.secondaryScores?.find((s) => s.playerId === props.player.id)
+    return props.secondaryIndex === 1
       ? (secondaryScores?.score1 ?? 0)
       : (secondaryScores?.score2 ?? 0)
   }
-  
-  return props.player.isMainPlayer 
+
+  return props.player.isMainPlayer
     ? (props.round.playerScore ?? 0)
     : (props.round.opponentScore ?? 0)
 })
 
-const displayScore = computed(() => 
-  currentScore.value // Toujours afficher la valeur (0 par défaut)
+const displayScore = computed(
+  () => currentScore.value // Toujours afficher la valeur (0 par défaut)
 )
 
-const showEditIcon = computed(() => 
-  props.editable && !isEditing.value
-)
+const showEditIcon = computed(() => props.editable && !isEditing.value)
 
 const cellClasses = computed(() => [
   'score-cell',
@@ -426,18 +420,18 @@ const cellClasses = computed(() => [
     'cell-current': props.current,
     'cell-completed': currentScore.value !== null,
     'cell-empty': currentScore.value === null,
-    'cell-saving': isSaving.value
-  }
+    'cell-saving': isSaving.value,
+  },
 ])
 
 // Démarrer l'édition
 const startEditing = async () => {
   if (!props.editable || isEditing.value) return
-  
+
   isEditing.value = true
   editValue.value = currentScore.value ?? 0
   emit('editing-started')
-  
+
   await nextTick()
   scoreInput.value?.focus()
   scoreInput.value?.select()
@@ -446,30 +440,30 @@ const startEditing = async () => {
 // Sauvegarder le score
 const saveScore = async () => {
   if (!isEditing.value || isSaving.value) return
-  
+
   const newScore = editValue.value
-  
+
   // Validation
   if (newScore < 0 || newScore > maxScore.value) {
     // Afficher erreur de validation
     return
   }
-  
+
   // Pas de changement
   if (newScore === currentScore.value) {
     cancelEdit()
     return
   }
-  
+
   isSaving.value = true
-  
+
   try {
     emit('score-updated', {
       roundId: props.round.id,
       playerId: props.player.id,
-      score: newScore
+      score: newScore,
     })
-    
+
     isEditing.value = false
     emit('editing-ended')
   } catch (error) {
@@ -563,7 +557,8 @@ const validateInput = () => {
   @apply flex gap-1;
 }
 
-.save-btn, .cancel-btn {
+.save-btn,
+.cancel-btn {
   @apply w-6 h-6 flex items-center justify-center rounded
          text-xs font-bold transition-colors;
 }
@@ -592,9 +587,10 @@ const validateInput = () => {
 router
   .group(() => {
     // ... routes existantes ...
-    
+
     // Nouveau endpoint pour mise à jour des scores
-    router.put('/parties/:gameId/rounds/:roundId/score', [PartiesController, 'updateRoundScore'])
+    router
+      .put('/parties/:gameId/rounds/:roundId/score', [PartiesController, 'updateRoundScore'])
       .as('parties.rounds.update_score')
   })
   .middleware([middleware.auth()])
@@ -679,19 +675,23 @@ export interface ScoreUpdateEvent {
 ## 🚀 Performance & Optimisations
 
 ### 1. Optimistic Updates
+
 - Mise à jour immédiate de l'UI
 - Rollback automatique en cas d'erreur
 - Feedback visuel de l'état de sauvegarde
 
 ### 2. Debouncing
+
 - Éviter les requêtes multiples lors de la saisie rapide
 - Timeout de 300ms avant sauvegarde automatique
 
 ### 3. Caching
+
 - Cache des données de partie côté frontend
 - Invalidation intelligente après mise à jour
 
 ### 4. Network Resilience
+
 - Retry automatique en cas d'échec réseau
 - Queue des modifications hors ligne
 - Synchronisation à la reconnexion
@@ -706,27 +706,27 @@ export interface ScoreUpdateEvent {
 describe('GameScoreBoard', () => {
   it('should display 5 rounds with proper states', () => {
     const wrapper = mount(GameScoreBoard, {
-      props: { 
+      props: {
         game: mockGame,
         players: mockPlayers,
         rounds: mockRoundsWithMixed,
-        canEdit: true
-      }
+        canEdit: true,
+      },
     })
-    
+
     expect(wrapper.findAll('.round-row')).toHaveLength(5)
     expect(wrapper.find('.round-completed')).toExist()
     expect(wrapper.find('.round-current')).toExist()
     expect(wrapper.find('.round-pending')).toExist()
   })
-  
+
   it('should enter edit mode when clicking on editable score', async () => {
     const wrapper = mount(ScoreCell, {
-      props: { round: mockRound, player: mockPlayer, editable: true }
+      props: { round: mockRound, player: mockPlayer, editable: true },
     })
-    
+
     await wrapper.find('.score-cell').trigger('click')
-    
+
     expect(wrapper.find('.score-input')).toExist()
     expect(wrapper.find('input').element).toBe(document.activeElement)
   })
@@ -742,20 +742,20 @@ test('PUT /parties/:id/rounds/:roundId/score updates round score', async ({ clie
   const game = await GameFactory.createWithRounds()
   const round = game.rounds[0]
   const player = game.players[0]
-  
+
   const response = await client
     .put(`/parties/${game.id}/rounds/${round.id}/score`)
     .json({ playerId: player.id, score: 15 })
     .loginAs(game.user)
-  
+
   response.assertStatus(200)
   response.assertBodyContains({
     success: true,
     round: {
       id: round.id,
       playerScore: 15,
-      isCompleted: false
-    }
+      isCompleted: false,
+    },
   })
 })
 ```

@@ -1,0 +1,5 @@
+# Marker file to force GitHub Actions cache invalidation
+# This file forces a complete rebuild of all caches
+timestamp: 2025-08-21T09:15:00Z
+reason: Persistent TypeScript module resolution issues in CI
+solution: Complete cache invalidation and fresh environment build

@@ -1,0 +1,3 @@
+# Force CI cache invalidation Thu Aug 21 09:07:19 CEST 2025
+# Additional cache invalidation - v2 Wed Aug 21 09:15:00 CEST 2025
+# Force node_modules and TypeScript cache rebuild

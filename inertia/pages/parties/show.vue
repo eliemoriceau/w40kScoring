@@ -74,225 +74,15 @@
         </div>
       </div>
 
-      <!-- Layout des joueurs et scores - Responsive colonne sur mobile -->
-      <div class="flex flex-col lg:grid lg:grid-cols-2 gap-6 mb-8">
-        <!-- Joueur 1 -->
-        <div class="space-y-6">
-          <div class="bg-slate-800 border border-red-800/50 rounded-lg p-4">
-            <h3 class="text-lg font-bold text-red-300 text-center mb-2">
-              {{ getPlayer1().pseudo }}
-              <span v-if="getPlayer1().isMainPlayer" class="text-slate-500 text-sm">(Vous)</span>
-            </h3>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-slate-200">
-                {{ getPlayer1().totalScore || 0 }}
-              </div>
-              <div class="text-slate-500 text-sm">Score Total</div>
-            </div>
-          </div>
-
-          <!-- Score primaire par Round - Joueur 1 -->
-          <div class="bg-slate-800 border border-red-800/50 rounded-lg p-4">
-            <h4 class="text-md font-semibold text-red-300 text-center mb-4">
-              Score primaire par Round
-            </h4>
-            <div class="space-y-2">
-              <div
-                v-for="round in rounds"
-                :key="round.id"
-                class="flex justify-between items-center py-2 px-3 bg-slate-700 rounded"
-              >
-                <span class="text-slate-300">Round {{ round.roundNumber }}</span>
-                <div class="flex items-center gap-2">
-                  <span
-                    v-if="!isEditingRound(round.id, getPlayer1().id)"
-                    class="font-bold text-slate-200 cursor-pointer hover:text-red-300"
-                    @click="
-                      startEditingRound(
-                        round.id,
-                        getPlayer1().id,
-                        getPlayer1().isMainPlayer ? round.playerScore : round.opponentScore
-                      )
-                    "
-                  >
-                    {{ getPlayer1().isMainPlayer ? round.playerScore : round.opponentScore }}
-                  </span>
-                  <input
-                    v-else
-                    v-model.number="editingScore"
-                    @blur="saveRoundScore(round.id, getPlayer1().id)"
-                    @keyup.enter="saveRoundScore(round.id, getPlayer1().id)"
-                    @keyup.escape="cancelEditing"
-                    class="w-16 px-2 py-1 bg-slate-600 text-slate-200 border border-red-600 rounded text-center font-bold"
-                    type="number"
-                    min="0"
-                    ref="scoreInput"
-                  />
-                  <button
-                    v-if="meta.canEdit && !isEditingRound(round.id, getPlayer1().id)"
-                    @click="
-                      startEditingRound(
-                        round.id,
-                        getPlayer1().id,
-                        getPlayer1().isMainPlayer ? round.playerScore : round.opponentScore
-                      )
-                    "
-                    class="text-slate-500 hover:text-red-400 transition-colors"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div v-if="rounds.length === 0" class="text-slate-500 text-center py-4">
-                Aucun round joué
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Joueur 2 -->
-        <div class="space-y-6">
-          <div class="bg-slate-800 border border-red-800/50 rounded-lg p-4">
-            <h3 class="text-lg font-bold text-red-300 text-center mb-2">
-              {{ getPlayer2()?.pseudo || 'Adversaire' }}
-              <span v-if="getPlayer2()?.isMainPlayer" class="text-slate-500 text-sm">(Vous)</span>
-            </h3>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-slate-200">
-                {{ getPlayer2()?.totalScore || 0 }}
-              </div>
-              <div class="text-slate-500 text-sm">Score Total</div>
-            </div>
-          </div>
-
-          <!-- Score primaire par Round - Joueur 2 -->
-          <div class="bg-slate-800 border border-red-800/50 rounded-lg p-4">
-            <h4 class="text-md font-semibold text-red-300 text-center mb-4">
-              Score primaire par Round
-            </h4>
-            <div class="space-y-2">
-              <div
-                v-for="round in rounds"
-                :key="round.id"
-                class="flex justify-between items-center py-2 px-3 bg-slate-700 rounded"
-              >
-                <span class="text-slate-300">Round {{ round.roundNumber }}</span>
-                <div class="flex items-center gap-2">
-                  <span
-                    v-if="!isEditingRound(round.id, getPlayer2()?.id)"
-                    class="font-bold text-slate-200 cursor-pointer hover:text-red-300"
-                    @click="
-                      startEditingRound(
-                        round.id,
-                        getPlayer2()?.id,
-                        getPlayer1().isMainPlayer ? round.opponentScore : round.playerScore
-                      )
-                    "
-                  >
-                    {{ getPlayer1().isMainPlayer ? round.opponentScore : round.playerScore }}
-                  </span>
-                  <input
-                    v-else
-                    v-model.number="editingScore"
-                    @blur="saveRoundScore(round.id, getPlayer2()?.id)"
-                    @keyup.enter="saveRoundScore(round.id, getPlayer2()?.id)"
-                    @keyup.escape="cancelEditing"
-                    class="w-16 px-2 py-1 bg-slate-600 text-slate-200 border border-red-600 rounded text-center font-bold"
-                    type="number"
-                    min="0"
-                    ref="scoreInput"
-                  />
-                  <button
-                    v-if="meta.canEdit && !isEditingRound(round.id, getPlayer2()?.id)"
-                    @click="
-                      startEditingRound(
-                        round.id,
-                        getPlayer2()?.id,
-                        getPlayer1().isMainPlayer ? round.opponentScore : round.playerScore
-                      )
-                    "
-                    class="text-slate-500 hover:text-red-400 transition-colors"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div v-if="rounds.length === 0" class="text-slate-500 text-center py-4">
-                Aucun round joué
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Scores secondaires - Responsive colonne sur mobile -->
-      <div class="flex flex-col lg:grid lg:grid-cols-2 gap-6">
-        <!-- Scores secondaires Joueur 1 -->
-        <div class="bg-slate-800 border border-red-800/50 rounded-lg p-6">
-          <h4 class="text-lg font-bold text-red-300 mb-4 text-center">
-            Score secondaire - {{ getPlayer1().pseudo }}
-          </h4>
-          <div class="space-y-3">
-            <div
-              v-for="score in getSecondaryScoresForPlayer(getPlayer1().id)"
-              :key="score.id"
-              class="flex justify-between items-center py-2 px-3 bg-slate-700 rounded"
-            >
-              <div>
-                <div class="text-slate-300 font-medium">{{ score.scoreName }}</div>
-                <div class="text-slate-500 text-sm">Round {{ getRoundNumber(score.roundId) }}</div>
-              </div>
-              <span class="font-bold text-slate-200">{{ score.scoreValue }}</span>
-            </div>
-            <div
-              v-if="getSecondaryScoresForPlayer(getPlayer1().id).length === 0"
-              class="text-slate-500 text-center py-8"
-            >
-              Aucun score secondaire enregistré
-            </div>
-          </div>
-        </div>
-
-        <!-- Scores secondaires Joueur 2 -->
-        <div class="bg-slate-800 border border-red-800/50 rounded-lg p-6">
-          <h4 class="text-lg font-bold text-red-300 mb-4 text-center">
-            Score secondaire - {{ getPlayer2()?.pseudo || 'Adversaire' }}
-          </h4>
-          <div class="space-y-3">
-            <div
-              v-for="score in getSecondaryScoresForPlayer(getPlayer2()?.id || 0)"
-              :key="score.id"
-              class="flex justify-between items-center py-2 px-3 bg-slate-700 rounded"
-            >
-              <div>
-                <div class="text-slate-300 font-medium">{{ score.scoreName }}</div>
-                <div class="text-slate-500 text-sm">Round {{ getRoundNumber(score.roundId) }}</div>
-              </div>
-              <span class="font-bold text-slate-200">{{ score.scoreValue }}</span>
-            </div>
-            <div
-              v-if="getSecondaryScoresForPlayer(getPlayer2()?.id || 0).length === 0"
-              class="text-slate-500 text-center py-8"
-            >
-              Aucun score secondaire enregistré
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Nouveau composant d'édition inline des scores -->
+      <GameScoreBoard
+        :game="gameDetailData"
+        :players="players"
+        :rounds="rounds"
+        :secondary-scores="secondaryScores"
+        :can-edit="meta.canEdit"
+        class="mb-8"
+      />
 
       <!-- Actions en bas -->
       <div v-if="meta.canEdit" class="mt-8 flex justify-center">
@@ -307,25 +97,43 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, nextTick } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
+import GameScoreBoard from './components/GameScoreBoard.vue'
+import type { GameDetailDto, PlayerDto, RoundDto, SecondaryScoreDto, GameMetaDto } from './types'
 
 // Props définies par le contrôleur
-const props = defineProps({
-  game: Object,
-  players: Array,
-  rounds: Array,
-  secondaryScores: Array,
-  stats: Object,
-  user: Object,
-  meta: Object,
-})
+const props = defineProps<{
+  game: any // Ancien format, gardé pour compatibilité
+  players: PlayerDto[]
+  rounds: RoundDto[]
+  secondaryScores: SecondaryScoreDto[]
+  stats: any
+  user: any
+  meta: GameMetaDto
+}>()
 
-// État pour l'édition inline
-const editingRoundId = ref(null)
-const editingPlayerId = ref(null)
-const editingScore = ref(0)
+// Conversion des données pour le nouveau composant
+const gameDetailData = computed(
+  (): GameDetailDto => ({
+    id: props.game.id,
+    userId: props.game.userId,
+    gameType: props.game.gameType,
+    pointsLimit: props.game.pointsLimit,
+    status: props.game.status,
+    mission: props.game.mission,
+    deployment: props.game.deployment,
+    primaryScoringMethod: props.game.primaryScoringMethod,
+    notes: props.game.notes,
+    winner: props.game.winner,
+    createdAt: props.game.createdAt,
+    startedAt: props.game.startedAt,
+    completedAt: props.game.completedAt,
+  })
+)
+
+// État local (conservation pour compatibilité avec l'ancien code)
 const isLoading = ref(false)
 
 // Classes CSS dynamiques selon le statut
@@ -399,85 +207,7 @@ function getWinnerText() {
   }
 }
 
-// Logique d'édition inline
-function isEditingRound(roundId, playerId) {
-  return editingRoundId.value === roundId && editingPlayerId.value === playerId
-}
-
-async function startEditingRound(roundId, playerId, currentScore) {
-  if (!props.meta?.canEdit) return
-
-  editingRoundId.value = roundId
-  editingPlayerId.value = playerId
-  editingScore.value = currentScore
-
-  // Focus sur l'input après le prochain tick
-  await nextTick()
-  const input = document.querySelector('input[ref="scoreInput"]')
-  if (input) {
-    input.focus()
-    input.select()
-  }
-}
-
-function cancelEditing() {
-  editingRoundId.value = null
-  editingPlayerId.value = null
-  editingScore.value = 0
-}
-
-async function saveRoundScore(roundId, playerId) {
-  if (isLoading.value) return
-
-  const newScore = editingScore.value
-  const currentRound = props.rounds.find((r) => r.id === roundId)
-
-  if (!currentRound || newScore < 0) {
-    cancelEditing()
-    return
-  }
-
-  // Détermine si on modifie le score du joueur principal ou de l'adversaire
-  const isMainPlayerScore = getPlayer1().id === playerId
-  const isMainPlayerFirst = getPlayer1().isMainPlayer
-
-  let playerScore = currentRound.playerScore
-  let opponentScore = currentRound.opponentScore
-
-  if ((isMainPlayerScore && isMainPlayerFirst) || (!isMainPlayerScore && !isMainPlayerFirst)) {
-    playerScore = newScore
-  } else {
-    opponentScore = newScore
-  }
-
-  isLoading.value = true
-
-  try {
-    // Appel API pour sauvegarder le score
-    await router.patch(
-      `/parties/${props.game.id}/rounds/${roundId}`,
-      {
-        playerScore,
-        opponentScore,
-      },
-      {
-        preserveState: true,
-        preserveScroll: true,
-        onSuccess: () => {
-          cancelEditing()
-        },
-        onError: (errors) => {
-          console.error('Erreur lors de la sauvegarde:', errors)
-          // TODO: Afficher un message d'erreur à l'utilisateur
-        },
-      }
-    )
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde du score:', error)
-  } finally {
-    isLoading.value = false
-  }
-}
+// Fonctions utilitaires conservées pour l'affichage des métadonnées
 
 // Actions
 function editGame() {

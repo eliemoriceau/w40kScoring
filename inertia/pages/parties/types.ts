@@ -124,3 +124,138 @@ export interface SlotProps {
   loading: boolean
   error: string | null
 }
+
+// ================================
+// Types pour l'édition inline des scores (Phase 2)
+// ================================
+
+export interface RoundDto {
+  id: number
+  roundNumber: number
+  playerScore: number // Score du joueur principal (défaut 0)
+  opponentScore: number // Score de l'adversaire (défaut 0)
+  isCompleted: boolean
+  gameId: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SecondaryScoreDto {
+  id: number
+  roundId: number
+  playerId: number
+  scoreName: string
+  scoreValue: number // Score secondaire (0-15)
+  createdAt: string
+  updatedAt: string
+}
+
+export interface GameDetailDto {
+  id: number
+  userId: number
+  gameType: string
+  pointsLimit: number
+  status: 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+  mission?: string
+  deployment?: string
+  primaryScoringMethod?: string
+  notes?: string
+  winner?: 'PLAYER' | 'OPPONENT' | 'DRAW'
+  createdAt: string
+  startedAt?: string
+  completedAt?: string
+}
+
+export interface PlayerDto {
+  id: number
+  pseudo: string
+  userId?: number
+  isMainPlayer: boolean
+  totalScore: number
+  gameId: number
+}
+
+export interface GameMetaDto {
+  title: string
+  statusLabel: string
+  gameTypeLabel: string
+  canEdit: boolean
+}
+
+// Events pour la communication entre composants
+export interface ScoreUpdateEvent {
+  roundId: number
+  playerId: number
+  score: number
+  scoreType: 'primary' | 'secondary'
+}
+
+export interface SecondaryScoreUpdateEvent {
+  roundId: number
+  playerId: number
+  scoreName: string
+  scoreValue: number
+}
+
+// Propriétés pour les composants
+export interface ScoreCellProps {
+  round: RoundDto
+  player: PlayerDto
+  gameId: number
+  editable: boolean
+  current?: boolean
+  scoreType?: 'primary' | 'secondary'
+}
+
+export interface RoundRowProps {
+  round: RoundDto
+  players: PlayerDto[]
+  gameId: number
+  canEdit: boolean
+  currentRound: number
+  allowEditCompleted?: boolean
+}
+
+export interface GameScoreBoardProps {
+  game: GameDetailDto
+  players: PlayerDto[]
+  rounds: RoundDto[]
+  secondaryScores: SecondaryScoreDto[]
+  canEdit: boolean
+}
+
+export interface SecondaryScoresProps {
+  players: PlayerDto[]
+  secondaryScores: SecondaryScoreDto[]
+  rounds: RoundDto[]
+  canEdit: boolean
+}
+
+// États locaux pour les composants
+export interface ScoreCellState {
+  isEditing: boolean
+  editValue: number
+  isSaving: boolean
+  hasError: boolean
+}
+
+export interface RoundRowState {
+  isEditing: boolean
+  editingCellId: string | null
+}
+
+// Utilitaires
+export interface ScoreValidation {
+  isValid: boolean
+  message?: string
+  min: number
+  max: number
+}
+
+export interface OptimisticUpdate {
+  roundId: number
+  playerId: number
+  oldValue: number | null
+  newValue: number
+  timestamp: number
+}

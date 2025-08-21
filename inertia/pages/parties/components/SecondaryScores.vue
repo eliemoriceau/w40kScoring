@@ -1,0 +1,517 @@
+<template>
+  <div class="secondary-scores">
+    <div class="section-header">
+      <h3 class="section-title">Scores Secondaires</h3>
+      <p class="section-description">Objectifs secondaires par round (maximum 15 points chacun)</p>
+    </div>
+
+    <!-- Grille responsive pour les deux joueurs -->
+    <div class="players-grid">
+      <!-- Joueur 1 -->
+      <div class="player-section">
+        <h4 class="player-title">{{ players[0]?.pseudo || 'Joueur 1' }}</h4>
+        <div class="secondary-list">
+          <div v-for="round in rounds" :key="`player1-round-${round.id}`" class="round-secondary">
+            <div class="round-header">
+              <span class="round-label">Round {{ round.roundNumber }}</span>
+              <button
+                v-if="canEdit && !hasSecondaryScores(round.id, players[0]?.id)"
+                @click="addSecondaryScore(round.id, players[0]?.id)"
+                class="add-button"
+                title="Ajouter score secondaire"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Scores secondaires existants -->
+            <div class="scores-list">
+              <div
+                v-for="score in getSecondaryScoresForRoundAndPlayer(round.id, players[0]?.id)"
+                :key="score.id"
+                class="secondary-score-item"
+              >
+                <div class="score-info">
+                  <span class="score-name">{{ score.scoreName }}</span>
+                  <span class="score-value">{{ score.scoreValue }} pts</span>
+                </div>
+                <div v-if="canEdit" class="score-actions">
+                  <button @click="editSecondaryScore(score)" class="edit-btn" title="Modifier">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    @click="deleteSecondaryScore(score.id)"
+                    class="delete-btn"
+                    title="Supprimer"
+                  >
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Message vide -->
+              <div v-if="!hasSecondaryScores(round.id, players[0]?.id)" class="empty-message">
+                <span class="text-gray-500 text-sm">Aucun score secondaire</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total des scores secondaires Joueur 1 -->
+        <div class="player-total">
+          <span class="total-label">Total Secondaires:</span>
+          <span class="total-value">{{ getTotalSecondaryScore(players[0]?.id) }} pts</span>
+        </div>
+      </div>
+
+      <!-- Joueur 2 -->
+      <div v-if="players[1]" class="player-section">
+        <h4 class="player-title">{{ players[1].pseudo }}</h4>
+        <div class="secondary-list">
+          <div v-for="round in rounds" :key="`player2-round-${round.id}`" class="round-secondary">
+            <div class="round-header">
+              <span class="round-label">Round {{ round.roundNumber }}</span>
+              <button
+                v-if="canEdit && !hasSecondaryScores(round.id, players[1].id)"
+                @click="addSecondaryScore(round.id, players[1].id)"
+                class="add-button"
+                title="Ajouter score secondaire"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Scores secondaires existants -->
+            <div class="scores-list">
+              <div
+                v-for="score in getSecondaryScoresForRoundAndPlayer(round.id, players[1].id)"
+                :key="score.id"
+                class="secondary-score-item"
+              >
+                <div class="score-info">
+                  <span class="score-name">{{ score.scoreName }}</span>
+                  <span class="score-value">{{ score.scoreValue }} pts</span>
+                </div>
+                <div v-if="canEdit" class="score-actions">
+                  <button @click="editSecondaryScore(score)" class="edit-btn" title="Modifier">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    @click="deleteSecondaryScore(score.id)"
+                    class="delete-btn"
+                    title="Supprimer"
+                  >
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Message vide -->
+              <div v-if="!hasSecondaryScores(round.id, players[1].id)" class="empty-message">
+                <span class="text-gray-500 text-sm">Aucun score secondaire</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total des scores secondaires Joueur 2 -->
+        <div class="player-total">
+          <span class="total-label">Total Secondaires:</span>
+          <span class="total-value">{{ getTotalSecondaryScore(players[1].id) }} pts</span>
+        </div>
+      </div>
+
+      <!-- Joueur 2 absent -->
+      <div v-else class="player-section empty-player">
+        <h4 class="player-title text-gray-500">En attente d'adversaire</h4>
+        <div class="empty-placeholder">
+          <span class="text-gray-600">Les scores secondaires apparaîtront ici</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour ajouter/éditer un score secondaire -->
+  <div v-if="showModal" class="modal-overlay" @click="closeModal">
+    <div class="modal-content" @click.stop>
+      <h3 class="modal-title">{{ editingScore ? 'Modifier' : 'Ajouter' }} un Score Secondaire</h3>
+
+      <form @submit.prevent="saveSecondaryScore" class="modal-form">
+        <div class="form-group">
+          <label for="scoreName" class="form-label">Nom de l'objectif</label>
+          <input
+            id="scoreName"
+            v-model="formData.scoreName"
+            type="text"
+            class="form-input"
+            placeholder="Ex: Contrôler le centre"
+            required
+            maxlength="50"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="scoreValue" class="form-label">Points (0-15)</label>
+          <input
+            id="scoreValue"
+            v-model.number="formData.scoreValue"
+            type="number"
+            class="form-input"
+            min="0"
+            max="15"
+            required
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" @click="closeModal" class="btn-cancel">Annuler</button>
+          <button type="submit" class="btn-save" :disabled="isLoading">
+            {{ isLoading ? 'Sauvegarde...' : 'Sauvegarder' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, reactive } from 'vue'
+import { router } from '@inertiajs/vue3'
+import type { SecondaryScoresProps, SecondaryScoreDto, SecondaryScoreUpdateEvent } from '../types'
+
+const props = defineProps<SecondaryScoresProps>()
+
+const emit = defineEmits<{
+  'secondary-score-updated': [event: SecondaryScoreUpdateEvent]
+}>()
+
+// État local
+const showModal = ref(false)
+const isLoading = ref(false)
+const editingScore = ref<SecondaryScoreDto | null>(null)
+
+const formData = reactive({
+  roundId: 0,
+  playerId: 0,
+  scoreName: '',
+  scoreValue: 0,
+})
+
+// Obtenir les scores secondaires pour un round et un joueur
+const getSecondaryScoresForRoundAndPlayer = (roundId: number, playerId?: number) => {
+  if (!playerId) return []
+  return props.secondaryScores.filter(
+    (score) => score.roundId === roundId && score.playerId === playerId
+  )
+}
+
+// Vérifier si un joueur a des scores secondaires pour un round
+const hasSecondaryScores = (roundId: number, playerId?: number) => {
+  return getSecondaryScoresForRoundAndPlayer(roundId, playerId).length > 0
+}
+
+// Calculer le total des scores secondaires pour un joueur
+const getTotalSecondaryScore = (playerId?: number) => {
+  if (!playerId) return 0
+  return props.secondaryScores
+    .filter((score) => score.playerId === playerId)
+    .reduce((total, score) => total + score.scoreValue, 0)
+}
+
+// Ajouter un score secondaire
+const addSecondaryScore = (roundId: number, playerId: number) => {
+  editingScore.value = null
+  formData.roundId = roundId
+  formData.playerId = playerId
+  formData.scoreName = ''
+  formData.scoreValue = 0
+  showModal.value = true
+}
+
+// Éditer un score secondaire
+const editSecondaryScore = (score: SecondaryScoreDto) => {
+  editingScore.value = score
+  formData.roundId = score.roundId
+  formData.playerId = score.playerId
+  formData.scoreName = score.scoreName
+  formData.scoreValue = score.scoreValue
+  showModal.value = true
+}
+
+// Sauvegarder le score secondaire
+const saveSecondaryScore = async () => {
+  isLoading.value = true
+
+  try {
+    const endpoint = editingScore.value
+      ? `/scores/${editingScore.value.id}` // Mise à jour
+      : '/scores' // Création
+
+    const method = editingScore.value ? 'put' : 'post'
+
+    await router[method](
+      endpoint,
+      {
+        roundId: formData.roundId,
+        playerId: formData.playerId,
+        scoreType: 'SECONDARY',
+        scoreName: formData.scoreName,
+        scoreValue: formData.scoreValue,
+      },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          emit('secondary-score-updated', {
+            roundId: formData.roundId,
+            playerId: formData.playerId,
+            scoreName: formData.scoreName,
+            scoreValue: formData.scoreValue,
+          })
+          closeModal()
+        },
+        onError: (errors) => {
+          console.error('Erreur lors de la sauvegarde:', errors)
+        },
+      }
+    )
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde du score secondaire:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Supprimer un score secondaire
+const deleteSecondaryScore = async (scoreId: number) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce score secondaire ?')) {
+    return
+  }
+
+  try {
+    await router.delete(`/scores/${scoreId}`, {
+      preserveState: true,
+      preserveScroll: true,
+    })
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error)
+  }
+}
+
+// Fermer la modal
+const closeModal = () => {
+  showModal.value = false
+  editingScore.value = null
+  formData.roundId = 0
+  formData.playerId = 0
+  formData.scoreName = ''
+  formData.scoreValue = 0
+}
+</script>
+
+<style scoped>
+.secondary-scores {
+  @apply bg-slate-800 border border-red-800/50 rounded-lg p-6;
+}
+
+.section-header {
+  @apply mb-6 text-center;
+}
+
+.section-title {
+  @apply text-xl font-bold text-red-300 mb-2;
+}
+
+.section-description {
+  @apply text-sm text-gray-400;
+}
+
+.players-grid {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
+}
+
+.player-section {
+  @apply space-y-4;
+}
+
+.player-title {
+  @apply text-lg font-semibold text-red-300 text-center;
+}
+
+.secondary-list {
+  @apply space-y-3;
+}
+
+.round-secondary {
+  @apply bg-slate-700 rounded-lg p-3;
+}
+
+.round-header {
+  @apply flex items-center justify-between mb-2;
+}
+
+.round-label {
+  @apply text-sm font-medium text-gray-300;
+}
+
+.add-button {
+  @apply text-green-400 hover:text-green-300 transition-colors p-1;
+}
+
+.scores-list {
+  @apply space-y-2;
+}
+
+.secondary-score-item {
+  @apply flex items-center justify-between bg-slate-600 rounded p-2;
+}
+
+.score-info {
+  @apply flex flex-col gap-1;
+}
+
+.score-name {
+  @apply text-sm font-medium text-white;
+}
+
+.score-value {
+  @apply text-xs text-green-400 font-semibold;
+}
+
+.score-actions {
+  @apply flex items-center gap-1;
+}
+
+.edit-btn {
+  @apply text-blue-400 hover:text-blue-300 transition-colors p-1;
+}
+
+.delete-btn {
+  @apply text-red-400 hover:text-red-300 transition-colors p-1;
+}
+
+.empty-message {
+  @apply text-center py-4;
+}
+
+.player-total {
+  @apply flex items-center justify-between bg-slate-700 rounded-lg p-3 mt-4;
+}
+
+.total-label {
+  @apply text-sm font-medium text-gray-300;
+}
+
+.total-value {
+  @apply text-lg font-bold text-yellow-400;
+}
+
+.empty-player {
+  @apply opacity-50;
+}
+
+.empty-placeholder {
+  @apply text-center py-8;
+}
+
+/* Modal */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
+}
+
+.modal-content {
+  @apply bg-slate-800 rounded-lg p-6 w-full max-w-md border border-red-800/50;
+}
+
+.modal-title {
+  @apply text-lg font-bold text-red-300 mb-4;
+}
+
+.modal-form {
+  @apply space-y-4;
+}
+
+.form-group {
+  @apply space-y-2;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-300;
+}
+
+.form-input {
+  @apply w-full px-3 py-2 bg-slate-700 border border-gray-600 rounded-lg
+         text-white placeholder-gray-400 
+         focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent;
+}
+
+.modal-actions {
+  @apply flex items-center justify-end gap-3 pt-4;
+}
+
+.btn-cancel {
+  @apply px-4 py-2 text-gray-400 hover:text-white transition-colors;
+}
+
+.btn-save {
+  @apply px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg
+         transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .players-grid {
+    @apply grid-cols-1;
+  }
+
+  .secondary-score-item {
+    @apply flex-col items-start gap-2;
+  }
+
+  .score-actions {
+    @apply self-end;
+  }
+}
+</style>

@@ -1,11 +1,15 @@
 <template>
-  <div :class="cellClasses" @click="startEditing">
+  <div 
+    class="relative min-h-12 flex items-center justify-center border-2 border-transparent rounded-lg p-2 transition-all duration-200 cursor-pointer"
+    :class="cellClasses"
+    @click="startEditing"
+  >
     <!-- Mode affichage -->
-    <div v-if="!isEditing" class="score-display">
-      <span class="score-value">{{ displayScore }}</span>
+    <div v-if="!isEditing" class="flex items-center gap-2">
+      <span class="text-xl font-bold text-white">{{ displayScore }}</span>
       <svg
         v-if="showEditIcon"
-        class="edit-icon"
+        class="w-4 h-4 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -20,14 +24,14 @@
     </div>
 
     <!-- Mode édition -->
-    <div v-else class="score-edit">
+    <div v-else class="flex items-center gap-2">
       <input
         ref="scoreInput"
         v-model.number="editValue"
-        :min="0"
+        :min="minScore"
         :max="maxScore"
         type="number"
-        class="score-input"
+        class="w-16 px-2 py-1 text-center font-bold bg-slate-700 border border-w40k-red-500 rounded text-white focus:outline-none focus:ring-2 focus:ring-w40k-red-300"
         @blur="saveScore"
         @keyup.enter="saveScore"
         @keyup.escape="cancelEdit"
@@ -35,14 +39,26 @@
         @keyup.arrow-down="decrementScore"
         @input="validateInput"
       />
-      <div class="edit-actions">
-        <button @click="saveScore" class="save-btn" title="Sauvegarder">✓</button>
-        <button @click="cancelEdit" class="cancel-btn" title="Annuler">✕</button>
+      <div class="flex gap-1">
+        <button 
+          @click="saveScore" 
+          class="w-6 h-6 flex items-center justify-center rounded bg-green-600 hover:bg-green-500 text-white text-xs font-bold transition-colors"
+          title="Sauvegarder"
+        >
+          ✓
+        </button>
+        <button 
+          @click="cancelEdit" 
+          class="w-6 h-6 flex items-center justify-center rounded bg-w40k-red-600 hover:bg-w40k-red-500 text-white text-xs font-bold transition-colors"
+          title="Annuler"
+        >
+          ✕
+        </button>
       </div>
     </div>
 
     <!-- Indicateur de sauvegarde -->
-    <div v-if="isSaving" class="saving-indicator">
+    <div v-if="isSaving" class="absolute top-1 right-1 text-blue-400">
       <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path
@@ -54,7 +70,7 @@
     </div>
 
     <!-- Indicateur d'erreur -->
-    <div v-if="hasError" class="error-indicator" title="Erreur de sauvegarde">
+    <div v-if="hasError" class="absolute top-1 right-1 text-w40k-red-400" title="Erreur de sauvegarde">
       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           stroke-linecap="round"
@@ -83,18 +99,18 @@ const emit = defineEmits<{
   'editing-ended': []
 }>()
 
+// Configuration des scores
+const SCORE_LIMITS = {
+  primary: { min: 0, max: 50 },
+  secondary: { min: 0, max: 15 },
+} as const
+
 // État local
 const isEditing = ref(false)
 const editValue = ref(0)
 const isSaving = ref(false)
 const hasError = ref(false)
 const scoreInput = ref<HTMLInputElement>()
-
-// Configuration des scores
-const SCORE_LIMITS = {
-  primary: { min: 0, max: 50 },
-  secondary: { min: 0, max: 15 },
-} as const
 
 // Score maximum selon le type
 const maxScore = computed(() => SCORE_LIMITS[props.scoreType].max)
@@ -103,7 +119,6 @@ const minScore = computed(() => SCORE_LIMITS[props.scoreType].min)
 // Score actuel à afficher (défaut 0)
 const currentScore = computed(() => {
   if (props.scoreType === 'secondary') {
-    // TODO: Implémenter les scores secondaires quand disponibles
     return 0
   }
 
@@ -115,24 +130,26 @@ const currentScore = computed(() => {
 })
 
 const displayScore = computed(() => currentScore.value)
-
 const showEditIcon = computed(() => props.editable && !isEditing.value && !isSaving.value)
 
 const cellClasses = computed(() => {
   const score = currentScore.value
-  return [
-    'score-cell',
-    {
-      'cell-editable': props.editable,
-      'cell-editing': isEditing.value,
-      'cell-current': props.current,
-      'cell-completed': score > 0,
-      'cell-empty': score === 0,
-      'cell-saving': isSaving.value,
-      'cell-error': hasError.value,
-    },
-  ]
+  const baseClasses = 'group'
+  
+  if (!props.editable) return baseClasses
+  if (isEditing.value) return `${baseClasses} border-w40k-red-500 bg-w40k-red-900/20 shadow-w40k-lg scale-102`
+  if (props.current) return `${baseClasses} border-orange-300 bg-orange-900/20 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
+  if (score > 0) return `${baseClasses} border-green-300 bg-green-900/10 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
+  if (hasError.value) return `${baseClasses} border-w40k-red-600 bg-w40k-red-900/30`
+  if (isSaving.value) return `${baseClasses} border-blue-400 bg-blue-900/20`
+  
+  return `${baseClasses} border-gray-400 bg-gray-800/50 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
 })
+
+// Validation du score
+const validateScore = (score: number): boolean => {
+  return score >= minScore.value && score <= maxScore.value && Number.isInteger(score)
+}
 
 // Démarrer l'édition
 const startEditing = async () => {
@@ -146,11 +163,6 @@ const startEditing = async () => {
   await nextTick()
   scoreInput.value?.focus()
   scoreInput.value?.select()
-}
-
-// Validation du score
-const validateScore = (score: number): boolean => {
-  return score >= minScore.value && score <= maxScore.value && Number.isInteger(score)
 }
 
 // Sauvegarder le score
@@ -175,7 +187,6 @@ const saveScore = async () => {
   hasError.value = false
 
   try {
-    // Appel à l'API Phase 1
     await router.put(
       `/parties/${props.gameId}/rounds/${props.round.id}/score`,
       {
@@ -186,7 +197,6 @@ const saveScore = async () => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          // Émettre l'événement de mise à jour
           emit('score-updated', {
             roundId: props.round.id,
             playerId: props.player.id,
@@ -245,7 +255,6 @@ const validateInput = () => {
     editValue.value = minScore.value
   }
   
-  // Reset l'erreur si la valeur est maintenant valide
   if (validateScore(editValue.value)) {
     hasError.value = false
   }
@@ -259,122 +268,32 @@ watch(isEditing, (newValue) => {
 })
 </script>
 
-<!-- <style scoped> TEMPORAIREMENT DÉSACTIVÉ - @apply incompatible avec Tailwind CSS v4
-.score-cell {
-  @apply relative min-h-[3rem] flex items-center justify-center
-         border-2 border-transparent rounded-lg p-2
-         transition-all duration-200 cursor-pointer;
-}
-
-.cell-editable:hover {
-  @apply border-red-300 bg-red-900/10;
-}
-
-.cell-editing {
-  @apply border-red-500 bg-red-900/20 shadow-lg;
-}
-
-.cell-current {
-  @apply border-orange-300 bg-orange-900/20;
-}
-
-.cell-completed {
-  @apply border-green-300 bg-green-900/10;
-}
-
-.cell-empty {
-  @apply border-gray-400 bg-gray-800/50;
-}
-
-.cell-saving {
-  @apply border-blue-400 bg-blue-900/20;
-}
-
-.cell-error {
-  @apply border-red-600 bg-red-900/30;
-}
-
-.score-display {
-  @apply flex items-center gap-2;
-}
-
-.score-value {
-  @apply text-xl font-bold text-white;
-}
-
-.edit-icon {
-  @apply w-4 h-4 text-gray-400 opacity-0 transition-opacity;
-}
-
-.cell-editable:hover .edit-icon {
-  @apply opacity-100;
-}
-
-.score-edit {
-  @apply flex items-center gap-2;
-}
-
-.score-input {
-  @apply w-16 px-2 py-1 text-center font-bold
-         bg-slate-700 border border-red-500 rounded
-         text-white focus:outline-none focus:ring-2 focus:ring-red-300;
-}
-
-.edit-actions {
-  @apply flex gap-1;
-}
-
-.save-btn,
-.cancel-btn {
-  @apply w-6 h-6 flex items-center justify-center rounded
-         text-xs font-bold transition-colors;
-}
-
-.save-btn {
-  @apply bg-green-600 hover:bg-green-500 text-white;
-}
-
-.cancel-btn {
-  @apply bg-red-600 hover:bg-red-500 text-white;
-}
-
-.saving-indicator {
-  @apply absolute top-1 right-1 text-blue-400;
-}
-
-.error-indicator {
-  @apply absolute top-1 right-1 text-red-400;
-}
-
-/* Animation pour les transitions */
-.score-cell {
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    transform 0.1s ease;
-}
-
-.cell-editing {
+<style scoped>
+.scale-102 {
   transform: scale(1.02);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .score-cell {
-    @apply min-h-[2.5rem];
+  .min-h-12 {
+    min-height: 2.5rem;
   }
-
-  .score-value {
-    @apply text-lg;
+  
+  .text-xl {
+    font-size: 1.125rem;
   }
-
-  .score-input {
-    @apply w-14 text-sm;
+  
+  .w-16 {
+    width: 3.5rem;
   }
-
-  .save-btn,
-  .cancel-btn {
-    @apply w-8 h-8 text-sm;
+  
+  .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .w-6, .h-6 {
+    width: 2rem;
+    height: 2rem;
   }
 }
-</style> -->
+</style>

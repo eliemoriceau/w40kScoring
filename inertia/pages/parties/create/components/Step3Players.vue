@@ -236,49 +236,84 @@ const isValid = computed(() => {
   return isValidForProgression
 })
 
-// Méthodes pour l'adversaire
+// Configuration des adversaires
+const OPPONENT_CONFIG = {
+  icons: {
+    existing: '👤',
+    invite: '✉️',
+    guest: '🤖',
+  },
+  roles: {
+    existing: 'Utilisateur Existant',
+    invite: 'Invité par Email',
+    guest: 'Joueur Invité',
+  },
+  fallbacks: {
+    name: 'Adversaire',
+    role: 'Adversaire',
+  },
+} as const
+
+// Méthodes pour l'adversaire optimisées
 const getOpponentName = (): string => {
   // Sécurité : vérifier que opponentType existe
   if (!props.data.opponentType) {
-    return 'Adversaire'
+    return OPPONENT_CONFIG.fallbacks.name
   }
 
   if (props.data.opponentType === 'existing' && props.data.opponentId) {
     const friend = props.userFriends.find((f) => f.id === props.data.opponentId)
     return friend?.pseudo || 'Utilisateur Existant'
   }
-  return props.data.opponentPseudo || props.data.opponentEmail || 'Adversaire'
+  return props.data.opponentPseudo || props.data.opponentEmail || OPPONENT_CONFIG.fallbacks.name
 }
 
 const getOpponentIcon = (): string => {
-  const icons = {
-    existing: '👤',
-    invite: '✉️',
-    guest: '🤖',
-  }
-  return icons[props.data.opponentType] || '👤'
+  return OPPONENT_CONFIG.icons[props.data.opponentType] || OPPONENT_CONFIG.icons.existing
 }
 
 const getOpponentRole = (): string => {
-  const roles = {
-    existing: 'Utilisateur Existant',
-    invite: 'Invité par Email',
-    guest: 'Joueur Invité',
-  }
-  return roles[props.data.opponentType] || 'Adversaire'
+  return OPPONENT_CONFIG.roles[props.data.opponentType] || OPPONENT_CONFIG.fallbacks.role
 }
 
+// Configuration des statuts
+const STATUS_CONFIG = {
+  text: {
+    existing: 'Confirmé',
+    guest: 'Prêt',
+    invite: {
+      confirmed: 'Confirmé',
+      pending: 'En Attente',
+    },
+  },
+  classes: {
+    confirmed: 'confirmed',
+    pending: 'pending',
+  },
+} as const
+
 const getOpponentStatus = (): string => {
-  if (props.data.opponentType === 'existing') return 'Confirmé'
-  if (props.data.opponentType === 'invite')
-    return isOpponentConfirmed.value ? 'Confirmé' : 'En Attente'
+  const type = props.data.opponentType
+  
+  if (type === 'existing') return STATUS_CONFIG.text.existing
+  if (type === 'guest') return STATUS_CONFIG.text.guest
+  if (type === 'invite') {
+    return isOpponentConfirmed.value 
+      ? STATUS_CONFIG.text.invite.confirmed 
+      : STATUS_CONFIG.text.invite.pending
+  }
   return 'Prêt'
 }
 
 const getOpponentStatusClass = (): string => {
-  if (props.data.opponentType === 'existing' || props.data.opponentType === 'guest')
-    return 'confirmed'
-  return isOpponentConfirmed.value ? 'confirmed' : 'pending'
+  const type = props.data.opponentType
+  
+  if (type === 'existing' || type === 'guest') {
+    return STATUS_CONFIG.classes.confirmed
+  }
+  return isOpponentConfirmed.value 
+    ? STATUS_CONFIG.classes.confirmed 
+    : STATUS_CONFIG.classes.pending
 }
 
 const getOpponentArmyHint = (): string => {
@@ -298,23 +333,37 @@ const getScoreManagementText = (): string => {
   return 'Les deux joueurs pourront saisir et modifier les scores pendant la partie'
 }
 
-// Autres méthodes
-const getGameTypeDisplay = (gameType: GameType): string => {
-  const displays = {
+// Configuration des types de jeu et durées
+const GAME_CONFIG = {
+  types: {
     MATCHED_PLAY: 'Jeu Équilibré',
     NARRATIVE: 'Jeu Narratif',
     OPEN_PLAY: 'Jeu Libre',
-  }
-  return displays[gameType] || gameType
+  },
+  durations: [
+    { maxPoints: 500, duration: '1h' },
+    { maxPoints: 1000, duration: '1h30' },
+    { maxPoints: 1500, duration: '1h45' },
+    { maxPoints: 2000, duration: '2h' },
+  ],
+  defaultDuration: '2h30+',
+} as const
+
+// Autres méthodes optimisées
+const getGameTypeDisplay = (gameType: GameType): string => {
+  return GAME_CONFIG.types[gameType] || gameType
 }
 
 const getEstimatedDuration = (): string => {
   const points = props.data.pointsLimit
-  if (points <= 500) return '1h'
-  if (points <= 1000) return '1h30'
-  if (points <= 1500) return '1h45'
-  if (points <= 2000) return '2h'
-  return '2h30+'
+  
+  for (const config of GAME_CONFIG.durations) {
+    if (points <= config.maxPoints) {
+      return config.duration
+    }
+  }
+  
+  return GAME_CONFIG.defaultDuration
 }
 
 // Gestion des mises à jour

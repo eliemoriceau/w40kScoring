@@ -239,7 +239,7 @@ test.group('Wizard Integration', (group) => {
     assert.equal(metadata.gameType, 'MATCHED_PLAY')
     assert.equal(metadata.pointsLimit, 2000)
     assert.equal(metadata.playersCount, 2)
-    assert.equal(metadata.roundsCount, 1)
-    assert.isTrue(metadata.enableRounds)
+    assert.equal(metadata.roundsCount, 0) // Rounds désormais ajoutés après création
+    assert.isFalse(metadata.enableRounds) // Rounds désormais créés automatiquement
   })
 })

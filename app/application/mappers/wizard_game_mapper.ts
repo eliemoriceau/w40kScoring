@@ -26,21 +26,9 @@ export class WizardGameMapper {
       userId: player.userId || null,
     }))
 
-    // Mapper les rounds si activés
-    let rounds: RoundData[] | undefined
-    if (wizardData.enableRounds && wizardData.rounds && wizardData.rounds.length > 0) {
-      rounds = wizardData.rounds.map((round) => ({
-        roundNumber: round.roundNumber,
-        playerScore: round.playerScore || 0,
-        opponentScore: round.opponentScore || 0,
-        scores: round.scores?.map((score) => ({
-          playerId: score.playerId,
-          scoreType: score.scoreType,
-          scoreName: score.scoreName || '',
-          scoreValue: score.scoreValue,
-        })),
-      }))
-    }
+    // Ne plus inclure les rounds - ils seront créés automatiquement
+    // Les rounds sont désormais créés automatiquement lors de la création de partie
+    const rounds: RoundData[] | undefined = undefined
 
     return {
       userId: currentUserId,
@@ -191,8 +179,8 @@ export class WizardGameMapper {
       pointsLimit: wizardData.pointsLimit,
       mission: wizardData.mission,
       opponentType: wizardData.opponentType,
-      enableRounds: wizardData.enableRounds,
-      roundsCount: wizardData.rounds?.length || 0,
+      enableRounds: false, // Rounds désormais ajoutés après création
+      roundsCount: 0, // Pas de rounds lors de la création initiale
       playersCount: wizardData.players.length,
     }
   }

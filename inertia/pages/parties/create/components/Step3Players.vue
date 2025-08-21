@@ -13,7 +13,19 @@
         <h3 class="section-title">Joueurs de la Partie</h3>
         <p class="section-description">Vérifiez et complétez les informations des joueurs</p>
 
-        <div class="players-list">
+        <!-- Message d'erreur si données manquantes -->
+        <div v-if="!props.data.opponentType" class="missing-data-warning">
+          <div class="warning-icon">⚠️</div>
+          <div class="warning-content">
+            <h4>Configuration Incomplète</h4>
+            <p>Vous devez d'abord configurer l'adversaire à l'étape précédente.</p>
+            <button @click="$emit('previous')" class="btn-back-to-step2">
+              ⮜ Retour à l'Étape 2
+            </button>
+          </div>
+        </div>
+
+        <div v-else class="players-list">
           <!-- Joueur principal (utilisateur actuel) -->
           <div class="player-card current-user">
             <div class="player-header">
@@ -171,7 +183,7 @@
       <button @click="$emit('previous')" class="btn-previous">⮜ Précédent</button>
 
       <button
-        @click="$emit('next')"
+        @click="handleNext"
         :disabled="!isValid || loading"
         class="btn-next"
         :class="{ loading: loading }"
@@ -213,15 +225,29 @@ const isOpponentConfirmed = ref(false)
 
 // Computed
 const isValid = computed(() => {
-  // Validation de base : au moins 2 joueurs configurés
-  return props.data.players && props.data.players.length >= 2
+  // Si nous avons un opponentType et currentUser, on peut considérer l'étape valide
+  // Les joueurs seront créés automatiquement
+  const hasOpponentType = !!props.data.opponentType
+  const hasCurrentUser = !!props.currentUser
+  const hasPlayers = props.data.players && props.data.players.length >= 2
+
+  // Si nous avons les données de base mais pas encore les joueurs, on considère valide
+  // car ils seront créés automatiquement
+  const isValidForProgression = hasOpponentType && hasCurrentUser
+
+  return isValidForProgression
 })
 
 // Méthodes pour l'adversaire
 const getOpponentName = (): string => {
+  // Sécurité : vérifier que opponentType existe
+  if (!props.data.opponentType) {
+    return 'Adversaire'
+  }
+
   if (props.data.opponentType === 'existing' && props.data.opponentId) {
-    const friend = props.props.userFriends.find((f) => f.id === props.data.opponentId)
-    return friend?.pseudo || 'Adversaire'
+    const friend = props.userFriends.find((f) => f.id === props.data.opponentId)
+    return friend?.pseudo || 'Utilisateur Existant'
   }
   return props.data.opponentPseudo || props.data.opponentEmail || 'Adversaire'
 }
@@ -237,7 +263,7 @@ const getOpponentIcon = (): string => {
 
 const getOpponentRole = (): string => {
   const roles = {
-    existing: 'Ami',
+    existing: 'Utilisateur Existant',
     invite: 'Invité par Email',
     guest: 'Joueur Invité',
   }
@@ -295,7 +321,7 @@ const getEstimatedDuration = (): string => {
 
 // Gestion des mises à jour
 const updateCurrentPlayerArmy = () => {
-  updatePlayerArmy(props.props.currentUser.id, currentPlayerArmy.value)
+  updatePlayerArmy(props.currentUser.id, currentPlayerArmy.value)
 }
 
 const updateOpponentArmy = () => {
@@ -323,10 +349,44 @@ const updatePlayerArmy = (playerId: number, army: string) => {
   emit('validate')
 }
 
+// Navigation
+const handleNext = () => {
+  // S'assurer que les joueurs sont créés avant de continuer
+  if (!props.data.players || props.data.players.length < 2) {
+    // Créer les joueurs avant de continuer
+
+    const players = [
+      {
+        pseudo: props.currentUser.pseudo,
+        army: currentPlayerArmy.value || '',
+        userId: props.currentUser.id,
+        isCurrentUser: true,
+      },
+      {
+        pseudo: getOpponentName(),
+        army: opponentArmy.value || '',
+        userId: props.data.opponentId || null,
+        isCurrentUser: false,
+      },
+    ]
+
+    // Mettre à jour les données et attendre avant de continuer
+    emit('update:data', { players })
+
+    // Attendre un tick pour que les données soient mises à jour
+    setTimeout(() => {
+      emit('next')
+    }, 10)
+  } else {
+    // Les joueurs existent déjà
+    emit('next')
+  }
+}
+
 // Actions spéciales
 const resendInvitation = () => {
   // Logique pour renvoyer l'invitation
-  console.log("Renvoi de l'invitation à", props.data.opponentEmail)
+  // Renvoyer l'invitation
 }
 
 const copyInviteLink = () => {
@@ -338,24 +398,37 @@ const copyInviteLink = () => {
 
 // Lifecycle
 onMounted(() => {
+  // Composant monté
+
   // Initialiser les joueurs si ce n'est pas déjà fait
   if (!props.data.players || props.data.players.length === 0) {
+    // Initialiser les joueurs depuis zéro
+
+    // Vérifier que nous avons les données nécessaires
+    if (!props.currentUser) {
+      // Erreur : pas de currentUser disponible
+      return
+    }
+
     const players = [
       {
-        pseudo: props.props.currentUser.pseudo,
+        pseudo: props.currentUser.pseudo,
         army: '',
-        userId: props.props.currentUser.id,
+        userId: props.currentUser.id,
         isCurrentUser: true,
       },
       {
         pseudo: getOpponentName(),
         army: '',
-        userId: props.data.opponentId,
+        userId: props.data.opponentId || null,
         isCurrentUser: false,
       },
     ]
 
+    // Joueurs créés
     emit('update:data', { players })
+  } else {
+    // Les joueurs existent déjà
   }
 
   // Initialiser les valeurs des armées
@@ -434,6 +507,50 @@ onMounted(() => {
   color: rgba(255, 255, 255, 0.7);
   margin: 0 0 1.5rem 0;
   line-height: 1.4;
+}
+
+/* Message d'avertissement données manquantes */
+.missing-data-warning {
+  background: rgba(255, 165, 0, 0.1);
+  border: 2px solid #ffa500;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.warning-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.warning-content h4 {
+  color: #ffa500;
+  font-size: 1.3rem;
+  margin: 0 0 1rem 0;
+}
+
+.warning-content p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.4;
+}
+
+.btn-back-to-step2 {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #ffa500, #ff8c00);
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-back-to-step2:hover {
+  background: linear-gradient(135deg, #ff8c00, #ffa500);
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(255, 165, 0, 0.4);
 }
 
 /* Liste des joueurs */

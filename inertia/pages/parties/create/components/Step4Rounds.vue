@@ -310,7 +310,7 @@ const isValid = computed(() => {
 // Méthodes pour les noms des joueurs
 const getPlayerName = (isCurrentUser: boolean): string => {
   if (isCurrentUser) {
-    return props.props.currentUser.pseudo
+    return props.currentUser.pseudo
   }
 
   const opponent = props.data.players?.find((p) => !p.isCurrentUser)

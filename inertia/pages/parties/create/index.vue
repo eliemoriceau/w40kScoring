@@ -5,7 +5,7 @@
       <div class="max-w-4xl mx-auto px-4">
         <h1 class="wizard-title">⚔️ Créer une Nouvelle Bataille</h1>
         <p class="wizard-subtitle">
-          Configurez votre partie Warhammer 40K en {{ totalSteps }} étapes
+          Créez votre partie Warhammer 40K en {{ totalSteps }} étapes simples
         </p>
 
         <!-- Indicateur de progression -->
@@ -30,7 +30,7 @@
             <component
               :is="currentStepComponent"
               :data="wizardData"
-              :props="stepProps"
+              v-bind="stepProps"
               :errors="wizardState.errors"
               :loading="isLoading"
               @update:data="handleDataUpdate"
@@ -38,6 +38,7 @@
               @previous="handlePrevious"
               @complete="handleComplete"
               @validate="handleValidation"
+              @step-change="handleStepChange"
             />
           </KeepAlive>
         </Transition>
@@ -94,7 +95,7 @@ import { ref, computed, defineAsyncComponent, onMounted, onUnmounted } from 'vue
 import { router } from '@inertiajs/vue3'
 import { useGameWizard } from './composables/use_game_wizard'
 import { useGameValidation } from './composables/use_game_validation'
-import type { WizardProps, NotificationData } from './types/wizard'
+import type { WizardProps, NotificationData, WizardStep } from './types/wizard'
 
 // Import des composants
 import StepIndicator from './components/StepIndicator.vue'
@@ -117,6 +118,7 @@ const {
   completionProgress,
   goToNextStep,
   goToPreviousStep,
+  goToStep,
   updateData,
   validateCurrentStep,
   setLoading,
@@ -128,7 +130,7 @@ const {
 const { validateForSubmission } = useGameValidation()
 
 // État local
-const totalSteps = 5
+const totalSteps = 4
 const notification = ref<NotificationData | null>(null)
 const showExitConfirmation = ref(false)
 
@@ -138,8 +140,7 @@ const currentStepComponent = computed(() => {
     1: defineAsyncComponent(() => import('./components/Step1GameConfig.vue')),
     2: defineAsyncComponent(() => import('./components/Step2Opponent.vue')),
     3: defineAsyncComponent(() => import('./components/Step3Players.vue')),
-    4: defineAsyncComponent(() => import('./components/Step4Rounds.vue')),
-    5: defineAsyncComponent(() => import('./components/Step5Summary.vue')),
+    4: defineAsyncComponent(() => import('./components/Step5Summary.vue')), // Step5 devient Step4
   }
 
   return components[currentStep.value]
@@ -255,6 +256,12 @@ const handleComplete = async () => {
 
 const handleValidation = () => {
   validateCurrentStep()
+}
+
+const handleStepChange = (step: number) => {
+  if (step >= 1 && step <= totalSteps) {
+    goToStep(step as WizardStep)
+  }
 }
 
 const handleSaveProgress = () => {

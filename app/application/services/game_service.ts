@@ -19,6 +19,7 @@ import { ScoreRepository } from '#domain/repositories/score_repository'
 import { IdGenerator } from '#domain/services/id_generator'
 import CreateGameCommand from '#application/commands/create_game_command'
 import StartGameCommand from '#application/commands/start_game_command'
+import UpdateRoundScoreCommand from '#application/commands/update_round_score_command'
 // Partie service imports
 import { CreatePartieDto } from '#application/dto/create_partie_dto'
 import { PartieResponseDto, PartieListResponseDto } from '#application/dto/partie_response_dto'
@@ -155,7 +156,12 @@ export default class GameService {
     const rounds: Round[] = []
     const scores: Score[] = []
 
-    if (data.rounds) {
+    // NOUVEAU : Créer automatiquement 5 rounds vides si aucun rounds fourni (undefined)
+    // Si rounds: [] est passé explicitement, on respecte la volonté de l'utilisateur
+    if (data.rounds === undefined) {
+      const initialRounds = await this.createInitialRounds(savedGame.id)
+      rounds.push(...initialRounds)
+    } else if (data.rounds && data.rounds.length > 0) {
       for (const roundData of data.rounds) {
         // Create round
         const tempRoundId = new RoundId(Math.floor(Math.random() * 1000000))
@@ -369,6 +375,102 @@ export default class GameService {
     }
 
     return { round: savedRound, scores }
+  }
+
+  /**
+   * Crée automatiquement 5 rounds vides pour une nouvelle partie
+   *
+   * Chaque round est créé avec des scores par défaut à 0
+   * Utilisé lors de la création d'une partie via le wizard
+   */
+  private async createInitialRounds(gameId: GameId): Promise<Round[]> {
+    const rounds: Round[] = []
+
+    for (let i = 1; i <= 5; i++) {
+      const roundId = new RoundId(Math.floor(Math.random() * 1000000))
+      const round = Round.createEmpty(roundId, gameId, new RoundNumber(i))
+
+      const savedRound = await this.roundRepository.save(round)
+      rounds.push(savedRound)
+    }
+
+    return rounds
+  }
+
+  /**
+   * Met à jour le score d'un round spécifique
+   *
+   * Utilisé pour l'édition inline des scores dans l'interface
+   */
+  async updateRoundScore(command: UpdateRoundScoreCommand): Promise<Round> {
+    // 1. Récupérer le round
+    const round = await this.roundRepository.findById(command.roundId)
+    if (!round) {
+      throw new Error(`Round not found: ${command.roundId.value}`)
+    }
+
+    // 2. Vérifier que le round appartient à la bonne partie
+    if (!round.gameId.equals(command.gameId)) {
+      throw new Error(
+        `Round ${command.roundId.value} does not belong to game ${command.gameId.value}`
+      )
+    }
+
+    // 3. Récupérer les scores actuels (défaut 0)
+    const currentPlayerScore = round.playerScore ?? 0
+    const currentOpponentScore = round.opponentScore ?? 0
+
+    // 4. Déterminer quel score mettre à jour
+    const isMainPlayer = await this.isMainPlayer(command.gameId, command.playerId)
+
+    const newPlayerScore = isMainPlayer ? command.score : currentPlayerScore
+    const newOpponentScore = isMainPlayer ? currentOpponentScore : command.score
+
+    // 5. Mettre à jour les scores (garantis non-undefined)
+    round.updateScores(newPlayerScore, newOpponentScore)
+
+    // 6. Sauvegarder
+    return await this.roundRepository.save(round)
+  }
+
+  /**
+   * Vérifie si un joueur est le joueur principal de la partie
+   *
+   * Le joueur principal est celui qui a créé la partie (game.userId)
+   */
+  private async isMainPlayer(gameId: GameId, playerId: PlayerId): Promise<boolean> {
+    const game = await this.gameRepository.findById(gameId)
+    if (!game) {
+      throw new Error(`Game not found: ${gameId.value}`)
+    }
+
+    const players = await this.playerRepository.findByGameId(gameId)
+    const mainPlayer = players.find((p) => p.userId === game.userId)
+
+    return mainPlayer?.id.equals(playerId) ?? false
+  }
+
+  /**
+   * Vérifie qu'un utilisateur a accès à une partie
+   *
+   * L'accès est autorisé si l'utilisateur est le créateur ou un participant
+   */
+  async userHasAccessToGame(gameId: GameId, userId: number): Promise<boolean> {
+    const game = await this.gameRepository.findById(gameId)
+    if (!game) {
+      return false
+    }
+
+    // L'utilisateur est le créateur de la partie
+    if (game.userId === userId) {
+      return true
+    }
+
+    // L'utilisateur est un participant de la partie
+    const players = await this.playerRepository.findByGameId(gameId)
+    const userPlayer = players.find((p) => p.userId === userId)
+
+    return !!userPlayer
   }
 
   // ========================================

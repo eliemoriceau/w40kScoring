@@ -2,7 +2,7 @@
  * Types TypeScript pour le Wizard de Création de Game W40K
  */
 
-export type WizardStep = 1 | 2 | 3 | 4 | 5
+export type WizardStep = 1 | 2 | 3 | 4
 
 export type GameType = 'MATCHED_PLAY' | 'NARRATIVE' | 'OPEN_PLAY'
 export type OpponentType = 'existing' | 'invite' | 'guest'
@@ -55,7 +55,6 @@ export interface StepValidation {
   step2: boolean
   step3: boolean
   step4: boolean
-  step5: boolean
 }
 
 export interface WizardState {

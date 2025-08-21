@@ -12,9 +12,7 @@
             </h3>
             <div class="total-score">{{ getPlayerTotalScore(players[0]) }}</div>
             <div class="score-breakdown">
-              <span class="primary-score">
-                Primaires: {{ getPrimaryScore(players[0]) }}
-              </span>
+              <span class="primary-score"> Primaires: {{ getPrimaryScore(players[0]) }} </span>
               <span class="secondary-score">
                 Secondaires: {{ getSecondaryScore(players[0]) }}
               </span>
@@ -42,9 +40,7 @@
             </h3>
             <div class="total-score">{{ getPlayerTotalScore(players[1]) }}</div>
             <div class="score-breakdown">
-              <span class="primary-score">
-                Primaires: {{ getPrimaryScore(players[1]) }}
-              </span>
+              <span class="primary-score"> Primaires: {{ getPrimaryScore(players[1]) }} </span>
               <span class="secondary-score">
                 Secondaires: {{ getSecondaryScore(players[1]) }}
               </span>
@@ -86,7 +82,12 @@
       <!-- Message si aucun round -->
       <div v-if="localRounds.length === 0" class="no-rounds">
         <div class="no-rounds-content">
-          <svg class="w-12 h-12 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            class="w-12 h-12 text-gray-600 mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -95,7 +96,9 @@
             />
           </svg>
           <p class="text-gray-400">Aucun round créé pour cette partie</p>
-          <p class="text-sm text-gray-500">Les rounds seront automatiquement créés lors du démarrage</p>
+          <p class="text-sm text-gray-500">
+            Les rounds seront automatiquement créés lors du démarrage
+          </p>
         </div>
       </div>
     </div>
@@ -117,10 +120,7 @@
         <div class="progress-item">
           <span class="progress-label">Rounds terminés</span>
           <div class="progress-bar">
-            <div
-              class="progress-fill"
-              :style="{ width: `${getCompletionPercentage()}%` }"
-            />
+            <div class="progress-fill" :style="{ width: `${getCompletionPercentage()}%` }" />
           </div>
           <span class="progress-text">{{ getCompletedRounds() }}/{{ localRounds.length }}</span>
         </div>
@@ -128,10 +128,7 @@
         <div class="progress-item">
           <span class="progress-label">Scores saisis</span>
           <div class="progress-bar">
-            <div
-              class="progress-fill"
-              :style="{ width: `${getScoreEntryPercentage()}%` }"
-            />
+            <div class="progress-fill" :style="{ width: `${getScoreEntryPercentage()}%` }" />
           </div>
           <span class="progress-text">{{ getEnteredScores() }}/{{ getTotalPossibleScores() }}</span>
         </div>
@@ -139,11 +136,7 @@
     </div>
 
     <!-- Notification toast -->
-    <div
-      v-if="showNotification"
-      :class="notificationClasses"
-      class="notification-toast"
-    >
+    <div v-if="showNotification" :class="notificationClasses" class="notification-toast">
       <div class="notification-content">
         <span class="notification-icon">{{ notificationIcon }}</span>
         <span class="notification-message">{{ notificationMessage }}</span>
@@ -259,7 +252,7 @@ const getEnteredScores = () => {
 }
 
 const getTotalPossibleScores = () => {
-  const playersCount = props.players.filter(p => p).length
+  const playersCount = props.players.filter((p) => p).length
   return localRounds.value.length * playersCount
 }
 
@@ -276,14 +269,16 @@ const showProgressIndicators = computed(() => {
 // Gestion du gagnant
 const getWinnerText = () => {
   if (!props.game.winner) return ''
-  
+
   switch (props.game.winner) {
     case 'DRAW':
       return 'Égalité'
     case 'PLAYER':
       return props.players[0]?.isMainPlayer ? 'Victoire !' : `${props.players[0]?.pseudo} gagne`
     case 'OPPONENT':
-      return props.players[1]?.isMainPlayer ? 'Victoire !' : `${props.players[1]?.pseudo || 'Adversaire'} gagne`
+      return props.players[1]?.isMainPlayer
+        ? 'Victoire !'
+        : `${props.players[1]?.pseudo || 'Adversaire'} gagne`
     default:
       return ''
   }
@@ -291,15 +286,15 @@ const getWinnerText = () => {
 
 const winnerClasses = computed(() => {
   if (!props.game.winner) return ''
-  
+
   const isMainPlayerWin =
     (props.game.winner === 'PLAYER' && props.players[0]?.isMainPlayer) ||
     (props.game.winner === 'OPPONENT' && props.players[1]?.isMainPlayer)
-  
+
   if (props.game.winner === 'DRAW') {
     return 'text-yellow-400 font-bold'
   }
-  
+
   return isMainPlayerWin ? 'text-green-400 font-bold' : 'text-red-400 font-bold'
 })
 
@@ -374,7 +369,10 @@ const handleSecondaryScoreUpdate = (event: SecondaryScoreUpdateEvent) => {
 }
 
 // Système de notifications
-const showNotificationMessage = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+const showNotificationMessage = (
+  message: string,
+  type: 'success' | 'error' | 'info' = 'success'
+) => {
   notification.message = message
   notification.type = type
   notification.show = true
@@ -575,23 +573,23 @@ const notificationClasses = computed(() => [
   .summary-grid {
     @apply grid-cols-1 gap-4;
   }
-  
+
   .vs-section {
     @apply order-3;
   }
-  
+
   .total-score {
     @apply text-2xl;
   }
-  
+
   .score-breakdown {
     @apply flex-row justify-center gap-4;
   }
-  
+
   .rounds-header {
     @apply text-center;
   }
-  
+
   .rounds-legend {
     @apply justify-center;
   }

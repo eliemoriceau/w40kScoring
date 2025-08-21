@@ -115,21 +115,23 @@ const props = defineProps<{
 }>()
 
 // Conversion des données pour le nouveau composant
-const gameDetailData = computed((): GameDetailDto => ({
-  id: props.game.id,
-  userId: props.game.userId,
-  gameType: props.game.gameType,
-  pointsLimit: props.game.pointsLimit,
-  status: props.game.status,
-  mission: props.game.mission,
-  deployment: props.game.deployment,
-  primaryScoringMethod: props.game.primaryScoringMethod,
-  notes: props.game.notes,
-  winner: props.game.winner,
-  createdAt: props.game.createdAt,
-  startedAt: props.game.startedAt,
-  completedAt: props.game.completedAt,
-}))
+const gameDetailData = computed(
+  (): GameDetailDto => ({
+    id: props.game.id,
+    userId: props.game.userId,
+    gameType: props.game.gameType,
+    pointsLimit: props.game.pointsLimit,
+    status: props.game.status,
+    mission: props.game.mission,
+    deployment: props.game.deployment,
+    primaryScoringMethod: props.game.primaryScoringMethod,
+    notes: props.game.notes,
+    winner: props.game.winner,
+    createdAt: props.game.createdAt,
+    startedAt: props.game.startedAt,
+    completedAt: props.game.completedAt,
+  })
+)
 
 // État local (conservation pour compatibilité avec l'ancien code)
 const isLoading = ref(false)

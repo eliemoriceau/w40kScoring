@@ -2,9 +2,7 @@
   <div class="secondary-scores">
     <div class="section-header">
       <h3 class="section-title">Scores Secondaires</h3>
-      <p class="section-description">
-        Objectifs secondaires par round (maximum 15 points chacun)
-      </p>
+      <p class="section-description">Objectifs secondaires par round (maximum 15 points chacun)</p>
     </div>
 
     <!-- Grille responsive pour les deux joueurs -->
@@ -13,11 +11,7 @@
       <div class="player-section">
         <h4 class="player-title">{{ players[0]?.pseudo || 'Joueur 1' }}</h4>
         <div class="secondary-list">
-          <div
-            v-for="round in rounds"
-            :key="`player1-round-${round.id}`"
-            class="round-secondary"
-          >
+          <div v-for="round in rounds" :key="`player1-round-${round.id}`" class="round-secondary">
             <div class="round-header">
               <span class="round-label">Round {{ round.roundNumber }}</span>
               <button
@@ -49,11 +43,7 @@
                   <span class="score-value">{{ score.scoreValue }} pts</span>
                 </div>
                 <div v-if="canEdit" class="score-actions">
-                  <button
-                    @click="editSecondaryScore(score)"
-                    class="edit-btn"
-                    title="Modifier"
-                  >
+                  <button @click="editSecondaryScore(score)" class="edit-btn" title="Modifier">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         stroke-linecap="round"
@@ -81,10 +71,7 @@
               </div>
 
               <!-- Message vide -->
-              <div
-                v-if="!hasSecondaryScores(round.id, players[0]?.id)"
-                class="empty-message"
-              >
+              <div v-if="!hasSecondaryScores(round.id, players[0]?.id)" class="empty-message">
                 <span class="text-gray-500 text-sm">Aucun score secondaire</span>
               </div>
             </div>
@@ -102,11 +89,7 @@
       <div v-if="players[1]" class="player-section">
         <h4 class="player-title">{{ players[1].pseudo }}</h4>
         <div class="secondary-list">
-          <div
-            v-for="round in rounds"
-            :key="`player2-round-${round.id}`"
-            class="round-secondary"
-          >
+          <div v-for="round in rounds" :key="`player2-round-${round.id}`" class="round-secondary">
             <div class="round-header">
               <span class="round-label">Round {{ round.roundNumber }}</span>
               <button
@@ -138,11 +121,7 @@
                   <span class="score-value">{{ score.scoreValue }} pts</span>
                 </div>
                 <div v-if="canEdit" class="score-actions">
-                  <button
-                    @click="editSecondaryScore(score)"
-                    class="edit-btn"
-                    title="Modifier"
-                  >
+                  <button @click="editSecondaryScore(score)" class="edit-btn" title="Modifier">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         stroke-linecap="round"
@@ -170,10 +149,7 @@
               </div>
 
               <!-- Message vide -->
-              <div
-                v-if="!hasSecondaryScores(round.id, players[1].id)"
-                class="empty-message"
-              >
+              <div v-if="!hasSecondaryScores(round.id, players[1].id)" class="empty-message">
                 <span class="text-gray-500 text-sm">Aucun score secondaire</span>
               </div>
             </div>
@@ -200,10 +176,8 @@
   <!-- Modal pour ajouter/éditer un score secondaire -->
   <div v-if="showModal" class="modal-overlay" @click="closeModal">
     <div class="modal-content" @click.stop>
-      <h3 class="modal-title">
-        {{ editingScore ? 'Modifier' : 'Ajouter' }} un Score Secondaire
-      </h3>
-      
+      <h3 class="modal-title">{{ editingScore ? 'Modifier' : 'Ajouter' }} un Score Secondaire</h3>
+
       <form @submit.prevent="saveSecondaryScore" class="modal-form">
         <div class="form-group">
           <label for="scoreName" class="form-label">Nom de l'objectif</label>
@@ -232,9 +206,7 @@
         </div>
 
         <div class="modal-actions">
-          <button type="button" @click="closeModal" class="btn-cancel">
-            Annuler
-          </button>
+          <button type="button" @click="closeModal" class="btn-cancel">Annuler</button>
           <button type="submit" class="btn-save" :disabled="isLoading">
             {{ isLoading ? 'Sauvegarde...' : 'Sauvegarder' }}
           </button>
@@ -533,11 +505,11 @@ const closeModal = () => {
   .players-grid {
     @apply grid-cols-1;
   }
-  
+
   .secondary-score-item {
     @apply flex-col items-start gap-2;
   }
-  
+
   .score-actions {
     @apply self-end;
   }

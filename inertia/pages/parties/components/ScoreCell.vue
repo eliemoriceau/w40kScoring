@@ -44,14 +44,7 @@
     <!-- Indicateur de sauvegarde -->
     <div v-if="isSaving" class="saving-indicator">
       <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-        <circle
-          class="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          stroke-width="4"
-        />
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path
           class="opacity-75"
           fill="currentColor"
@@ -328,7 +321,7 @@ watch(isEditing, (newValue) => {
 
 /* Animation pour les transitions */
 .score-cell {
-  transition: 
+  transition:
     border-color 0.2s ease,
     background-color 0.2s ease,
     transform 0.1s ease;
@@ -343,15 +336,15 @@ watch(isEditing, (newValue) => {
   .score-cell {
     @apply min-h-[2.5rem];
   }
-  
+
   .score-value {
     @apply text-lg;
   }
-  
+
   .score-input {
     @apply w-14 text-sm;
   }
-  
+
   .save-btn,
   .cancel-btn {
     @apply w-8 h-8 text-sm;

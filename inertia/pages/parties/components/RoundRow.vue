@@ -105,7 +105,7 @@ const handleEditingStarted = () => {
 
 const handleEditingEnded = () => {
   isEditing.value = false
-  
+
   // Vérifier si le round est maintenant complété
   if (
     !props.round.isCompleted &&
@@ -203,27 +203,27 @@ const handleEditingEnded = () => {
   .scores-row {
     @apply grid-cols-1 gap-3;
   }
-  
+
   .vs-divider {
     @apply order-2;
   }
-  
+
   .vs-text {
     @apply text-xs px-4 py-1;
   }
-  
+
   .player-score:first-child {
     @apply order-1;
   }
-  
+
   .player-score:last-child {
     @apply order-3;
   }
-  
+
   .round-header {
     @apply flex-col gap-2 text-center;
   }
-  
+
   .round-number {
     @apply text-base;
   }
@@ -234,7 +234,7 @@ const handleEditingEnded = () => {
   .scores-row {
     @apply gap-3;
   }
-  
+
   .player-name {
     @apply text-xs;
   }

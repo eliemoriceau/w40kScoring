@@ -3,7 +3,7 @@ import RoundId from '#domain/value-objects/round_id'
 
 /**
  * Event émis lors de la mise à jour des scores d'un round
- * 
+ *
  * Déclenché lors de l'édition inline des scores
  */
 export default class RoundScoresUpdatedEvent implements DomainEvent {

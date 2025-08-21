@@ -379,31 +379,27 @@ export default class GameService {
 
   /**
    * Crée automatiquement 5 rounds vides pour une nouvelle partie
-   * 
+   *
    * Chaque round est créé avec des scores par défaut à 0
    * Utilisé lors de la création d'une partie via le wizard
    */
   private async createInitialRounds(gameId: GameId): Promise<Round[]> {
     const rounds: Round[] = []
-    
+
     for (let i = 1; i <= 5; i++) {
       const roundId = new RoundId(Math.floor(Math.random() * 1000000))
-      const round = Round.createEmpty(
-        roundId,
-        gameId,
-        new RoundNumber(i)
-      )
-      
+      const round = Round.createEmpty(roundId, gameId, new RoundNumber(i))
+
       const savedRound = await this.roundRepository.save(round)
       rounds.push(savedRound)
     }
-    
+
     return rounds
   }
 
   /**
    * Met à jour le score d'un round spécifique
-   * 
+   *
    * Utilisé pour l'édition inline des scores dans l'interface
    */
   async updateRoundScore(command: UpdateRoundScoreCommand): Promise<Round> {
@@ -415,7 +411,9 @@ export default class GameService {
 
     // 2. Vérifier que le round appartient à la bonne partie
     if (!round.gameId.equals(command.gameId)) {
-      throw new Error(`Round ${command.roundId.value} does not belong to game ${command.gameId.value}`)
+      throw new Error(
+        `Round ${command.roundId.value} does not belong to game ${command.gameId.value}`
+      )
     }
 
     // 3. Récupérer les scores actuels (défaut 0)
@@ -424,7 +422,7 @@ export default class GameService {
 
     // 4. Déterminer quel score mettre à jour
     const isMainPlayer = await this.isMainPlayer(command.gameId, command.playerId)
-    
+
     const newPlayerScore = isMainPlayer ? command.score : currentPlayerScore
     const newOpponentScore = isMainPlayer ? currentOpponentScore : command.score
 
@@ -437,7 +435,7 @@ export default class GameService {
 
   /**
    * Vérifie si un joueur est le joueur principal de la partie
-   * 
+   *
    * Le joueur principal est celui qui a créé la partie (game.userId)
    */
   private async isMainPlayer(gameId: GameId, playerId: PlayerId): Promise<boolean> {
@@ -445,16 +443,16 @@ export default class GameService {
     if (!game) {
       throw new Error(`Game not found: ${gameId.value}`)
     }
-    
+
     const players = await this.playerRepository.findByGameId(gameId)
-    const mainPlayer = players.find(p => p.userId === game.userId)
-    
+    const mainPlayer = players.find((p) => p.userId === game.userId)
+
     return mainPlayer?.id.equals(playerId) ?? false
   }
 
   /**
    * Vérifie qu'un utilisateur a accès à une partie
-   * 
+   *
    * L'accès est autorisé si l'utilisateur est le créateur ou un participant
    */
   async userHasAccessToGame(gameId: GameId, userId: number): Promise<boolean> {
@@ -470,8 +468,8 @@ export default class GameService {
 
     // L'utilisateur est un participant de la partie
     const players = await this.playerRepository.findByGameId(gameId)
-    const userPlayer = players.find(p => p.userId === userId)
-    
+    const userPlayer = players.find((p) => p.userId === userId)
+
     return !!userPlayer
   }
 

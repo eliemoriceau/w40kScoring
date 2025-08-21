@@ -51,10 +51,10 @@ export default class Round extends AggregateRoot {
       false, // Not completed initially
       new Date()
     )
-    
+
     // Émettre l'événement de création uniquement pour les rounds créés automatiquement
     round.addDomainEvent(new RoundCreatedEvent(id, gameId, roundNumber))
-    
+
     return round
   }
 
@@ -142,7 +142,7 @@ export default class Round extends AggregateRoot {
 
     this._playerScore = playerScore
     this._opponentScore = opponentScore
-    
+
     // Émettre l'événement de mise à jour des scores
     this.addDomainEvent(new RoundScoresUpdatedEvent(this._id, playerScore, opponentScore))
   }

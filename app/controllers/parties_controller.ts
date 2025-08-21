@@ -437,46 +437,46 @@ export default class PartiesController {
     try {
       // 1. Authentification requise
       const user = auth.getUserOrFail()
-      
+
       // 2. Validation des paramètres de route
       const gameIdNumber = Number(params.gameId)
       const roundIdNumber = Number(params.roundId)
-      
+
       if (!gameIdNumber || Number.isNaN(gameIdNumber) || gameIdNumber <= 0) {
         return response.status(400).json({
           error: 'Invalid game ID',
-          message: "L'identifiant de la partie doit être un nombre valide"
+          message: "L'identifiant de la partie doit être un nombre valide",
         })
       }
-      
+
       if (!roundIdNumber || Number.isNaN(roundIdNumber) || roundIdNumber <= 0) {
         return response.status(400).json({
           error: 'Invalid round ID',
-          message: "L'identifiant du round doit être un nombre valide"
+          message: "L'identifiant du round doit être un nombre valide",
         })
       }
-      
+
       // 3. Validation du body de la requête
       const { playerId, score } = await request.validateUsing(updateRoundScoreValidator)
-      
+
       // 4. Vérifier l'accès à la partie
       const gameId = new GameId(gameIdNumber)
       const hasAccess = await this.gameService.userHasAccessToGame(gameId, user.id)
       if (!hasAccess) {
         return response.status(403).json({
           error: 'Forbidden',
-          message: "Vous n'avez pas accès à cette partie"
+          message: "Vous n'avez pas accès à cette partie",
         })
       }
 
       // 5. Créer la command et mettre à jour le score
       const command = UpdateRoundScoreCommand.fromPrimitives(
-        gameIdNumber, 
-        roundIdNumber, 
-        playerId, 
+        gameIdNumber,
+        roundIdNumber,
+        playerId,
         score
       )
-      
+
       const updatedRound = await this.gameService.updateRoundScore(command)
 
       // 6. Retourner le round mis à jour
@@ -491,7 +491,6 @@ export default class PartiesController {
           gameId: updatedRound.gameId.value,
         },
       })
-      
     } catch (error) {
       logger.error('Round score update failed', {
         error: error.message,
@@ -506,7 +505,7 @@ export default class PartiesController {
       if (error.message.includes('Score must be between') || error.message.includes('must be')) {
         return response.status(422).json({
           error: 'Validation Error',
-          message: error.message
+          message: error.message,
         })
       }
 
@@ -514,14 +513,14 @@ export default class PartiesController {
       if (error.message.includes('not found') || error.message.includes('not belong')) {
         return response.status(404).json({
           error: 'Resource not found',
-          message: error.message
+          message: error.message,
         })
       }
 
       // Erreur générique
       return response.status(500).json({
         error: 'Internal error',
-        message: 'Erreur lors de la mise à jour du score'
+        message: 'Erreur lors de la mise à jour du score',
       })
     }
   }

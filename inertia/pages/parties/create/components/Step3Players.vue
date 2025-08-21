@@ -201,10 +201,8 @@ import type { GameCreationWizardData, GameType } from '../types/wizard'
 
 interface Props {
   data: GameCreationWizardData
-  props: {
-    userFriends: Array<{ id: number; pseudo: string; avatar?: string }>
-    currentUser: { id: number; pseudo: string; email: string }
-  }
+  userFriends: Array<{ id: number; pseudo: string; avatar?: string }>
+  currentUser: { id: number; pseudo: string; email: string }
   errors?: Record<string, string[]>
   loading?: boolean
 }

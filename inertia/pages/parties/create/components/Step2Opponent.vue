@@ -209,10 +209,8 @@ import type { GameCreationWizardData, OpponentType, User } from '../types/wizard
 
 interface Props {
   data: GameCreationWizardData
-  props: {
-    userFriends: User[]
-    currentUser: { id: number; pseudo: string; email: string }
-  }
+  userFriends: User[]
+  currentUser: { id: number; pseudo: string; email: string }
   errors?: Record<string, string[]>
   loading?: boolean
 }

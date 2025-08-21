@@ -23,7 +23,7 @@ import LucidPlayerQueryRepository from '#infrastructure/repositories/lucid_playe
 import LucidRoundQueryRepository from '#infrastructure/repositories/lucid_round_query_repository'
 import LucidScoreQueryRepository from '#infrastructure/repositories/lucid_score_query_repository'
 import GameId from '#domain/value-objects/game_id'
-import UpdateRoundScoreCommand from '#application/commands/update_round_score_command'
+import { UpdateRoundScoreCommand } from '#application/commands'
 
 /**
  * PartiesController

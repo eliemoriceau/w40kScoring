@@ -33,6 +33,7 @@
     "#config/*": "./config/*.js",
     "#domain/*": "./app/domain/*.js",
     "#application/*": "./app/application/*.js",
+    "#application/commands": "./app/application/commands/index.js",
     "#infrastructure/*": "./app/infrastructure/*.js"
   },
   "devDependencies": {

@@ -1,15 +1,20 @@
 <template>
   <div
-    class="relative min-h-12 flex items-center justify-center border-2 border-transparent rounded-lg p-2 transition-all duration-200 cursor-pointer"
-    :class="cellClasses"
+    :class="[
+      'relative min-h-12 flex items-center justify-center rounded-lg p-3 transition-all duration-300 cursor-pointer group',
+      cellStateClasses,
+      editable ? 'hover:scale-102' : 'cursor-default',
+    ]"
     @click="startEditing"
   >
-    <!-- Mode affichage -->
-    <div v-if="!isEditing" class="flex items-center gap-2">
-      <span class="text-xl font-bold text-white">{{ displayScore }}</span>
+    <!-- Mode Affichage -->
+    <div v-if="!isEditing" class="flex items-center gap-2 w-full justify-center">
+      <span :class="scoreDisplayClasses">{{ displayScore }}</span>
+
+      <!-- Icône d'édition avec animation -->
       <svg
         v-if="showEditIcon"
-        class="w-4 h-4 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100"
+        class="w-4 h-4 text-w40k-text-muted opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-w40k-red-400"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -23,15 +28,15 @@
       </svg>
     </div>
 
-    <!-- Mode édition -->
-    <div v-else class="flex items-center gap-2">
+    <!-- Mode Édition avec Animation -->
+    <div v-else class="flex items-center gap-2 w-full">
       <input
         ref="scoreInput"
         v-model.number="editValue"
         :min="minScore"
         :max="maxScore"
         type="number"
-        class="w-16 px-2 py-1 text-center font-bold bg-slate-700 border border-w40k-red-500 rounded text-white focus:outline-none focus:ring-2 focus:ring-w40k-red-300"
+        class="w-16 px-2 py-1 text-center font-bold bg-w40k-bg-secondary border-2 border-w40k-red-500 rounded text-w40k-text-primary focus:outline-none focus:ring-2 focus:ring-w40k-red-400 focus:border-w40k-red-300 transition-all duration-200"
         @blur="saveScore"
         @keyup.enter="saveScore"
         @keyup.escape="cancelEdit"
@@ -39,17 +44,27 @@
         @keyup.arrow-down="decrementScore"
         @input="validateInput"
       />
+
+      <!-- Boutons d'action avec effets Magic UI -->
       <div class="flex gap-1">
         <button
           @click="saveScore"
-          class="w-6 h-6 flex items-center justify-center rounded bg-green-600 hover:bg-green-500 text-white text-xs font-bold transition-colors"
+          :class="[
+            'w-7 h-7 flex items-center justify-center rounded transition-all duration-200 font-bold text-xs',
+            'bg-green-600 hover:bg-green-500 text-white shadow-lg hover:shadow-xl hover:scale-110',
+            'border border-green-500 hover:border-green-400',
+          ]"
           title="Sauvegarder"
         >
           ✓
         </button>
         <button
           @click="cancelEdit"
-          class="w-6 h-6 flex items-center justify-center rounded bg-w40k-red-600 hover:bg-w40k-red-500 text-white text-xs font-bold transition-colors"
+          :class="[
+            'w-7 h-7 flex items-center justify-center rounded transition-all duration-200 font-bold text-xs',
+            'bg-w40k-red-600 hover:bg-w40k-red-500 text-white shadow-lg hover:shadow-xl hover:scale-110',
+            'border border-w40k-red-500 hover:border-w40k-red-400',
+          ]"
           title="Annuler"
         >
           ✕
@@ -57,9 +72,12 @@
       </div>
     </div>
 
-    <!-- Indicateur de sauvegarde -->
-    <div v-if="isSaving" class="absolute top-1 right-1 text-blue-400">
-      <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+    <!-- Indicateurs de statut avec animations -->
+    <div
+      v-if="isSaving"
+      class="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center shadow-lg animate-pulse"
+    >
+      <svg class="animate-spin h-3 w-3 text-white" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path
           class="opacity-75"
@@ -69,13 +87,12 @@
       </svg>
     </div>
 
-    <!-- Indicateur d'erreur -->
     <div
       v-if="hasError"
-      class="absolute top-1 right-1 text-w40k-red-400"
+      class="absolute -top-1 -right-1 w-5 h-5 bg-w40k-red-500 rounded-full flex items-center justify-center shadow-lg animate-bounce"
       title="Erreur de sauvegarde"
     >
-      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -84,6 +101,13 @@
         />
       </svg>
     </div>
+
+    <!-- Border Beam Effect pour les scores élevés -->
+    <div
+      v-if="isHighScore"
+      class="absolute inset-0 rounded-lg opacity-75 pointer-events-none"
+      :class="borderBeamClasses"
+    />
   </div>
 </template>
 
@@ -103,7 +127,7 @@ const emit = defineEmits<{
   'editing-ended': []
 }>()
 
-// Configuration des scores
+// Configuration des scores avec thématique W40K
 const SCORE_LIMITS = {
   primary: { min: 0, max: 50 },
   secondary: { min: 0, max: 15 },
@@ -116,16 +140,21 @@ const isSaving = ref(false)
 const hasError = ref(false)
 const scoreInput = ref<HTMLInputElement>()
 
-// Score maximum selon le type
+// Computed properties
 const maxScore = computed(() => SCORE_LIMITS[props.scoreType].max)
 const minScore = computed(() => SCORE_LIMITS[props.scoreType].min)
 
-// Score actuel à afficher (défaut 0)
 const currentScore = computed(() => {
   if (props.scoreType === 'secondary') {
     return 0
   }
 
+  // Utiliser le nouveau mapping des scores par joueur pour résoudre le problème de différentiation
+  if (props.round.playerScores && props.player.id in props.round.playerScores) {
+    return props.round.playerScores[props.player.id] ?? 0
+  }
+
+  // Fallback vers l'ancienne logique si le mapping n'est pas disponible
   const score = props.player.isMainPlayer ? props.round.playerScore : props.round.opponentScore
 
   return score ?? 0
@@ -133,30 +162,63 @@ const currentScore = computed(() => {
 
 const displayScore = computed(() => currentScore.value)
 const showEditIcon = computed(() => props.editable && !isEditing.value && !isSaving.value)
+const isHighScore = computed(() => currentScore.value > maxScore.value * 0.8)
 
-const cellClasses = computed(() => {
+// Classes dynamiques avec thème W40K
+const cellStateClasses = computed(() => {
   const score = currentScore.value
-  const baseClasses = 'group'
 
-  if (!props.editable) return baseClasses
-  if (isEditing.value)
-    return `${baseClasses} border-w40k-red-500 bg-w40k-red-900/20 shadow-w40k-lg scale-102`
-  if (props.current)
-    return `${baseClasses} border-orange-300 bg-orange-900/20 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
-  if (score > 0)
-    return `${baseClasses} border-green-300 bg-green-900/10 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
-  if (hasError.value) return `${baseClasses} border-w40k-red-600 bg-w40k-red-900/30`
-  if (isSaving.value) return `${baseClasses} border-blue-400 bg-blue-900/20`
+  if (!props.editable) return 'bg-w40k-bg-elevated border border-w40k-text-subtle opacity-60'
 
-  return `${baseClasses} border-gray-400 bg-gray-800/50 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
+  if (isEditing.value) {
+    return 'border-2 border-w40k-red-500 bg-w40k-red-900/30 shadow-w40k-lg scale-102 ring-2 ring-w40k-red-500/30'
+  }
+
+  if (props.current) {
+    return 'border-2 border-orange-400 bg-orange-900/20 shadow-lg hover:border-w40k-red-400 hover:bg-w40k-red-900/20'
+  }
+
+  if (score > 0) {
+    return 'border-2 border-green-400 bg-green-900/15 hover:border-w40k-red-400 hover:bg-w40k-red-900/20 hover:shadow-w40k'
+  }
+
+  if (hasError.value) {
+    return 'border-2 border-w40k-red-600 bg-w40k-red-900/40 animate-pulse'
+  }
+
+  if (isSaving.value) {
+    return 'border-2 border-blue-400 bg-blue-900/20'
+  }
+
+  return 'border-2 border-w40k-text-subtle bg-w40k-bg-secondary hover:border-w40k-red-400 hover:bg-w40k-red-900/10 hover:shadow-w40k'
 })
 
-// Validation du score
+const scoreDisplayClasses = computed(() => {
+  const score = currentScore.value
+  let baseClasses = 'font-bold transition-all duration-200'
+
+  if (score === 0) return `${baseClasses} text-xl text-w40k-text-muted`
+  if (score < maxScore.value * 0.3) return `${baseClasses} text-xl text-w40k-text-secondary`
+  if (score < maxScore.value * 0.7) return `${baseClasses} text-xl text-w40k-gold-400`
+
+  return `${baseClasses} text-2xl text-w40k-red-400 drop-shadow-lg`
+})
+
+const borderBeamClasses = computed(() => {
+  if (!isHighScore.value) return ''
+
+  return [
+    'animate-pulse',
+    'bg-gradient-to-r from-transparent via-w40k-gold-500/50 to-transparent',
+    'border border-w40k-gold-500/50',
+  ]
+})
+
+// Méthodes
 const validateScore = (score: number): boolean => {
   return score >= minScore.value && score <= maxScore.value && Number.isInteger(score)
 }
 
-// Démarrer l'édition
 const startEditing = async () => {
   if (!props.editable || isEditing.value || isSaving.value) return
 
@@ -170,19 +232,16 @@ const startEditing = async () => {
   scoreInput.value?.select()
 }
 
-// Sauvegarder le score
 const saveScore = async () => {
   if (!isEditing.value || isSaving.value) return
 
   const newScore = editValue.value
 
-  // Validation
   if (!validateScore(newScore)) {
     hasError.value = true
     return
   }
 
-  // Pas de changement
   if (newScore === currentScore.value) {
     cancelEdit()
     return
@@ -212,8 +271,9 @@ const saveScore = async () => {
           isEditing.value = false
           emit('editing-ended')
         },
-        onError: () => {
+        onError: (errors) => {
           hasError.value = true
+          console.error('Erreur de validation du score:', errors)
         },
       }
     )
@@ -225,7 +285,6 @@ const saveScore = async () => {
   }
 }
 
-// Annuler l'édition
 const cancelEdit = () => {
   isEditing.value = false
   editValue.value = currentScore.value ?? 0
@@ -233,7 +292,6 @@ const cancelEdit = () => {
   emit('editing-ended')
 }
 
-// Navigation clavier
 const incrementScore = () => {
   const newValue = editValue.value + 1
   if (newValue <= maxScore.value) {
@@ -250,7 +308,6 @@ const decrementScore = () => {
   }
 }
 
-// Validation en temps réel
 const validateInput = () => {
   const value = editValue.value
 
@@ -265,7 +322,7 @@ const validateInput = () => {
   }
 }
 
-// Reset de l'erreur quand on commence à éditer
+// Watchers
 watch(isEditing, (newValue) => {
   if (newValue) {
     hasError.value = false
@@ -278,28 +335,38 @@ watch(isEditing, (newValue) => {
   transform: scale(1.02);
 }
 
-/* Responsive */
+/* Animations W40K */
+@keyframes border-beam {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-border-beam {
+  animation: border-beam 2s linear infinite;
+}
+
+/* Responsive W40K */
 @media (max-width: 768px) {
   .min-h-12 {
     min-height: 2.5rem;
   }
-
+  .text-2xl {
+    font-size: 1.25rem;
+  }
   .text-xl {
     font-size: 1.125rem;
   }
-
   .w-16 {
     width: 3.5rem;
   }
-
-  .text-sm {
-    font-size: 0.875rem;
-  }
-
-  .w-6,
-  .h-6 {
-    width: 2rem;
-    height: 2rem;
+  .w-7,
+  .h-7 {
+    width: 1.75rem;
+    height: 1.75rem;
   }
 }
 </style>

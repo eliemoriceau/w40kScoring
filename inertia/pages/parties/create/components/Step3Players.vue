@@ -294,12 +294,12 @@ const STATUS_CONFIG = {
 
 const getOpponentStatus = (): string => {
   const type = props.data.opponentType
-  
+
   if (type === 'existing') return STATUS_CONFIG.text.existing
   if (type === 'guest') return STATUS_CONFIG.text.guest
   if (type === 'invite') {
-    return isOpponentConfirmed.value 
-      ? STATUS_CONFIG.text.invite.confirmed 
+    return isOpponentConfirmed.value
+      ? STATUS_CONFIG.text.invite.confirmed
       : STATUS_CONFIG.text.invite.pending
   }
   return 'Prêt'
@@ -307,13 +307,11 @@ const getOpponentStatus = (): string => {
 
 const getOpponentStatusClass = (): string => {
   const type = props.data.opponentType
-  
+
   if (type === 'existing' || type === 'guest') {
     return STATUS_CONFIG.classes.confirmed
   }
-  return isOpponentConfirmed.value 
-    ? STATUS_CONFIG.classes.confirmed 
-    : STATUS_CONFIG.classes.pending
+  return isOpponentConfirmed.value ? STATUS_CONFIG.classes.confirmed : STATUS_CONFIG.classes.pending
 }
 
 const getOpponentArmyHint = (): string => {
@@ -356,13 +354,13 @@ const getGameTypeDisplay = (gameType: GameType): string => {
 
 const getEstimatedDuration = (): string => {
   const points = props.data.pointsLimit
-  
+
   for (const config of GAME_CONFIG.durations) {
     if (points <= config.maxPoints) {
       return config.duration
     }
   }
-  
+
   return GAME_CONFIG.defaultDuration
 }
 

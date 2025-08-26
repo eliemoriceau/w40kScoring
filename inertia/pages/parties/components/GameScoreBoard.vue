@@ -65,7 +65,7 @@
       </div>
 
       <div class="rounds-grid">
-        <RoundRow
+        <W40KRoundRow
           v-for="round in localRounds"
           :key="round.id"
           :round="round"
@@ -105,7 +105,7 @@
 
     <!-- Scores secondaires -->
     <div class="secondary-scores-container mt-8">
-      <SecondaryScores
+      <W40KSecondaryScores
         :players="players"
         :secondary-scores="secondaryScores"
         :rounds="localRounds"
@@ -148,8 +148,8 @@
 <script setup lang="ts">
 import { computed, ref, reactive } from 'vue'
 import { router } from '@inertiajs/vue3'
-import RoundRow from './RoundRow.vue'
-import SecondaryScores from './SecondaryScores.vue'
+import W40KRoundRow from './W40KRoundRow.vue'
+import W40KSecondaryScores from './W40KSecondaryScores.vue'
 import type {
   GameScoreBoardProps,
   ScoreUpdateEvent,
@@ -215,31 +215,37 @@ const gameStatusClasses = computed(() => {
   }
 })
 
-// Calculs des scores avec mise en cache
+// Calculs des scores avec mise en cache et logique corrigée
 const playerScores = computed(() => {
   const scores = new Map<number, { primary: number; secondary: number; total: number }>()
-  
-  props.players.forEach(player => {
+
+  props.players.forEach((player) => {
     if (!player) return
-    
-    // Score primaire
+
+    // Score primaire avec logique corrigée utilisant le mapping des scores
     const primary = localRounds.value.reduce((total, round) => {
+      // Utiliser le nouveau mapping si disponible
+      if (round.playerScores && player.id in round.playerScores) {
+        return total + (round.playerScores[player.id] || 0)
+      }
+
+      // Fallback vers l'ancienne logique
       const score = player.isMainPlayer ? round.playerScore : round.opponentScore
       return total + (score || 0)
     }, 0)
-    
+
     // Score secondaire
     const secondary = props.secondaryScores
       .filter((score) => score.playerId === player.id)
       .reduce((total, score) => total + score.scoreValue, 0)
-    
+
     scores.set(player.id, {
       primary,
       secondary,
-      total: primary + secondary
+      total: primary + secondary,
     })
   })
-  
+
   return scores
 })
 
@@ -262,35 +268,36 @@ const getSecondaryScore = (player?: PlayerDto) => {
 const progressStats = computed(() => {
   const totalRounds = localRounds.value.length
   const playersCount = props.players.filter((p) => p).length
-  
+
   if (totalRounds === 0) {
     return {
       completedRounds: 0,
       completionPercentage: 0,
       enteredScores: 0,
       totalPossibleScores: 0,
-      scoreEntryPercentage: 0
+      scoreEntryPercentage: 0,
     }
   }
-  
+
   let completedRounds = 0
   let enteredScores = 0
-  
-  localRounds.value.forEach(round => {
+
+  localRounds.value.forEach((round) => {
     if (round.isCompleted) completedRounds++
-    
+
     if (round.playerScore !== null && round.playerScore !== undefined) enteredScores++
     if (round.opponentScore !== null && round.opponentScore !== undefined) enteredScores++
   })
-  
+
   const totalPossibleScores = totalRounds * playersCount
-  
+
   return {
     completedRounds,
     completionPercentage: Math.round((completedRounds / totalRounds) * 100),
     enteredScores,
     totalPossibleScores,
-    scoreEntryPercentage: totalPossibleScores > 0 ? Math.round((enteredScores / totalPossibleScores) * 100) : 0
+    scoreEntryPercentage:
+      totalPossibleScores > 0 ? Math.round((enteredScores / totalPossibleScores) * 100) : 0,
   }
 })
 
@@ -363,7 +370,7 @@ const updateLocalRound = (roundId: number, playerId: number, score: number) => {
     newValue: score,
     timestamp: Date.now(),
   })
-  
+
   // Nettoyer les anciennes mises à jour optimistes
   if (optimisticUpdates.value.length > MAX_OPTIMISTIC_UPDATES) {
     optimisticUpdates.value = optimisticUpdates.value.slice(-MAX_OPTIMISTIC_UPDATES)
@@ -420,7 +427,7 @@ const showNotificationMessage = (
   if (notification.show && notification.message === message) {
     return
   }
-  
+
   notification.message = message
   notification.type = type
   notification.show = true
@@ -429,7 +436,7 @@ const showNotificationMessage = (
   if (notification.timeout) {
     clearTimeout(notification.timeout)
   }
-  
+
   // Auto-hide avec constante configurée
   notification.timeout = setTimeout(() => {
     notification.show = false

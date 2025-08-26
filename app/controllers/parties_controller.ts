@@ -200,8 +200,15 @@ export default class PartiesController {
           winner: gameDetail.getWinner(),
           isEditable: gameDetail.isEditable(),
         },
-        players: gameDetail.players,
-        rounds: gameDetail.rounds,
+        players: gameDetail.players.map((player) => ({
+          ...player,
+          isMainPlayer: player.userId === user.id, // Ajouter le flag isMainPlayer pour le frontend
+        })),
+        rounds: gameDetail.rounds.map((round) => ({
+          ...round,
+          // Ajouter le mapping des scores par joueur pour résoudre le problème
+          playerScores: this.buildPlayerScoresMapping(round, gameDetail.players, gameDetail.userId),
+        })),
         secondaryScores: gameDetail.getSecondaryScoresForPlayer(
           gameDetail.getMainPlayer()?.id || 0
         ),
@@ -268,6 +275,32 @@ export default class PartiesController {
       CANCELLED: 'Annulée',
     }
     return labels[status as keyof typeof labels] || status
+  }
+
+  /**
+   * Construit le mapping des scores par joueur pour un round
+   * Résout le problème de différentiation des joueurs
+   */
+  private buildPlayerScoresMapping(
+    round: any,
+    players: any[],
+    gameOwnerId: number
+  ): { [playerId: number]: number } {
+    const scoreMap: { [playerId: number]: number } = {}
+
+    // Trouver le joueur principal et l'adversaire
+    const mainPlayer = players.find((p) => p.userId === gameOwnerId)
+    const opponentPlayer = players.find((p) => p.userId !== gameOwnerId)
+
+    if (mainPlayer) {
+      scoreMap[mainPlayer.id] = round.playerScore || 0
+    }
+
+    if (opponentPlayer) {
+      scoreMap[opponentPlayer.id] = round.opponentScore || 0
+    }
+
+    return scoreMap
   }
 
   /**
@@ -443,17 +476,11 @@ export default class PartiesController {
       const roundIdNumber = Number(params.roundId)
 
       if (!gameIdNumber || Number.isNaN(gameIdNumber) || gameIdNumber <= 0) {
-        return response.status(400).json({
-          error: 'Invalid game ID',
-          message: "L'identifiant de la partie doit être un nombre valide",
-        })
+        return response.status(400)
       }
 
       if (!roundIdNumber || Number.isNaN(roundIdNumber) || roundIdNumber <= 0) {
-        return response.status(400).json({
-          error: 'Invalid round ID',
-          message: "L'identifiant du round doit être un nombre valide",
-        })
+        return response.status(400)
       }
 
       // 3. Validation du body de la requête
@@ -463,10 +490,7 @@ export default class PartiesController {
       const gameId = new GameId(gameIdNumber)
       const hasAccess = await this.gameService.userHasAccessToGame(gameId, user.id)
       if (!hasAccess) {
-        return response.status(403).json({
-          error: 'Forbidden',
-          message: "Vous n'avez pas accès à cette partie",
-        })
+        return response.status(403)
       }
 
       // 5. Créer la command et mettre à jour le score
@@ -477,20 +501,11 @@ export default class PartiesController {
         score
       )
 
-      const updatedRound = await this.gameService.updateRoundScore(command)
+      await this.gameService.updateRoundScore(command)
 
-      // 6. Retourner le round mis à jour
-      return response.json({
-        success: true,
-        round: {
-          id: updatedRound.id.value,
-          roundNumber: updatedRound.roundNumber.value,
-          playerScore: updatedRound.playerScore,
-          opponentScore: updatedRound.opponentScore,
-          isCompleted: updatedRound.isCompleted,
-          gameId: updatedRound.gameId.value,
-        },
-      })
+      // 6. Succès - retourner HTTP 204 (No Content) accepté par Inertia.js
+      // Les composants frontend gèrent l'état local via optimistic updates
+      return response.status(204)
     } catch (error) {
       logger.error('Round score update failed', {
         error: error.message,
@@ -501,27 +516,18 @@ export default class PartiesController {
         action: 'update_round_score',
       })
 
-      // Erreurs de validation
+      // Erreurs de validation - retourner erreur compatible Inertia
       if (error.message.includes('Score must be between') || error.message.includes('must be')) {
-        return response.status(422).json({
-          error: 'Validation Error',
-          message: error.message,
-        })
+        return response.status(422)
       }
 
-      // Erreurs métier (round non trouvé, etc.)
+      // Erreurs métier (round non trouvé, etc.) - retourner erreur compatible Inertia
       if (error.message.includes('not found') || error.message.includes('not belong')) {
-        return response.status(404).json({
-          error: 'Resource not found',
-          message: error.message,
-        })
+        return response.status(404)
       }
 
-      // Erreur générique
-      return response.status(500).json({
-        error: 'Internal error',
-        message: 'Erreur lors de la mise à jour du score',
-      })
+      // Erreur générique - retourner erreur compatible Inertia
+      return response.status(500)
     }
   }
 }

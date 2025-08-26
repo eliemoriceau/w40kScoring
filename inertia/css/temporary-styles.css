@@ -60,7 +60,9 @@
 .round-row-current {
   border-left-color: rgb(249 115 22);
   background-color: rgba(249 115 22, 0.2);
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 /* ScoreCell.vue styles */
@@ -90,7 +92,9 @@
 .score-cell-editing {
   border-color: rgb(220, 38, 38);
   background-color: rgba(220, 38, 38, 0.2);
-  box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.1), 0 4px 6px -2px rgba(220, 38, 38, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(220, 38, 38, 0.1),
+    0 4px 6px -2px rgba(220, 38, 38, 0.05);
   transform: scale(1.02);
 }
 

@@ -1,15 +1,41 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { Head, Link, usePage } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 
 interface Props {
   title?: string
   description?: string
 }
 
+interface User {
+  id: number
+  username: string
+  email: string
+}
+
+interface PageProps {
+  user?: User
+}
+
 const props = withDefaults(defineProps<Props>(), {
   title: 'w40kScoring',
   description: 'Application de scoring pour Warhammer 40,000',
 })
+
+const page = usePage<PageProps>()
+const user = computed(() => page.props.user)
+const isAuthenticated = computed(() => !!user.value)
+
+// Mobile menu state
+const isMobileMenuOpen = ref(false)
+
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
+
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false
+}
 </script>
 
 <template>
@@ -26,53 +52,187 @@ const props = withDefaults(defineProps<Props>(), {
         <div class="flex justify-between items-center h-16">
           <!-- Logo / Brand -->
           <div class="flex items-center">
-            <h1 class="text-2xl font-bold text-red-400">
-              w40k<span class="text-yellow-400">Scoring</span>
-            </h1>
+            <Link href="/" class="flex items-center">
+              <h1 class="text-2xl font-bold text-red-400 hover:text-red-300 transition-colors">
+                w40k<span class="text-yellow-400">Scoring</span>
+              </h1>
+            </Link>
           </div>
 
           <!-- Navigation Menu -->
           <div class="hidden md:block">
-            <div class="flex items-baseline space-x-8">
-              <a
-                href="/"
-                class="text-white hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Accueil
-              </a>
-              <a
-                href="/games"
-                class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Parties
-              </a>
-              <a
-                href="/players"
-                class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Joueurs
-              </a>
-              <a
-                href="/armies"
-                class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Armées
-              </a>
+            <div class="flex items-center space-x-1">
+              <!-- Main Navigation Links -->
+              <div class="flex items-baseline space-x-4">
+                <Link
+                  href="/"
+                  class="text-white hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Accueil
+                </Link>
+                
+                <!-- Authenticated User Links -->
+                <template v-if="isAuthenticated">
+                  <Link
+                    href="/parties"
+                    class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Mes Parties
+                  </Link>
+                  <Link
+                    href="/parties/create"
+                    class="text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Nouvelle Partie
+                  </Link>
+                </template>
+              </div>
+
+              <!-- Authentication Section -->
+              <div class="flex items-center space-x-4 ml-6">
+                <template v-if="isAuthenticated">
+                  <!-- User Info -->
+                  <div class="flex items-center space-x-3">
+                    <div class="text-sm">
+                      <span class="text-gray-300">Bienvenue,</span>
+                      <span class="text-red-400 font-medium">{{ user?.username }}</span>
+                    </div>
+                    
+                    <!-- Logout Button -->
+                    <Link
+                      href="/logout"
+                      method="post"
+                      as="button"
+                      class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-red-500 hover:border-red-400"
+                    >
+                      Déconnexion
+                    </Link>
+                  </div>
+                </template>
+                
+                <template v-else>
+                  <!-- Login/Register Buttons -->
+                  <div class="flex items-center space-x-2">
+                    <Link
+                      href="/login"
+                      class="text-gray-300 hover:text-red-400 px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-600 hover:border-red-400"
+                    >
+                      Connexion
+                    </Link>
+                    <Link
+                      href="/register"
+                      class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-red-500 hover:border-red-400"
+                    >
+                      S'inscrire
+                    </Link>
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
 
           <!-- Mobile menu button -->
           <div class="md:hidden">
-            <button class="text-gray-300 hover:text-white focus:outline-none focus:text-white">
+            <button
+              @click="toggleMobileMenu"
+              class="text-gray-300 hover:text-white focus:outline-none focus:text-white p-2"
+              :class="{ 'text-red-400': isMobileMenuOpen }"
+            >
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
+                  v-if="!isMobileMenuOpen"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
                   d="M4 6h16M4 12h16M4 18h16"
                 />
+                <path
+                  v-else
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
+          </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div 
+          v-if="isMobileMenuOpen"
+          class="md:hidden bg-black/30 backdrop-blur-sm border-t border-red-500/20"
+          @click="closeMobileMenu"
+        >
+          <div class="px-4 pt-2 pb-4 space-y-2">
+            <!-- Main Navigation Links -->
+            <Link
+              href="/"
+              class="block text-white hover:text-red-400 px-3 py-2 rounded-md text-base font-medium transition-colors"
+              @click="closeMobileMenu"
+            >
+              Accueil
+            </Link>
+
+            <!-- Authenticated User Links -->
+            <template v-if="isAuthenticated">
+              <Link
+                href="/parties"
+                class="block text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                @click="closeMobileMenu"
+              >
+                Mes Parties
+              </Link>
+              <Link
+                href="/parties/create"
+                class="block text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                @click="closeMobileMenu"
+              >
+                Nouvelle Partie
+              </Link>
+            </template>
+
+            <!-- Authentication Section for Mobile -->
+            <div class="border-t border-red-500/20 pt-4 mt-4">
+              <template v-if="isAuthenticated">
+                <!-- User Info -->
+                <div class="px-3 py-2">
+                  <p class="text-sm text-gray-300">Connecté en tant que:</p>
+                  <p class="text-red-400 font-medium">{{ user?.username }}</p>
+                </div>
+                
+                <!-- Logout Button -->
+                <Link
+                  href="/logout"
+                  method="post"
+                  as="button"
+                  class="block w-full text-left bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-base font-medium transition-colors mt-2"
+                  @click="closeMobileMenu"
+                >
+                  Déconnexion
+                </Link>
+              </template>
+              
+              <template v-else>
+                <!-- Login/Register Buttons -->
+                <div class="space-y-2">
+                  <Link
+                    href="/login"
+                    class="block text-center text-gray-300 hover:text-red-400 px-3 py-2 rounded-md text-base font-medium transition-colors border border-gray-600 hover:border-red-400"
+                    @click="closeMobileMenu"
+                  >
+                    Connexion
+                  </Link>
+                  <Link
+                    href="/register"
+                    class="block text-center bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-base font-medium transition-colors border border-red-500 hover:border-red-400"
+                    @click="closeMobileMenu"
+                  >
+                    S'inscrire
+                  </Link>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </nav>
@@ -101,18 +261,23 @@ const props = withDefaults(defineProps<Props>(), {
             <h4 class="text-white font-semibold mb-4">Liens rapides</h4>
             <ul class="space-y-2">
               <li>
-                <a href="/" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
-                  >Accueil</a
+                <Link href="/" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                  >Accueil</Link
                 >
               </li>
-              <li>
-                <a href="/games" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
-                  >Mes parties</a
+              <li v-if="isAuthenticated">
+                <Link href="/parties" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                  >Mes parties</Link
                 >
               </li>
-              <li>
-                <a href="/stats" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
-                  >Statistiques</a
+              <li v-if="isAuthenticated">
+                <Link href="/parties/create" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                  >Nouvelle partie</Link
+                >
+              </li>
+              <li v-if="!isAuthenticated">
+                <Link href="/register" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                  >Rejoindre la croisade</Link
                 >
               </li>
             </ul>

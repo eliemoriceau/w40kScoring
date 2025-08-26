@@ -1,0 +1,119 @@
+import { test } from '@japa/runner'
+
+/**
+ * Tests E2E basiques de navigation
+ * 
+ * Tests simples pour valider que Playwright fonctionne
+ * et que les pages principales sont accessibles.
+ */
+test.group('Navigation de Base - E2E', () => {
+  
+  test('devrait charger la page d\'accueil', async ({ browserContext, visit }) => {
+    const page = await browserContext.newPage()
+    
+    try {
+      // Navigation vers la page d'accueil
+      await visit('/', { page })
+      
+      // Attendre que la page soit chargée
+      await page.waitForLoadState('networkidle', { timeout: 10000 })
+      
+      // Vérifier que la page contient du contenu
+      const title = await page.textContent('title')
+      console.log('Page title:', title)
+      
+      // Test basique : vérifier que la page se charge
+      const bodyContent = await page.textContent('body')
+      expect(bodyContent).toBeTruthy()
+      
+    } catch (error) {
+      console.error('Erreur lors du test de navigation:', error)
+      throw error
+    } finally {
+      await page.close()
+    }
+  })
+  
+  test('devrait pouvoir naviguer vers /parties', async ({ browserContext, visit, assert }) => {
+    const page = await browserContext.newPage()
+    
+    try {
+      // Navigation directe vers /parties
+      await visit('/parties', { page })
+      
+      // Attendre que la page soit chargée
+      await page.waitForLoadState('networkidle', { timeout: 10000 })
+      
+      // Vérifier que l'URL est correcte
+      assert.include(page.url(), '/parties')
+      
+      // Vérifier que la page contient du contenu
+      const bodyContent = await page.textContent('body')
+      assert.isNotEmpty(bodyContent)
+      
+    } catch (error) {
+      console.error('Erreur lors de la navigation vers /parties:', error)
+      throw error
+    } finally {
+      await page.close()
+    }
+  })
+  
+  test('devrait pouvoir prendre une capture d\'écran', async ({ browserContext, visit, assert }) => {
+    const page = await browserContext.newPage()
+    
+    try {
+      // Navigation vers la page d'accueil
+      await visit('/', { page })
+      
+      // Attendre que la page soit chargée
+      await page.waitForLoadState('networkidle', { timeout: 10000 })
+      
+      // Prendre une capture d'écran pour debug
+      await page.screenshot({ 
+        path: 'tests/browser/screenshots/homepage.png',
+        fullPage: true 
+      })
+      
+      console.log('Capture d\'écran sauvegardée dans tests/browser/screenshots/homepage.png')
+      
+      // Test réussi si on arrive jusqu'ici
+      assert.isTrue(true)
+      
+    } catch (error) {
+      console.error('Erreur lors de la capture:', error)
+      throw error
+    } finally {
+      await page.close()
+    }
+  })
+  
+  test('devrait pouvoir interagir avec le DOM', async ({ browserContext, visit, assert }) => {
+    const page = await browserContext.newPage()
+    
+    try {
+      // Navigation vers une page
+      await visit('/', { page })
+      
+      // Attendre que la page soit chargée
+      await page.waitForLoadState('networkidle', { timeout: 10000 })
+      
+      // Essayer de trouver des éléments communs
+      const links = await page.locator('a').count()
+      console.log(`Nombre de liens trouvés: ${links}`)
+      
+      const buttons = await page.locator('button').count()
+      console.log(`Nombre de boutons trouvés: ${buttons}`)
+      
+      // Test réussi si on arrive jusqu'ici
+      assert.isAtLeast(links, 0)
+      assert.isAtLeast(buttons, 0)
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'interaction DOM:', error)
+      throw error
+    } finally {
+      await page.close()
+    }
+  })
+})

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, shallowRef } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { usePartiesHelpers } from './composables/use_parties_helpers'
 import type { PartiesIndexProps, PartiesFilters, LoadingState } from './types'
@@ -13,8 +13,8 @@ import LoadingSpinner from '~/shared/components/LoadingSpinner.vue'
 // Props Inertia (typées)
 const props = defineProps<PartiesIndexProps>()
 
-// État réactif local
-const loading = ref<LoadingState>({
+// État réactif local optimisé
+const loading = shallowRef<LoadingState>({
   loading: false,
   error: null,
 })
@@ -28,8 +28,9 @@ const filters = ref<PartiesFilters>({
 // Composables et helpers
 const { enrichParties, getStatusColor, getStatusLabel, formatPlayersText } = usePartiesHelpers()
 
-// Computed properties
+// Computed properties avec cache
 const enrichedParties = computed(() => {
+  // Cache les parties pour éviter les recalculs inutiles
   return enrichParties(props.parties.parties)
 })
 
@@ -59,6 +60,11 @@ const handleClearFilters = () => {
 }
 
 const applyFilters = () => {
+  // Optimisation : éviter les requêtes si déjà en cours
+  if (loading.value.loading && loading.value.operation === 'filter') {
+    return
+  }
+  
   loading.value = { loading: true, error: null, operation: 'filter' }
 
   // Construire les paramètres pour Inertia
@@ -69,6 +75,7 @@ const applyFilters = () => {
   router.get('/parties', params, {
     preserveState: true,
     preserveScroll: true,
+    replace: true, // Remplace l'historique pour éviter l'accumulation
     onFinish: () => {
       loading.value = { loading: false, error: null }
     },
@@ -77,7 +84,6 @@ const applyFilters = () => {
         loading: false,
         error: 'Erreur lors du filtrage des parties',
       }
-      // Erreur lors du filtrage
     },
   })
 }

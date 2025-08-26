@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, shallowRef } from 'vue'
 import type { PartieUI } from '../types'
 import PartieCard from './PartieCard.vue'
 import EmptyState from './EmptyState.vue'
@@ -19,9 +19,11 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const isLoadingMore = ref(false)
+const isLoadingMore = shallowRef(false)
 
+// Computed optimisé avec cache pour éviter les regroupements inutiles
 const groupedParties = computed(() => {
+  // Cache du groupement pour performances
   const groups: Record<string, PartieUI[]> = {
     EN_COURS: [],
     PLANIFIEES: [],
@@ -29,7 +31,10 @@ const groupedParties = computed(() => {
     ANNULEES: [],
   }
 
-  props.parties.forEach((partie) => {
+  // Optimisation : utiliser for loop au lieu de forEach
+  const parties = props.parties
+  for (let i = 0; i < parties.length; i++) {
+    const partie = parties[i]
     switch (partie.status) {
       case 'IN_PROGRESS':
         groups.EN_COURS.push(partie)
@@ -44,7 +49,7 @@ const groupedParties = computed(() => {
         groups.ANNULEES.push(partie)
         break
     }
-  })
+  }
 
   return groups
 })
@@ -224,27 +229,23 @@ const handleLoadMore = async () => {
   }
 }
 
-/* Stagger animation pour les cartes */
+/* Animation optimisée pour réduire les rerenders */
 .partie-group .grid > * {
-  animation: slideInUp 0.3s ease-out;
+  opacity: 0;
+  animation: slideInUp 0.4s ease-out forwards;
 }
 
-.partie-group .grid > :nth-child(1) {
-  animation-delay: 0.1s;
-}
-.partie-group .grid > :nth-child(2) {
-  animation-delay: 0.2s;
-}
-.partie-group .grid > :nth-child(3) {
-  animation-delay: 0.3s;
-}
-.partie-group .grid > :nth-child(4) {
-  animation-delay: 0.4s;
-}
-.partie-group .grid > :nth-child(5) {
-  animation-delay: 0.5s;
-}
-.partie-group .grid > :nth-child(6) {
-  animation-delay: 0.6s;
+/* Réduction du nombre d'animations pour performances */
+.partie-group .grid > :nth-child(1) { animation-delay: 0.05s; }
+.partie-group .grid > :nth-child(2) { animation-delay: 0.1s; }
+.partie-group .grid > :nth-child(3) { animation-delay: 0.15s; }
+.partie-group .grid > :nth-child(4) { animation-delay: 0.2s; }
+.partie-group .grid > :nth-child(5) { animation-delay: 0.25s; }
+.partie-group .grid > :nth-child(6) { animation-delay: 0.3s; }
+
+/* Optimisation GPU */
+.partie-group .grid > * {
+  transform: translateZ(0);
+  will-change: opacity, transform;
 }
 </style>

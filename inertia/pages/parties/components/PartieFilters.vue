@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import type { PartiesFilters } from '../types'
 
 interface Props {
@@ -20,9 +20,10 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-// État local pour les filtres
+// État local pour les filtres avec optimisation
 const localFilters = ref<PartiesFilters>({ ...props.filters })
 const searchDebounce = ref<NodeJS.Timeout>()
+const isUpdating = ref(false)
 
 // Labels pour les filtres
 const statusLabels: Record<string, string> = {
@@ -38,49 +39,95 @@ const gameTypeLabels: Record<string, string> = {
   OPEN_PLAY: 'Jeu Libre',
 }
 
-// Watchers pour la synchronisation
+// Watchers optimisés pour éviter les cycles de rerender
 watch(
   () => props.filters,
   (newFilters) => {
-    localFilters.value = { ...newFilters }
+    if (!isUpdating.value) {
+      localFilters.value = { ...newFilters }
+    }
   },
   { deep: true }
 )
 
 watch(
   localFilters,
-  (newFilters) => {
+  async (newFilters, oldFilters) => {
+    // Éviter les cycles de mise à jour
+    isUpdating.value = true
+    
+    // Émettre immédiatement la mise à jour des filtres
     emit('update:filters', newFilters)
 
-    // Debounce pour la recherche, émission immédiate pour les autres filtres
+    // Débounce optimisé selon le type de changement
     if (searchDebounce.value) {
       clearTimeout(searchDebounce.value)
     }
 
-    searchDebounce.value = setTimeout(() => {
+    // Si c'est un changement de recherche, debounce plus long
+    const isSearchChange = newFilters.search !== oldFilters?.search
+    const debounceTime = isSearchChange ? 400 : 100
+
+    searchDebounce.value = setTimeout(async () => {
       emit('filter-change', newFilters)
-    }, 300)
+      await nextTick()
+      isUpdating.value = false
+    }, debounceTime)
   },
   { deep: true }
 )
 
-// Handlers
+// Handlers optimisés
 const handleStatusChange = (status: string) => {
-  localFilters.value.status = localFilters.value.status === status ? undefined : status
-  // Émission immédiate pour les filtres dropdown
-  clearTimeout(searchDebounce.value!)
-  emit('filter-change', localFilters.value)
+  const newStatus = localFilters.value.status === status ? undefined : status
+  
+  // Mise à jour atomique pour éviter les rerenders multiples
+  localFilters.value = {
+    ...localFilters.value,
+    status: newStatus
+  }
+  
+  // Émission immédiate pour les filtres dropdown (pas de debounce)
+  if (searchDebounce.value) {
+    clearTimeout(searchDebounce.value)
+  }
+  
+  // Émission directe sans passer par le watcher
+  nextTick(() => {
+    emit('filter-change', localFilters.value)
+  })
 }
 
 const handleGameTypeChange = (gameType: string) => {
-  localFilters.value.gameType = localFilters.value.gameType === gameType ? undefined : gameType
+  const newGameType = localFilters.value.gameType === gameType ? undefined : gameType
+  
+  // Mise à jour atomique
+  localFilters.value = {
+    ...localFilters.value,
+    gameType: newGameType
+  }
+  
   // Émission immédiate pour les filtres dropdown
-  clearTimeout(searchDebounce.value!)
-  emit('filter-change', localFilters.value)
+  if (searchDebounce.value) {
+    clearTimeout(searchDebounce.value)
+  }
+  
+  // Émission directe
+  nextTick(() => {
+    emit('filter-change', localFilters.value)
+  })
 }
 
 const handleClearAll = () => {
-  localFilters.value = { status: undefined, gameType: undefined, search: '' }
+  // Clear avec mise à jour atomique
+  const clearedFilters = { status: undefined, gameType: undefined, search: '' }
+  localFilters.value = clearedFilters
+  
+  // Nettoyer le debounce et émettre immédiatement
+  if (searchDebounce.value) {
+    clearTimeout(searchDebounce.value)
+  }
+  
   emit('clear-filters')
 }
 

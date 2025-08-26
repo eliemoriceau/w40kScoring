@@ -1,5 +1,5 @@
 <template>
-  <div 
+  <div
     class="relative min-h-12 flex items-center justify-center border-2 border-transparent rounded-lg p-2 transition-all duration-200 cursor-pointer"
     :class="cellClasses"
     @click="startEditing"
@@ -40,15 +40,15 @@
         @input="validateInput"
       />
       <div class="flex gap-1">
-        <button 
-          @click="saveScore" 
+        <button
+          @click="saveScore"
           class="w-6 h-6 flex items-center justify-center rounded bg-green-600 hover:bg-green-500 text-white text-xs font-bold transition-colors"
           title="Sauvegarder"
         >
           ✓
         </button>
-        <button 
-          @click="cancelEdit" 
+        <button
+          @click="cancelEdit"
           class="w-6 h-6 flex items-center justify-center rounded bg-w40k-red-600 hover:bg-w40k-red-500 text-white text-xs font-bold transition-colors"
           title="Annuler"
         >
@@ -70,7 +70,11 @@
     </div>
 
     <!-- Indicateur d'erreur -->
-    <div v-if="hasError" class="absolute top-1 right-1 text-w40k-red-400" title="Erreur de sauvegarde">
+    <div
+      v-if="hasError"
+      class="absolute top-1 right-1 text-w40k-red-400"
+      title="Erreur de sauvegarde"
+    >
       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           stroke-linecap="round"
@@ -122,10 +126,8 @@ const currentScore = computed(() => {
     return 0
   }
 
-  const score = props.player.isMainPlayer
-    ? props.round.playerScore
-    : props.round.opponentScore
-    
+  const score = props.player.isMainPlayer ? props.round.playerScore : props.round.opponentScore
+
   return score ?? 0
 })
 
@@ -135,14 +137,17 @@ const showEditIcon = computed(() => props.editable && !isEditing.value && !isSav
 const cellClasses = computed(() => {
   const score = currentScore.value
   const baseClasses = 'group'
-  
+
   if (!props.editable) return baseClasses
-  if (isEditing.value) return `${baseClasses} border-w40k-red-500 bg-w40k-red-900/20 shadow-w40k-lg scale-102`
-  if (props.current) return `${baseClasses} border-orange-300 bg-orange-900/20 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
-  if (score > 0) return `${baseClasses} border-green-300 bg-green-900/10 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
+  if (isEditing.value)
+    return `${baseClasses} border-w40k-red-500 bg-w40k-red-900/20 shadow-w40k-lg scale-102`
+  if (props.current)
+    return `${baseClasses} border-orange-300 bg-orange-900/20 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
+  if (score > 0)
+    return `${baseClasses} border-green-300 bg-green-900/10 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
   if (hasError.value) return `${baseClasses} border-w40k-red-600 bg-w40k-red-900/30`
   if (isSaving.value) return `${baseClasses} border-blue-400 bg-blue-900/20`
-  
+
   return `${baseClasses} border-gray-400 bg-gray-800/50 hover:border-w40k-red-300 hover:bg-w40k-red-900/10`
 })
 
@@ -248,13 +253,13 @@ const decrementScore = () => {
 // Validation en temps réel
 const validateInput = () => {
   const value = editValue.value
-  
+
   if (value > maxScore.value) {
     editValue.value = maxScore.value
   } else if (value < minScore.value) {
     editValue.value = minScore.value
   }
-  
+
   if (validateScore(editValue.value)) {
     hasError.value = false
   }
@@ -278,20 +283,21 @@ watch(isEditing, (newValue) => {
   .min-h-12 {
     min-height: 2.5rem;
   }
-  
+
   .text-xl {
     font-size: 1.125rem;
   }
-  
+
   .w-16 {
     width: 3.5rem;
   }
-  
+
   .text-sm {
     font-size: 0.875rem;
   }
-  
-  .w-6, .h-6 {
+
+  .w-6,
+  .h-6 {
     width: 2rem;
     height: 2rem;
   }

@@ -296,7 +296,7 @@ const performSearch = () => {
 
   searchTimeout = setTimeout(async () => {
     const query = searchQuery.value.trim()
-    
+
     if (query.length < SEARCH_CONFIG.MIN_QUERY_LENGTH) {
       searchResults.value = []
       return

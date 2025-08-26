@@ -138,6 +138,8 @@ export interface RoundDto {
   gameId: number
   createdAt: string
   updatedAt: string
+  // Nouveau mapping pour associer correctement les joueurs à leurs scores
+  playerScores: { [playerId: number]: number } // Map playerId -> score
 }
 
 export interface SecondaryScoreDto {
@@ -170,7 +172,7 @@ export interface PlayerDto {
   id: number
   pseudo: string
   userId?: number
-  isMainPlayer: boolean
+  isMainPlayer?: boolean // Optionnel car calculé côté backend
   totalScore: number
   gameId: number
 }

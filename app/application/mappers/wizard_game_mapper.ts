@@ -174,6 +174,11 @@ export class WizardGameMapper {
    * Extrait les métadonnées de la partie pour la réponse
    */
   static extractGameMetadata(wizardData: GameCreationWizardRequest) {
+    // Détecter si les informations d'armée sont présentes
+    const hasArmyInfo = wizardData.players.some(
+      (player) => player.army && player.army.trim().length > 0
+    )
+
     return {
       gameType: wizardData.gameType,
       pointsLimit: wizardData.pointsLimit,
@@ -182,6 +187,7 @@ export class WizardGameMapper {
       enableRounds: false, // Rounds désormais ajoutés après création
       roundsCount: 0, // Pas de rounds lors de la création initiale
       playersCount: wizardData.players.length,
+      hasArmyInfo,
     }
   }
 }

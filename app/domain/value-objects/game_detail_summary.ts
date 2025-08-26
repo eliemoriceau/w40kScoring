@@ -62,14 +62,41 @@ export class GameDetailSummary {
 
   /**
    * Calcule le score total pour un joueur donné
+   * Utilise une logique correcte de mapping des joueurs aux scores
    */
   getTotalScoreForPlayer(playerId: number): number {
     return this.rounds
       .filter((round) => round.isCompleted)
       .reduce((total, round) => {
-        const playerInRound = this.getMainPlayer()?.id === playerId
-        return total + (playerInRound ? round.playerScore : round.opponentScore)
+        // Utiliser la logique correcte : déterminer quel score correspond au joueur
+        const score = this.getScoreForPlayerInRound(playerId, round)
+        return total + (score || 0)
       }, 0)
+  }
+
+  /**
+   * Détermine le score d'un joueur spécifique dans un round donné
+   * Logique corrigée pour différencier correctement les joueurs
+   */
+  private getScoreForPlayerInRound(playerId: number, round: RoundSummary): number {
+    const mainPlayer = this.getMainPlayer()
+    const opponentPlayer = this.getOpponentPlayer()
+
+    if (!mainPlayer || !opponentPlayer) {
+      return 0
+    }
+
+    // Si c'est le joueur principal, utiliser playerScore
+    if (playerId === mainPlayer.id) {
+      return round.playerScore || 0
+    }
+
+    // Si c'est l'adversaire, utiliser opponentScore
+    if (playerId === opponentPlayer.id) {
+      return round.opponentScore || 0
+    }
+
+    return 0
   }
 
   /**

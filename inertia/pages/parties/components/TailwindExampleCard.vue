@@ -15,13 +15,13 @@
 
     <!-- Actions -->
     <div class="flex flex-col sm:flex-row gap-3">
-      <button 
+      <button
         @click="onPrimaryAction"
         class="px-4 py-2 bg-w40k-red-500 hover:bg-w40k-red-600 text-white rounded transition-colors duration-200 font-medium"
       >
         {{ primaryActionText }}
       </button>
-      <button 
+      <button
         @click="onSecondaryAction"
         class="px-4 py-2 bg-transparent border-2 border-w40k-gold-500 text-w40k-gold-400 hover:bg-w40k-gold-500 hover:text-w40k-bg-primary rounded transition-colors duration-200 font-medium"
       >
@@ -32,20 +32,20 @@
     <!-- Status indicator -->
     <div v-if="status" class="mt-4 pt-4 border-t border-w40k-text-subtle">
       <div class="flex items-center space-x-2">
-        <div 
+        <div
           class="w-3 h-3 rounded-full"
           :class="{
             'bg-green-500': status === 'success',
-            'bg-w40k-gold-500': status === 'warning', 
-            'bg-w40k-red-500': status === 'error'
+            'bg-w40k-gold-500': status === 'warning',
+            'bg-w40k-red-500': status === 'error',
           }"
         ></div>
-        <span 
+        <span
           class="text-sm font-medium"
           :class="{
             'text-green-400': status === 'success',
             'text-w40k-gold-400': status === 'warning',
-            'text-w40k-red-400': status === 'error'
+            'text-w40k-red-400': status === 'error',
           }"
         >
           {{ statusText }}

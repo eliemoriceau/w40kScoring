@@ -96,6 +96,11 @@ export default defineConfig({
         name: 'integration',
         timeout: 60000,
       },
+      {
+        files: ['tests/browser/**/*.spec(.ts|.js)'],
+        name: 'browser',
+        timeout: 60000,
+      },
     ],
     forceExit: false,
   },

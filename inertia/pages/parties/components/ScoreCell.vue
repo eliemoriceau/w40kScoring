@@ -107,10 +107,8 @@ const currentScore = computed(() => {
     return 0
   }
 
-  const score = props.player.isMainPlayer
-    ? props.round.playerScore
-    : props.round.opponentScore
-    
+  const score = props.player.isMainPlayer ? props.round.playerScore : props.round.opponentScore
+
   return score ?? 0
 })
 
@@ -238,13 +236,13 @@ const decrementScore = () => {
 // Validation en temps réel
 const validateInput = () => {
   const value = editValue.value
-  
+
   if (value > maxScore.value) {
     editValue.value = maxScore.value
   } else if (value < minScore.value) {
     editValue.value = minScore.value
   }
-  
+
   // Reset l'erreur si la valeur est maintenant valide
   if (validateScore(editValue.value)) {
     hasError.value = false

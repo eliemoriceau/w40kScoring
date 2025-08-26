@@ -71,7 +71,7 @@ export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
  * Learn more - https://japa.dev/docs/test-suites#lifecycle-hooks
  */
 export const configureSuite: Config['configureSuite'] = (suite) => {
-  if (['functional', 'e2e', 'integration', 'browser'].includes(suite.name)) {
+  if (['functional', 'e2e', 'integration'].includes(suite.name)) {
     return suite.setup(() => testUtils.httpServer().start())
   }
 }

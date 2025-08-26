@@ -1,6 +1,4 @@
 @import 'tailwindcss';
-@import './temporary-styles.css';
-@import './fix-styles.css';
 
 /* Utilitaires pour compatibility avec @apply dans les styles scoped */
 @layer utilities {

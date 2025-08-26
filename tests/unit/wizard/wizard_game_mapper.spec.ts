@@ -232,7 +232,7 @@ test.group('WizardGameMapper', () => {
     const emailOpponent: GameCreationWizardRequest = {
       gameType: 'MATCHED_PLAY',
       pointsLimit: 2000,
-      opponentType: 'invite',
+      opponentType: 'email',
       opponentEmail: 'test@example.com',
       opponentPseudo: 'EmailPlayer',
       players: [

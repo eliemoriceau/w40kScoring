@@ -74,8 +74,8 @@
         </div>
       </div>
 
-      <!-- Nouveau composant d'édition inline des scores avec design W40K -->
-      <W40KGameScoreBoard
+      <!-- Nouveau composant minimaliste pour l'affichage des scores -->
+      <W40KMinimalScoreBoard
         :game="gameDetailData"
         :players="players"
         :rounds="rounds"
@@ -100,7 +100,7 @@
 <script setup lang="ts">
 import { computed, ref, nextTick } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import W40KGameScoreBoard from './components/W40KGameScoreBoard.vue'
+import W40KMinimalScoreBoard from './components/W40KMinimalScoreBoard.vue'
 import type { GameDetailDto, PlayerDto, RoundDto, SecondaryScoreDto, GameMetaDto } from './types'
 
 // Props définies par le contrôleur

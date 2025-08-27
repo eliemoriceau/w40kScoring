@@ -61,11 +61,10 @@
             <div v-for="round in localRounds" :key="`player1-${round.id}`" class="text-center">
               <div class="text-xs text-slate-400 mb-1">R{{ round.roundNumber }}</div>
               <W40KScoreCell
-                :value="players[0]?.isMainPlayer ? round.playerScore : round.opponentScore"
-                :round-id="round.id"
-                :player-id="players[0]?.id"
-                :can-edit="canEdit && !round.isCompleted"
-                :is-completed="round.isCompleted"
+                :round="round"
+                :player="players[0]"
+                :game-id="props.game.id"
+                :editable="canEdit && !round.isCompleted"
                 @score-updated="handleScoreUpdate"
               />
             </div>
@@ -82,11 +81,10 @@
             <div v-for="round in localRounds" :key="`player2-${round.id}`" class="text-center">
               <div class="text-xs text-slate-400 mb-1">R{{ round.roundNumber }}</div>
               <W40KScoreCell
-                :value="players[1]?.isMainPlayer ? round.playerScore : round.opponentScore"
-                :round-id="round.id"
-                :player-id="players[1]?.id"
-                :can-edit="canEdit && !round.isCompleted"
-                :is-completed="round.isCompleted"
+                :round="round"
+                :player="players[1]"
+                :game-id="props.game.id"
+                :editable="canEdit && !round.isCompleted"
                 @score-updated="handleScoreUpdate"
               />
             </div>

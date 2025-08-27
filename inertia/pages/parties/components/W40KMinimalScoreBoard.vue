@@ -50,8 +50,9 @@
         Scores Primaires
       </h3>
 
-      <div class="space-y-4">
-        <!-- Ligne pour le joueur 1 -->
+      <!-- Grid côte à côte pour les deux joueurs -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Tableau pour le joueur 1 -->
         <div class="border border-slate-600 rounded-lg p-3">
           <div class="flex items-center justify-between mb-2">
             <span class="font-medium text-red-300">{{ players[0]?.pseudo || 'Joueur 1' }}</span>
@@ -71,7 +72,7 @@
           </div>
         </div>
 
-        <!-- Ligne pour le joueur 2 -->
+        <!-- Tableau pour le joueur 2 -->
         <div v-if="players[1]" class="border border-slate-600 rounded-lg p-3">
           <div class="flex items-center justify-between mb-2">
             <span class="font-medium text-red-300">{{ players[1].pseudo }}</span>
@@ -89,6 +90,11 @@
               />
             </div>
           </div>
+        </div>
+
+        <!-- Placeholder si pas de joueur 2 -->
+        <div v-else class="border border-slate-600 rounded-lg p-3 flex items-center justify-center">
+          <span class="text-slate-400 text-sm">En attente d'adversaire</span>
         </div>
       </div>
 

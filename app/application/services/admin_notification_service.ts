@@ -1,4 +1,7 @@
-import AdminNotification, { NotificationType, NotificationPriority } from '#models/admin_notification'
+import AdminNotification, {
+  NotificationType,
+  NotificationPriority,
+} from '#models/admin_notification'
 import AdminActionLog from '#models/admin_action_log'
 import { DateTime } from 'luxon'
 
@@ -35,11 +38,14 @@ export default class AdminNotificationService {
   /**
    * Récupère les notifications pour un utilisateur admin
    */
-  async getNotificationsForUser(userId: number, options: {
-    limit?: number
-    unreadOnly?: boolean
-    includeGlobal?: boolean
-  } = {}) {
+  async getNotificationsForUser(
+    userId: number,
+    options: {
+      limit?: number
+      unreadOnly?: boolean
+      includeGlobal?: boolean
+    } = {}
+  ) {
     const { limit = 20, unreadOnly = false, includeGlobal = true } = options
 
     let query = AdminNotification.query()
@@ -127,10 +133,7 @@ export default class AdminNotificationService {
    * Crée automatiquement une notification basée sur une action d'audit
    */
   async createNotificationFromAuditLog(logId: number) {
-    const log = await AdminActionLog.query()
-      .where('id', logId)
-      .preload('admin')
-      .first()
+    const log = await AdminActionLog.query().where('id', logId).preload('admin').first()
 
     if (!log) return null
 
@@ -232,29 +235,29 @@ export default class AdminNotificationService {
       AdminNotification.query().where('isRead', false).count('*').first(),
 
       // Par type
-      AdminNotification.query()
-        .select('type')
-        .count('* as count')
-        .groupBy('type'),
+      AdminNotification.query().select('type').count('* as count').groupBy('type'),
 
       // Par priorité
-      AdminNotification.query()
-        .select('priority')
-        .count('* as count')
-        .groupBy('priority'),
+      AdminNotification.query().select('priority').count('* as count').groupBy('priority'),
     ])
 
     return {
       total: Number(total?.$extras['count(*)'] || 0),
       unread: Number(unread?.$extras['count(*)'] || 0),
-      byType: byType.reduce((acc, item) => {
-        acc[item.type] = Number(item.$extras.count)
-        return acc
-      }, {} as Record<string, number>),
-      byPriority: byPriority.reduce((acc, item) => {
-        acc[item.priority] = Number(item.$extras.count)
-        return acc
-      }, {} as Record<string, number>),
+      byType: byType.reduce(
+        (acc, item) => {
+          acc[item.type] = Number(item.$extras.count)
+          return acc
+        },
+        {} as Record<string, number>
+      ),
+      byPriority: byPriority.reduce(
+        (acc, item) => {
+          acc[item.priority] = Number(item.$extras.count)
+          return acc
+        },
+        {} as Record<string, number>
+      ),
     }
   }
 }

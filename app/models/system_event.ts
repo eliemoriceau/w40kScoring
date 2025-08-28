@@ -3,19 +3,46 @@ import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 
-export type EventType = 
-  | 'user_created' | 'user_updated' | 'user_deleted' | 'user_role_changed' | 'user_login' | 'user_logout'
-  | 'game_created' | 'game_started' | 'game_completed' | 'game_cancelled' | 'game_updated'
-  | 'round_created' | 'round_completed' | 'round_updated'
-  | 'score_added' | 'score_updated' | 'score_deleted'
-  | 'notification_created' | 'notification_read' | 'notification_deleted'
-  | 'permission_granted' | 'permission_revoked'
-  | 'system_config_updated' | 'system_maintenance' | 'system_backup'
-  | 'error_occurred' | 'security_alert' | 'audit_log'
+export type EventType =
+  | 'user_created'
+  | 'user_updated'
+  | 'user_deleted'
+  | 'user_role_changed'
+  | 'user_login'
+  | 'user_logout'
+  | 'game_created'
+  | 'game_started'
+  | 'game_completed'
+  | 'game_cancelled'
+  | 'game_updated'
+  | 'round_created'
+  | 'round_completed'
+  | 'round_updated'
+  | 'score_added'
+  | 'score_updated'
+  | 'score_deleted'
+  | 'notification_created'
+  | 'notification_read'
+  | 'notification_deleted'
+  | 'permission_granted'
+  | 'permission_revoked'
+  | 'system_config_updated'
+  | 'system_maintenance'
+  | 'system_backup'
+  | 'error_occurred'
+  | 'security_alert'
+  | 'audit_log'
 
 export type EventSeverity = 'info' | 'warning' | 'error' | 'critical'
 
-export type EventCategory = 'authentication' | 'authorization' | 'data' | 'system' | 'security' | 'game' | 'user'
+export type EventCategory =
+  | 'authentication'
+  | 'authorization'
+  | 'data'
+  | 'system'
+  | 'security'
+  | 'game'
+  | 'user'
 
 /**
  * Modèle pour l'historique des événements système
@@ -126,7 +153,7 @@ export default class SystemEvent extends BaseModel {
       system_backup: 'save',
       error_occurred: 'alert-triangle',
       security_alert: 'shield-alert',
-      audit_log: 'file-text'
+      audit_log: 'file-text',
     }
 
     return icons[this.type] || 'activity'
@@ -140,7 +167,7 @@ export default class SystemEvent extends BaseModel {
       info: 'bg-blue-100 text-blue-800 border-blue-200',
       warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       error: 'bg-red-100 text-red-800 border-red-200',
-      critical: 'bg-red-200 text-red-900 border-red-300 font-bold'
+      critical: 'bg-red-200 text-red-900 border-red-300 font-bold',
     }
 
     return classes[this.severity]
@@ -157,7 +184,7 @@ export default class SystemEvent extends BaseModel {
       system: 'text-purple-600',
       security: 'text-red-600',
       game: 'text-indigo-600',
-      user: 'text-teal-600'
+      user: 'text-teal-600',
     }
 
     return classes[this.category]
@@ -191,10 +218,12 @@ export default class SystemEvent extends BaseModel {
    * Détermine si l'événement est lié à la sécurité
    */
   get isSecurityRelated(): boolean {
-    return this.category === 'security' || 
-           this.category === 'authorization' ||
-           this.type === 'security_alert' ||
-           this.type === 'user_role_changed'
+    return (
+      this.category === 'security' ||
+      this.category === 'authorization' ||
+      this.type === 'security_alert' ||
+      this.type === 'user_role_changed'
+    )
   }
 
   /**
@@ -206,7 +235,7 @@ export default class SystemEvent extends BaseModel {
     }
 
     const context = []
-    
+
     if (this.resourceType && this.resourceId) {
       context.push(`${this.resourceType}:${this.resourceId}`)
     }

@@ -35,7 +35,7 @@ export default class Permission extends BaseModel {
   declare updatedAt: DateTime
 
   @manyToMany(() => Role, {
-    pivotTable: 'role_permissions'
+    pivotTable: 'role_permissions',
   })
   declare roles: ManyToMany<typeof Role>
 
@@ -43,10 +43,7 @@ export default class Permission extends BaseModel {
    * Vérifie si la permission correspond à un pattern de ressource/action
    */
   matches(resource: string, action: string): boolean {
-    return (
-      this.resource === resource &&
-      (this.action === action || this.action === 'manage')
-    )
+    return this.resource === resource && (this.action === action || this.action === 'manage')
   }
 
   /**
@@ -65,7 +62,7 @@ export default class Permission extends BaseModel {
       notifications: 'Notifications',
       parties: 'Parties',
       analytics: 'Analytics',
-      system: 'Système'
+      system: 'Système',
     }
 
     const actionNames = {
@@ -73,7 +70,7 @@ export default class Permission extends BaseModel {
       create: 'Créer',
       update: 'Modifier',
       delete: 'Supprimer',
-      manage: 'Gérer'
+      manage: 'Gérer',
     }
 
     return `${actionNames[this.action]} ${resourceNames[this.resource]}`

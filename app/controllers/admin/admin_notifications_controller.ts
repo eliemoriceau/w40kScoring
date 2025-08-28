@@ -32,15 +32,19 @@ export default class AdminNotificationsController {
         timeAgo: notification.timeAgo,
         createdAt: notification.createdAt.toFormat('dd/MM/yyyy HH:mm'),
         metadata: notification.metadata,
-        relatedLog: notification.relatedLog ? {
-          id: notification.relatedLog.id,
-          action: notification.relatedLog.action,
-          actionDescription: notification.relatedLog.actionDescription,
-          admin: notification.relatedLog.admin ? {
-            id: notification.relatedLog.admin.id,
-            username: notification.relatedLog.admin.username,
-          } : null,
-        } : null,
+        relatedLog: notification.relatedLog
+          ? {
+              id: notification.relatedLog.id,
+              action: notification.relatedLog.action,
+              actionDescription: notification.relatedLog.actionDescription,
+              admin: notification.relatedLog.admin
+                ? {
+                    id: notification.relatedLog.admin.id,
+                    username: notification.relatedLog.admin.username,
+                  }
+                : null,
+            }
+          : null,
       }))
 
       return response.json({

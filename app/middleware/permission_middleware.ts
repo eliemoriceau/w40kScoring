@@ -55,7 +55,7 @@ export default class PermissionMiddleware {
     let resourceId: number | undefined
     if (options.resourceIdParam) {
       const paramValue = ctx.params[options.resourceIdParam]
-      resourceId = paramValue ? parseInt(paramValue, 10) : undefined
+      resourceId = paramValue ? Number.parseInt(paramValue, 10) : undefined
     }
 
     // Vérifier la permission

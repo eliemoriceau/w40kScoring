@@ -17,7 +17,8 @@ const AuthController = () => import('#controllers/auth_controller')
 // Admin Controllers
 const AdminDashboardsController = () => import('#controllers/admin/admin_dashboards_controller')
 const AdminUsersController = () => import('#controllers/admin/admin_users_controller')
-const AdminNotificationsController = () => import('#controllers/admin/admin_notifications_controller')
+const AdminNotificationsController = () =>
+  import('#controllers/admin/admin_notifications_controller')
 
 // Health check endpoint for Kubernetes
 router.get('/health', ({ response }) => {
@@ -160,7 +161,9 @@ router
     router
       .get('/notifications/unread-count', [AdminNotificationsController, 'unreadCount'])
       .as('notifications.unread_count')
-    router.get('/notifications/stats', [AdminNotificationsController, 'stats']).as('notifications.stats')
+    router
+      .get('/notifications/stats', [AdminNotificationsController, 'stats'])
+      .as('notifications.stats')
 
     router
       .get('/parties', ({ response }) => {

@@ -29,7 +29,7 @@ export default class Role extends BaseModel {
   @manyToMany(() => Permission, {
     pivotTable: 'role_permissions',
     pivotTimestamps: true,
-    pivotColumns: ['granted_at', 'granted_by']
+    pivotColumns: ['granted_at', 'granted_by'],
   })
   declare permissions: ManyToMany<typeof Permission>
 
@@ -38,9 +38,9 @@ export default class Role extends BaseModel {
    */
   async hasPermission(resource: string, action: string): Promise<boolean> {
     await this.load('permissions')
-    
-    return this.permissions.some(permission => 
-      permission.isActive && permission.matches(resource, action)
+
+    return this.permissions.some(
+      (permission) => permission.isActive && permission.matches(resource, action)
     )
   }
 
@@ -76,8 +76,8 @@ export default class Role extends BaseModel {
     await this.related('permissions').attach({
       [permissionId]: {
         granted_at: DateTime.now(),
-        granted_by: grantedBy
-      }
+        granted_by: grantedBy,
+      },
     })
   }
 
@@ -95,7 +95,7 @@ export default class Role extends BaseModel {
     await this.load('permissions', (query) => {
       query.where('is_active', true)
     })
-    
+
     return this.permissions
   }
 }

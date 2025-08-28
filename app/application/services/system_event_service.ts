@@ -1,12 +1,8 @@
 import SystemEvent from '#models/system_event'
-import type { 
-  EventType, 
-  EventSeverity, 
-  EventCategory 
-} from '#models/system_event'
+import type { EventType, EventSeverity, EventCategory } from '#models/system_event'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 
 /**
  * Service pour la gestion des événements système
@@ -56,8 +52,8 @@ export default class SystemEventService {
    * Enregistre un événement depuis un contexte HTTP
    */
   async logEventFromContext(
-    ctx: HttpContext, 
-    type: EventType, 
+    ctx: HttpContext,
+    type: EventType,
     category: EventCategory,
     title: string,
     description: string,
@@ -107,7 +103,7 @@ export default class SystemEventService {
         severity: success ? 'info' : 'warning',
         resourceType: 'user',
         resourceId: userId.toString(),
-        metadata: { success }
+        metadata: { success },
       }
     )
   }
@@ -125,7 +121,7 @@ export default class SystemEventService {
       user_created: 'Utilisateur créé',
       user_updated: 'Utilisateur modifié',
       user_deleted: 'Utilisateur supprimé',
-      user_role_changed: 'Rôle utilisateur modifié'
+      user_role_changed: 'Rôle utilisateur modifié',
     }
 
     const severity: EventSeverity = type === 'user_deleted' ? 'warning' : 'info'
@@ -140,7 +136,7 @@ export default class SystemEventService {
         severity,
         resourceType: 'user',
         resourceId: userId.toString(),
-        metadata: details
+        metadata: details,
       }
     )
   }
@@ -159,7 +155,7 @@ export default class SystemEventService {
       game_started: 'Partie démarrée',
       game_completed: 'Partie terminée',
       game_cancelled: 'Partie annulée',
-      game_updated: 'Partie modifiée'
+      game_updated: 'Partie modifiée',
     }
 
     return await this.logEventFromContext(
@@ -171,7 +167,7 @@ export default class SystemEventService {
       {
         resourceType: 'game',
         resourceId: gameId.toString(),
-        metadata: details
+        metadata: details,
       }
     )
   }
@@ -188,14 +184,10 @@ export default class SystemEventService {
     details: Record<string, any> = {}
   ): Promise<SystemEvent> {
     if (ctx) {
-      return await this.logEventFromContext(
-        ctx,
-        type,
-        'security',
-        title,
-        description,
-        { severity, metadata: details }
-      )
+      return await this.logEventFromContext(ctx, type, 'security', title, description, {
+        severity,
+        metadata: details,
+      })
     } else {
       // Événement système sans contexte utilisateur
       return await this.logEvent({
@@ -204,7 +196,7 @@ export default class SystemEventService {
         severity,
         title,
         description,
-        metadata: details
+        metadata: details,
       })
     }
   }
@@ -227,8 +219,8 @@ export default class SystemEventService {
       metadata: {
         stack: error.stack,
         name: error.name,
-        ...details
-      }
+        ...details,
+      },
     }
 
     if (ctx) {
@@ -240,7 +232,7 @@ export default class SystemEventService {
         eventData.description,
         {
           severity: eventData.severity,
-          metadata: eventData.metadata
+          metadata: eventData.metadata,
         }
       )
     } else {
@@ -251,19 +243,21 @@ export default class SystemEventService {
   /**
    * Récupère les événements avec filtres
    */
-  async getEvents(options: {
-    limit?: number
-    offset?: number
-    category?: EventCategory
-    severity?: EventSeverity
-    userId?: number
-    resourceType?: string
-    resourceId?: string
-    correlationId?: string
-    startDate?: DateTime
-    endDate?: DateTime
-    requiresAttention?: boolean
-  } = {}): Promise<{
+  async getEvents(
+    options: {
+      limit?: number
+      offset?: number
+      category?: EventCategory
+      severity?: EventSeverity
+      userId?: number
+      resourceType?: string
+      resourceId?: string
+      correlationId?: string
+      startDate?: DateTime
+      endDate?: DateTime
+      requiresAttention?: boolean
+    } = {}
+  ): Promise<{
     events: SystemEvent[]
     total: number
   }> {
@@ -329,7 +323,7 @@ export default class SystemEventService {
 
     return {
       events,
-      total: totalCount
+      total: totalCount,
     }
   }
 
@@ -342,24 +336,15 @@ export default class SystemEventService {
     eventsBySeverity: Record<string, number>
     eventsRequiringAttention: number
     recentErrors: SystemEvent[]
-    topUsers: Array<{ userId: number, username: string, eventCount: number }>
+    topUsers: Array<{ userId: number; username: string; eventCount: number }>
   }> {
     const periodStart = DateTime.now().minus({
-      days: period === 'day' ? 1 : period === 'week' ? 7 : 30
+      days: period === 'day' ? 1 : period === 'week' ? 7 : 30,
     })
 
-    const [
-      total,
-      byCategory,
-      bySeverity,
-      errors,
-      topUsers
-    ] = await Promise.all([
+    const [total, byCategory, bySeverity, errors, topUsers] = await Promise.all([
       // Total des événements
-      SystemEvent.query()
-        .where('occurredAt', '>=', periodStart.toSQL())
-        .count('*')
-        .first(),
+      SystemEvent.query().where('occurredAt', '>=', periodStart.toSQL()).count('*').first(),
 
       // Par catégorie
       SystemEvent.query()
@@ -393,26 +378,32 @@ export default class SystemEventService {
         .limit(5)
         .preload('user', (userQuery) => {
           userQuery.select('id', 'username')
-        })
+        }),
     ])
 
     return {
       totalEvents: Number(total?.$extras['count(*)'] || 0),
-      eventsByCategory: byCategory.reduce((acc, item) => {
-        acc[item.category] = Number(item.$extras.count)
-        return acc
-      }, {} as Record<string, number>),
-      eventsBySeverity: bySeverity.reduce((acc, item) => {
-        acc[item.severity] = Number(item.$extras.count)
-        return acc
-      }, {} as Record<string, number>),
+      eventsByCategory: byCategory.reduce(
+        (acc, item) => {
+          acc[item.category] = Number(item.$extras.count)
+          return acc
+        },
+        {} as Record<string, number>
+      ),
+      eventsBySeverity: bySeverity.reduce(
+        (acc, item) => {
+          acc[item.severity] = Number(item.$extras.count)
+          return acc
+        },
+        {} as Record<string, number>
+      ),
       eventsRequiringAttention: errors.length,
       recentErrors: errors,
-      topUsers: topUsers.map(event => ({
+      topUsers: topUsers.map((event) => ({
         userId: event.userId!,
         username: event.user?.username || 'Inconnu',
-        eventCount: Number(event.$extras.count)
-      }))
+        eventCount: Number(event.$extras.count),
+      })),
     }
   }
 
@@ -428,7 +419,7 @@ export default class SystemEventService {
    */
   async archiveOldEvents(daysToKeep: number = 90): Promise<number> {
     const cutoffDate = DateTime.now().minus({ days: daysToKeep })
-    
+
     const deletedCount = await SystemEvent.query()
       .where('occurredAt', '<', cutoffDate.toSQL())
       .where('severity', 'info') // Ne supprimer que les événements informatifs

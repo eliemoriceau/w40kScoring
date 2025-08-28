@@ -149,6 +149,11 @@ const currentScore = computed(() => {
     return 0
   }
 
+  // Vérifications de sécurité
+  if (!props.round || !props.player) {
+    return 0
+  }
+
   // Utiliser le nouveau mapping des scores par joueur pour résoudre le problème de différentiation
   if (props.round.playerScores && props.player.id in props.round.playerScores) {
     return props.round.playerScores[props.player.id] ?? 0

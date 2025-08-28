@@ -14,6 +14,9 @@ const PagesController = () => import('#controllers/pages_controller')
 const PartiesController = () => import('#controllers/parties_controller')
 const AuthController = () => import('#controllers/auth_controller')
 
+// Admin Controllers
+const AdminDashboardsController = () => import('#controllers/admin/admin_dashboards_controller')
+
 // Health check endpoint for Kubernetes
 router.get('/health', ({ response }) => {
   return response.json({
@@ -25,6 +28,7 @@ router.get('/health', ({ response }) => {
 
 // Home page
 router.get('/', [PagesController, 'home'])
+
 
 // Test Tailwind CSS (temporary route)
 router.get('/test-tailwind', ({ inertia }) => {
@@ -119,6 +123,62 @@ router
     router.get('/api/users/search', [PartiesController, 'searchUsers']).as('api.users.search')
   })
   .middleware([middleware.auth()])
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+| Routes for administrative panel - restricted to ADMIN role (level 3)
+*/
+router
+  .group(() => {
+    // Dashboard principal
+    router.get('/', [AdminDashboardsController, 'index']).as('dashboard')
+
+    // Placeholder pour les autres routes admin (implémentées dans les prochaines phases)
+    router
+      .get('/users', ({ response }) => {
+        return response.status(501).json({
+          message: 'Gestion des utilisateurs - En cours de développement (Phase 2)',
+        })
+      })
+      .as('users.index')
+
+    router
+      .get('/parties', ({ response }) => {
+        return response.status(501).json({
+          message: 'Gestion des parties - En cours de développement (Phase 3)',
+        })
+      })
+      .as('parties.index')
+
+    router
+      .get('/analytics', ({ response }) => {
+        return response.status(501).json({
+          message: 'Analytics - En cours de développement (Phase 4)',
+        })
+      })
+      .as('analytics.index')
+
+    router
+      .get('/system/config', ({ response }) => {
+        return response.status(501).json({
+          message: 'Configuration système - En cours de développement (Phase 5)',
+        })
+      })
+      .as('system.config')
+
+    router
+      .get('/system/logs', ({ response }) => {
+        return response.status(501).json({
+          message: 'Logs système - En cours de développement (Phase 5)',
+        })
+      })
+      .as('system.logs')
+  })
+  .prefix('/admin')
+  .as('admin')
+  .middleware([middleware.auth(), middleware.adminAccess(), middleware.auditLogger()])
 
 // 404 Not Found (fallback route)
 router.any('*', [PagesController, 'notFound'])

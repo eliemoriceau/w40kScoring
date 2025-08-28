@@ -7,7 +7,9 @@
         <div class="text-center">
           <h3 class="text-lg font-semibold text-red-300 mb-1">
             {{ players[0]?.pseudo || 'Joueur 1' }}
-            <span v-if="players[0]?.isMainPlayer" class="text-sm text-slate-400 font-normal">(Vous)</span>
+            <span v-if="players[0]?.isMainPlayer" class="text-sm text-slate-400 font-normal"
+              >(Vous)</span
+            >
           </h3>
           <div class="text-3xl font-bold text-white">
             {{ getPlayerTotalScore(players[0]) }}
@@ -16,9 +18,7 @@
 
         <!-- VS Central -->
         <div class="text-center">
-          <div class="text-xl font-bold text-slate-400 bg-slate-700 px-4 py-2 rounded-lg">
-            VS
-          </div>
+          <div class="text-xl font-bold text-slate-400 bg-slate-700 px-4 py-2 rounded-lg">VS</div>
           <div v-if="game.winner" class="mt-2">
             <span :class="winnerClasses">{{ getWinnerText() }}</span>
           </div>
@@ -28,7 +28,9 @@
         <div v-if="players[1]" class="text-center">
           <h3 class="text-lg font-semibold text-red-300 mb-1">
             {{ players[1].pseudo }}
-            <span v-if="players[1].isMainPlayer" class="text-sm text-slate-400 font-normal">(Vous)</span>
+            <span v-if="players[1].isMainPlayer" class="text-sm text-slate-400 font-normal"
+              >(Vous)</span
+            >
           </h3>
           <div class="text-3xl font-bold text-white">
             {{ getPlayerTotalScore(players[1]) }}
@@ -44,41 +46,57 @@
     <div class="bg-slate-800 border border-red-800/50 rounded-lg p-4">
       <h3 class="text-xl font-semibold text-red-300 mb-4 flex items-center gap-2">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
         </svg>
         Scores Primaires
       </h3>
 
       <!-- Compteur de Round Courant -->
       <div v-if="localRounds.length > 0" class="flex items-center justify-center mb-4">
-        <div class="bg-slate-700 border border-red-700/50 rounded-lg px-6 py-2 flex items-center gap-4">
-          <button 
+        <div
+          class="bg-slate-700 border border-red-700/50 rounded-lg px-6 py-2 flex items-center gap-4"
+        >
+          <button
             @click="previousRound"
             class="text-red-300 hover:text-red-200 disabled:text-slate-500 transition-colors duration-200 p-1"
             :disabled="roundCounter.currentRound <= 1"
             aria-label="Round précédent"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
-          
+
           <div class="text-center">
             <div class="text-xs text-slate-400 font-medium">Round Courant</div>
             <div class="text-lg font-bold text-white">
               {{ roundCounter.currentRound }} / {{ totalRounds }}
             </div>
           </div>
-          
-          <button 
+
+          <button
             @click="nextRound"
             class="text-red-300 hover:text-red-200 disabled:text-slate-500 transition-colors duration-200 p-1"
             :disabled="roundCounter.currentRound >= totalRounds"
             aria-label="Round suivant"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </div>
@@ -94,11 +112,13 @@
           </div>
           <div class="grid grid-cols-5 gap-2">
             <div v-for="round in localRounds" :key="`player1-${round.id}`" class="text-center">
-              <div 
+              <div
                 class="text-xs mb-1 transition-colors duration-200"
-                :class="round.roundNumber === roundCounter.currentRound 
-                  ? 'text-red-300 font-bold' 
-                  : 'text-slate-400'"
+                :class="
+                  round.roundNumber === roundCounter.currentRound
+                    ? 'text-red-300 font-bold'
+                    : 'text-slate-400'
+                "
               >
                 R{{ round.roundNumber }}
               </div>
@@ -122,11 +142,13 @@
           </div>
           <div class="grid grid-cols-5 gap-2">
             <div v-for="round in localRounds" :key="`player2-${round.id}`" class="text-center">
-              <div 
+              <div
                 class="text-xs mb-1 transition-colors duration-200"
-                :class="round.roundNumber === roundCounter.currentRound 
-                  ? 'text-red-300 font-bold' 
-                  : 'text-slate-400'"
+                :class="
+                  round.roundNumber === roundCounter.currentRound
+                    ? 'text-red-300 font-bold'
+                    : 'text-slate-400'
+                "
               >
                 R{{ round.roundNumber }}
               </div>
@@ -151,9 +173,18 @@
       <!-- Message si aucun round -->
       <div v-if="localRounds.length === 0" class="py-8 text-center text-slate-400">
         <div class="space-y-2">
-          <svg class="w-12 h-12 mx-auto text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          <svg
+            class="w-12 h-12 mx-auto text-slate-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            />
           </svg>
           <p>Aucun round créé pour cette partie</p>
           <p class="text-sm text-slate-500">Les rounds seront créés lors du démarrage</p>
@@ -165,16 +196,17 @@
     <div class="bg-slate-800 border border-red-800/50 rounded-lg p-4">
       <h3 class="text-xl font-semibold text-red-300 mb-4 flex items-center gap-2">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
         </svg>
         Scores Secondaires
       </h3>
 
-      <W40KCompactSecondaryScores
-        :players="players"
-        :secondary-scores="secondaryScores"
-      />
+      <W40KCompactSecondaryScores :players="players" :secondary-scores="secondaryScores" />
     </div>
 
     <!-- Toast de notification -->
@@ -233,7 +265,7 @@ const roundCounter = reactive<RoundCounterState>({
   currentRound: 1,
   totalRounds: 5,
   canNavigate: true,
-  roundHistory: []
+  roundHistory: [],
 })
 
 // État des notifications
@@ -284,8 +316,8 @@ const getSecondaryScore = (player?: PlayerDto) => {
 // Calculs pour le compteur de round
 const currentRound = computed(() => {
   if (!localRounds.value.length) return 1
-  
-  const firstIncomplete = localRounds.value.find(r => !r.isCompleted)
+
+  const firstIncomplete = localRounds.value.find((r) => !r.isCompleted)
   return firstIncomplete?.roundNumber || localRounds.value[localRounds.value.length - 1].roundNumber
 })
 
@@ -296,19 +328,19 @@ const totalRounds = computed(() => {
 // Fonctions de navigation des rounds
 const navigateToRound = (roundNumber: number) => {
   if (roundNumber < 1 || roundNumber > totalRounds.value) return
-  
+
   const previousRound = roundCounter.currentRound
   roundCounter.roundHistory.push(previousRound)
   roundCounter.currentRound = roundNumber
-  
+
   // Émettre événement pour mise à jour de l'affichage
-  const targetRound = localRounds.value.find(r => r.roundNumber === roundNumber)
+  const targetRound = localRounds.value.find((r) => r.roundNumber === roundNumber)
   emit('round-changed', {
     previousRound,
     currentRound: roundNumber,
-    roundId: targetRound?.id || 0
+    roundId: targetRound?.id || 0,
   })
-  
+
   showNotificationMessage(`Navigation vers Round ${roundNumber}`, 'info')
 }
 
@@ -343,9 +375,7 @@ const getWinnerText = () => {
     case 'DRAW':
       return 'Égalité'
     case 'PLAYER':
-      return props.players[0]?.isMainPlayer
-        ? 'Victoire !'
-        : `${props.players[0]?.pseudo} gagne`
+      return props.players[0]?.isMainPlayer ? 'Victoire !' : `${props.players[0]?.pseudo} gagne`
     case 'OPPONENT':
       return props.players[1]?.isMainPlayer
         ? 'Victoire !'

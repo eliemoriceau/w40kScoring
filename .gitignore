@@ -34,3 +34,4 @@ cookies.txt
 commands/
 database/seeders/*_test_*.ts
 database/seeders/fix_*.ts
+database.sqlite

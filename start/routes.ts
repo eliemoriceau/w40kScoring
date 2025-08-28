@@ -29,7 +29,6 @@ router.get('/health', ({ response }) => {
 // Home page
 router.get('/', [PagesController, 'home'])
 
-
 // Test Tailwind CSS (temporary route)
 router.get('/test-tailwind', ({ inertia }) => {
   return inertia.render('test-tailwind')

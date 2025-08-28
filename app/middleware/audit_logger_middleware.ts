@@ -92,16 +92,16 @@ export default class AuditLoggerMiddleware {
   private extractTargetId(urlParts: string[], params: any): number | null {
     // Chercher un ID numérique dans l'URL
     for (const part of urlParts) {
-      const id = parseInt(part, 10)
-      if (!isNaN(id)) {
+      const id = Number.parseInt(part, 10)
+      if (!Number.isNaN(id)) {
         return id
       }
     }
 
     // Chercher dans les paramètres
     if (params.id) {
-      const id = parseInt(params.id, 10)
-      return !isNaN(id) ? id : null
+      const id = Number.parseInt(params.id, 10)
+      return !Number.isNaN(id) ? id : null
     }
 
     return null

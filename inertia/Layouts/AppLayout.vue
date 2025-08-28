@@ -70,7 +70,7 @@ const closeMobileMenu = () => {
                 >
                   Accueil
                 </Link>
-                
+
                 <!-- Authenticated User Links -->
                 <template v-if="isAuthenticated">
                   <Link
@@ -97,7 +97,7 @@ const closeMobileMenu = () => {
                       <span class="text-gray-300">Bienvenue,</span>
                       <span class="text-red-400 font-medium">{{ user?.username }}</span>
                     </div>
-                    
+
                     <!-- Logout Button -->
                     <Link
                       href="/logout"
@@ -109,7 +109,7 @@ const closeMobileMenu = () => {
                     </Link>
                   </div>
                 </template>
-                
+
                 <template v-else>
                   <!-- Login/Register Buttons -->
                   <div class="flex items-center space-x-2">
@@ -159,7 +159,7 @@ const closeMobileMenu = () => {
         </div>
 
         <!-- Mobile Menu -->
-        <div 
+        <div
           v-if="isMobileMenuOpen"
           class="md:hidden bg-black/30 backdrop-blur-sm border-t border-red-500/20"
           @click="closeMobileMenu"
@@ -200,7 +200,7 @@ const closeMobileMenu = () => {
                   <p class="text-sm text-gray-300">Connecté en tant que:</p>
                   <p class="text-red-400 font-medium">{{ user?.username }}</p>
                 </div>
-                
+
                 <!-- Logout Button -->
                 <Link
                   href="/logout"
@@ -212,7 +212,7 @@ const closeMobileMenu = () => {
                   Déconnexion
                 </Link>
               </template>
-              
+
               <template v-else>
                 <!-- Login/Register Buttons -->
                 <div class="space-y-2">
@@ -266,17 +266,23 @@ const closeMobileMenu = () => {
                 >
               </li>
               <li v-if="isAuthenticated">
-                <Link href="/parties" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                <Link
+                  href="/parties"
+                  class="text-gray-300 hover:text-red-400 text-sm transition-colors"
                   >Mes parties</Link
                 >
               </li>
               <li v-if="isAuthenticated">
-                <Link href="/parties/create" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                <Link
+                  href="/parties/create"
+                  class="text-gray-300 hover:text-red-400 text-sm transition-colors"
                   >Nouvelle partie</Link
                 >
               </li>
               <li v-if="!isAuthenticated">
-                <Link href="/register" class="text-gray-300 hover:text-red-400 text-sm transition-colors"
+                <Link
+                  href="/register"
+                  class="text-gray-300 hover:text-red-400 text-sm transition-colors"
                   >Rejoindre la croisade</Link
                 >
               </li>

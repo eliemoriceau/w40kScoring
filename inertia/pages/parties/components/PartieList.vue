@@ -236,12 +236,24 @@ const handleLoadMore = async () => {
 }
 
 /* Réduction du nombre d'animations pour performances */
-.partie-group .grid > :nth-child(1) { animation-delay: 0.05s; }
-.partie-group .grid > :nth-child(2) { animation-delay: 0.1s; }
-.partie-group .grid > :nth-child(3) { animation-delay: 0.15s; }
-.partie-group .grid > :nth-child(4) { animation-delay: 0.2s; }
-.partie-group .grid > :nth-child(5) { animation-delay: 0.25s; }
-.partie-group .grid > :nth-child(6) { animation-delay: 0.3s; }
+.partie-group .grid > :nth-child(1) {
+  animation-delay: 0.05s;
+}
+.partie-group .grid > :nth-child(2) {
+  animation-delay: 0.1s;
+}
+.partie-group .grid > :nth-child(3) {
+  animation-delay: 0.15s;
+}
+.partie-group .grid > :nth-child(4) {
+  animation-delay: 0.2s;
+}
+.partie-group .grid > :nth-child(5) {
+  animation-delay: 0.25s;
+}
+.partie-group .grid > :nth-child(6) {
+  animation-delay: 0.3s;
+}
 
 /* Optimisation GPU */
 .partie-group .grid > * {

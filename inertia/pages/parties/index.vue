@@ -64,7 +64,7 @@ const applyFilters = () => {
   if (loading.value.loading && loading.value.operation === 'filter') {
     return
   }
-  
+
   loading.value = { loading: true, error: null, operation: 'filter' }
 
   // Construire les paramètres pour Inertia

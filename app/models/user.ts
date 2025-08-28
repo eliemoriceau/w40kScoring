@@ -36,6 +36,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column.dateTime()
   declare termsAcceptedAt: DateTime
 
+  @column.dateTime()
+  declare lastLoginAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

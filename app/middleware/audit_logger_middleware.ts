@@ -64,10 +64,12 @@ export default class AuditLoggerMiddleware {
 
     switch (method) {
       case 'POST':
+        if (urlParts.includes('reset-password')) return `${resource}.reset_password`
         return `${resource}.create`
       case 'PUT':
         if (urlParts.includes('ban')) return `${resource}.ban`
         if (urlParts.includes('unban')) return `${resource}.unban`
+        if (urlParts.includes('role')) return `${resource}.update_role`
         return `${resource}.update`
       case 'DELETE':
         return `${resource}.delete`

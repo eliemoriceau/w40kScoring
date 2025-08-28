@@ -16,6 +16,8 @@ const AuthController = () => import('#controllers/auth_controller')
 
 // Admin Controllers
 const AdminDashboardsController = () => import('#controllers/admin/admin_dashboards_controller')
+const AdminUsersController = () => import('#controllers/admin/admin_users_controller')
+const AdminNotificationsController = () => import('#controllers/admin/admin_notifications_controller')
 
 // Health check endpoint for Kubernetes
 router.get('/health', ({ response }) => {
@@ -134,14 +136,31 @@ router
     // Dashboard principal
     router.get('/', [AdminDashboardsController, 'index']).as('dashboard')
 
-    // Placeholder pour les autres routes admin (implémentées dans les prochaines phases)
+    // Gestion des utilisateurs (Phase 2)
+    router.get('/users', [AdminUsersController, 'index']).as('users.index')
+    router.get('/users/:id', [AdminUsersController, 'show']).as('users.show')
+    router.post('/users', [AdminUsersController, 'store']).as('users.store')
+    router.put('/users/:id', [AdminUsersController, 'update']).as('users.update')
+    router.delete('/users/:id', [AdminUsersController, 'destroy']).as('users.destroy')
+
+    // Actions spéciales pour utilisateurs
+    router.put('/users/:id/role', [AdminUsersController, 'updateRole']).as('users.update_role')
     router
-      .get('/users', ({ response }) => {
-        return response.status(501).json({
-          message: 'Gestion des utilisateurs - En cours de développement (Phase 2)',
-        })
-      })
-      .as('users.index')
+      .post('/users/:id/reset-password', [AdminUsersController, 'resetPassword'])
+      .as('users.reset_password')
+
+    // Gestion des notifications (Phase 2 - Sprint 3.2)
+    router.get('/notifications', [AdminNotificationsController, 'index']).as('notifications.index')
+    router
+      .put('/notifications/:id/read', [AdminNotificationsController, 'markAsRead'])
+      .as('notifications.mark_as_read')
+    router
+      .post('/notifications/read-all', [AdminNotificationsController, 'markAllAsRead'])
+      .as('notifications.mark_all_as_read')
+    router
+      .get('/notifications/unread-count', [AdminNotificationsController, 'unreadCount'])
+      .as('notifications.unread_count')
+    router.get('/notifications/stats', [AdminNotificationsController, 'stats']).as('notifications.stats')
 
     router
       .get('/parties', ({ response }) => {

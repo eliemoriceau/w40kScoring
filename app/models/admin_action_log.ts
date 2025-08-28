@@ -67,6 +67,8 @@ export default class AdminActionLog extends BaseModel {
     const descriptions: Record<string, string> = {
       'user.create': "Création d'utilisateur",
       'user.update': "Modification d'utilisateur",
+      'user.update_role': "Modification de rôle d'utilisateur",
+      'user.reset_password': 'Réinitialisation du mot de passe',
       'user.delete': "Suppression d'utilisateur",
       'user.ban': "Bannissement d'utilisateur",
       'user.unban': "Débannissement d'utilisateur",

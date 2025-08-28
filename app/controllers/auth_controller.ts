@@ -5,6 +5,7 @@ import { loginUserValidator } from '#validators/login_user'
 import { UserRegistrationService } from '../application/user/services/user_registration_service.js'
 import { LucidUserRepository } from '../infrastructure/user/repositories/lucid_user_repository.js'
 import { RegisterUserCommand } from '../application/user/commands/register_user_command.js'
+import { DateTime } from 'luxon'
 
 export default class AuthController {
   private userRegistrationService: UserRegistrationService
@@ -35,7 +36,13 @@ export default class AuthController {
       const result = await this.userRegistrationService.register(command)
 
       if (result.success) {
-        await auth.use('web').login(await User.findOrFail(result.userId))
+        const user = await User.findOrFail(result.userId)
+
+        // Mettre à jour la dernière connexion
+        user.lastLoginAt = DateTime.now()
+        await user.save()
+
+        await auth.use('web').login(user)
 
         session.flash(
           'success',
@@ -75,6 +82,10 @@ export default class AuthController {
         session.flash('error', 'Identifiants invalides')
         return response.redirect().back()
       }
+
+      // Mettre à jour la dernière connexion
+      user.lastLoginAt = DateTime.now()
+      await user.save()
 
       await auth.use('web').login(user, !!data.rememberMe)
 

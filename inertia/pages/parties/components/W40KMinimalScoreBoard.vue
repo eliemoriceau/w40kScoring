@@ -50,6 +50,40 @@
         Scores Primaires
       </h3>
 
+      <!-- Compteur de Round Courant -->
+      <div v-if="localRounds.length > 0" class="flex items-center justify-center mb-4">
+        <div class="bg-slate-700 border border-red-700/50 rounded-lg px-6 py-2 flex items-center gap-4">
+          <button 
+            @click="previousRound"
+            class="text-red-300 hover:text-red-200 disabled:text-slate-500 transition-colors duration-200 p-1"
+            :disabled="roundCounter.currentRound <= 1"
+            aria-label="Round précédent"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <div class="text-center">
+            <div class="text-xs text-slate-400 font-medium">Round Courant</div>
+            <div class="text-lg font-bold text-white">
+              {{ roundCounter.currentRound }} / {{ totalRounds }}
+            </div>
+          </div>
+          
+          <button 
+            @click="nextRound"
+            class="text-red-300 hover:text-red-200 disabled:text-slate-500 transition-colors duration-200 p-1"
+            :disabled="roundCounter.currentRound >= totalRounds"
+            aria-label="Round suivant"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <!-- Grid côte à côte pour les deux joueurs -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <!-- Tableau pour le joueur 1 -->
@@ -60,12 +94,20 @@
           </div>
           <div class="grid grid-cols-5 gap-2">
             <div v-for="round in localRounds" :key="`player1-${round.id}`" class="text-center">
-              <div class="text-xs text-slate-400 mb-1">R{{ round.roundNumber }}</div>
+              <div 
+                class="text-xs mb-1 transition-colors duration-200"
+                :class="round.roundNumber === roundCounter.currentRound 
+                  ? 'text-red-300 font-bold' 
+                  : 'text-slate-400'"
+              >
+                R{{ round.roundNumber }}
+              </div>
               <W40KScoreCell
                 :round="round"
                 :player="players[0]"
                 :game-id="props.game.id"
                 :editable="canEdit && !round.isCompleted"
+                :current="round.roundNumber === roundCounter.currentRound"
                 @score-updated="handleScoreUpdate"
               />
             </div>
@@ -80,12 +122,20 @@
           </div>
           <div class="grid grid-cols-5 gap-2">
             <div v-for="round in localRounds" :key="`player2-${round.id}`" class="text-center">
-              <div class="text-xs text-slate-400 mb-1">R{{ round.roundNumber }}</div>
+              <div 
+                class="text-xs mb-1 transition-colors duration-200"
+                :class="round.roundNumber === roundCounter.currentRound 
+                  ? 'text-red-300 font-bold' 
+                  : 'text-slate-400'"
+              >
+                R{{ round.roundNumber }}
+              </div>
               <W40KScoreCell
                 :round="round"
                 :player="players[1]"
                 :game-id="props.game.id"
                 :editable="canEdit && !round.isCompleted"
+                :current="round.roundNumber === roundCounter.currentRound"
                 @score-updated="handleScoreUpdate"
               />
             </div>
@@ -121,12 +171,9 @@
         Scores Secondaires
       </h3>
 
-      <W40KSecondaryScores
+      <W40KCompactSecondaryScores
         :players="players"
         :secondary-scores="secondaryScores"
-        :rounds="localRounds"
-        :can-edit="canEdit"
-        @secondary-score-updated="handleSecondaryScoreUpdate"
       />
     </div>
 
@@ -154,9 +201,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive } from 'vue'
+import { computed, ref, reactive, onMounted } from 'vue'
 import W40KScoreCell from './W40KScoreCell.vue'
-import W40KSecondaryScores from './W40KSecondaryScores.vue'
+import W40KCompactSecondaryScores from './W40KCompactSecondaryScores.vue'
 import type {
   GameScoreBoardProps,
   ScoreUpdateEvent,
@@ -164,15 +211,30 @@ import type {
   RoundDto,
   PlayerDto,
   OptimisticUpdate,
+  RoundCounterState,
+  RoundNavigationEvent,
 } from '../types'
 
 const props = defineProps<GameScoreBoardProps>()
+
+// Émissions d'événements
+const emit = defineEmits<{
+  'round-changed': [event: RoundNavigationEvent]
+}>()
 
 // Configuration
 const NOTIFICATION_TIMEOUT = 3000
 
 // État local pour optimistic updates
 const localRounds = ref<RoundDto[]>([...props.rounds])
+
+// État du compteur de round
+const roundCounter = reactive<RoundCounterState>({
+  currentRound: 1,
+  totalRounds: 5,
+  canNavigate: true,
+  roundHistory: []
+})
 
 // État des notifications
 const notification = reactive({
@@ -218,6 +280,60 @@ const getSecondaryScore = (player?: PlayerDto) => {
   if (!player) return 0
   return playerScores.value.get(player.id)?.secondary || 0
 }
+
+// Calculs pour le compteur de round
+const currentRound = computed(() => {
+  if (!localRounds.value.length) return 1
+  
+  const firstIncomplete = localRounds.value.find(r => !r.isCompleted)
+  return firstIncomplete?.roundNumber || localRounds.value[localRounds.value.length - 1].roundNumber
+})
+
+const totalRounds = computed(() => {
+  return Math.max(localRounds.value.length, 5) // Minimum 5 rounds W40K
+})
+
+// Fonctions de navigation des rounds
+const navigateToRound = (roundNumber: number) => {
+  if (roundNumber < 1 || roundNumber > totalRounds.value) return
+  
+  const previousRound = roundCounter.currentRound
+  roundCounter.roundHistory.push(previousRound)
+  roundCounter.currentRound = roundNumber
+  
+  // Émettre événement pour mise à jour de l'affichage
+  const targetRound = localRounds.value.find(r => r.roundNumber === roundNumber)
+  emit('round-changed', {
+    previousRound,
+    currentRound: roundNumber,
+    roundId: targetRound?.id || 0
+  })
+  
+  showNotificationMessage(`Navigation vers Round ${roundNumber}`, 'info')
+}
+
+const nextRound = () => {
+  if (roundCounter.currentRound < totalRounds.value) {
+    navigateToRound(roundCounter.currentRound + 1)
+  }
+}
+
+const previousRound = () => {
+  if (roundCounter.currentRound > 1) {
+    navigateToRound(roundCounter.currentRound - 1)
+  }
+}
+
+// Synchroniser le round courant avec le state
+const syncCurrentRound = () => {
+  roundCounter.currentRound = currentRound.value
+  roundCounter.totalRounds = totalRounds.value
+}
+
+// Initialisation au montage du composant
+onMounted(() => {
+  syncCurrentRound()
+})
 
 // Gestion du gagnant
 const getWinnerText = () => {
@@ -275,6 +391,7 @@ const updateLocalRound = (roundId: number, playerId: number, score: number) => {
 
 const handleScoreUpdate = async (event: ScoreUpdateEvent) => {
   updateLocalRound(event.roundId, event.playerId, event.score)
+  syncCurrentRound() // Resynchroniser après mise à jour
   showNotificationMessage('Score mis à jour', 'success')
 }
 

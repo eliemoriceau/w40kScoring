@@ -261,3 +261,94 @@ export interface OptimisticUpdate {
   newValue: number
   timestamp: number
 }
+
+// ================================
+// Types pour la modal de sélection des secondaires
+// ================================
+
+export interface SecondaryObjective {
+  id: string
+  name: string
+  description: string
+  maxPoints: number
+  category: 'tactical' | 'strategic' | 'warden' | 'custom'
+}
+
+export interface PredefinedSecondaryObjectives {
+  tactical: SecondaryObjective[]
+  strategic: SecondaryObjective[]
+  warden: SecondaryObjective[]
+}
+
+export interface SelectedSecondaryScore {
+  id: string // UUID temporaire pour la session
+  objectiveId: string // Référence à l'objectif
+  name: string
+  score: number
+  maxPoints: number
+}
+
+export interface SecondarySelectionModalProps {
+  isOpen: boolean
+  playerId: number
+  playerName: string
+  roundId: number
+  roundNumber: number
+  existingScores: SecondaryScoreDto[]
+  onSave: (scores: SelectedSecondaryScore[]) => void
+  onClose: () => void
+}
+
+export interface SecondarySelectionModalState {
+  selectedObjectives: SelectedSecondaryScore[]
+  customObjectiveName: string
+  customObjectiveScore: number
+  searchFilter: string
+  activeCategory: 'tactical' | 'strategic' | 'warden' | 'all'
+  isSaving: boolean
+  validationErrors: Record<string, string>
+}
+
+// ================================
+// Types pour les selects inline des secondaires
+// ================================
+
+export interface SecondaryObjectiveOption {
+  value: string
+  label: string
+  category: 'tactical' | 'strategic' | 'warden' | 'custom'
+  maxPoints: number
+}
+
+export interface SecondaryScoreRow {
+  id: string // UUID temporaire pour la ligne
+  objectiveId: string
+  objectiveName: string
+  score: number
+  isNew: boolean
+  isEditing: boolean
+  isSaving: boolean
+}
+
+export interface SecondaryInlineState {
+  rows: SecondaryScoreRow[]
+  availableObjectives: SecondaryObjectiveOption[]
+  customObjectiveName: string
+}
+
+// ================================
+// Types pour le compteur de round courant
+// ================================
+
+export interface RoundCounterState {
+  currentRound: number
+  totalRounds: number
+  canNavigate: boolean
+  roundHistory: number[]
+}
+
+export interface RoundNavigationEvent {
+  previousRound: number
+  currentRound: number
+  roundId: number
+}

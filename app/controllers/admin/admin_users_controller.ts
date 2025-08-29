@@ -1,7 +1,7 @@
 import { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import Role from '#models/role'
-import AdminStatsService from '#services/admin_stats_service'
+import AdminStatsService from '#application/services/admin_stats_service'
 import {
   adminUsersListValidator,
   adminUserCreateValidator,
@@ -13,9 +13,8 @@ export default class AdminUsersController {
    * Liste paginée des utilisateurs avec filtres et recherche
    * GET /admin/users
    */
-  async index({ request, inertia, bouncer }: HttpContext) {
-    // Vérification des permissions admin
-    await bouncer.authorize('adminAccess')
+  async index({ request, inertia }: HttpContext) {
+    // Les permissions admin sont vérifiées par le middleware AdminAccessMiddleware
 
     // Validation des paramètres de requête
     const {
@@ -116,8 +115,8 @@ export default class AdminUsersController {
    * Affichage du détail d'un utilisateur
    * GET /admin/users/:id
    */
-  async show({ params, inertia, bouncer }: HttpContext) {
-    await bouncer.authorize('adminAccess')
+  async show({ params, inertia }: HttpContext) {
+    // Les permissions admin sont vérifiées par le middleware AdminAccessMiddleware
 
     const user = await User.query().where('id', params.id).preload('role').firstOrFail()
 
@@ -159,8 +158,8 @@ export default class AdminUsersController {
    * Création d'un nouvel utilisateur
    * POST /admin/users
    */
-  async store({ request, response, session, bouncer }: HttpContext) {
-    await bouncer.authorize('adminAccess')
+  async store({ request, response, session }: HttpContext) {
+    // Les permissions admin sont vérifiées par le middleware AdminAccessMiddleware
 
     const data = await request.validateUsing(adminUserCreateValidator)
 
@@ -201,8 +200,8 @@ export default class AdminUsersController {
    * Mise à jour d'un utilisateur
    * PUT /admin/users/:id
    */
-  async update({ params, request, response, session, bouncer, auth }: HttpContext) {
-    await bouncer.authorize('adminAccess')
+  async update({ params, request, response, session, auth }: HttpContext) {
+    // Les permissions admin sont vérifiées par le middleware AdminAccessMiddleware
 
     const user = await User.findOrFail(params.id)
     const data = await request.validateUsing(adminUserUpdateValidator)
@@ -263,8 +262,8 @@ export default class AdminUsersController {
    * Suppression/désactivation d'un utilisateur
    * DELETE /admin/users/:id
    */
-  async destroy({ params, response, session, bouncer, auth }: HttpContext) {
-    await bouncer.authorize('adminAccess')
+  async destroy({ params, response, session, auth }: HttpContext) {
+    // Les permissions admin sont vérifiées par le middleware AdminAccessMiddleware
 
     const user = await User.query().preload('role').where('id', params.id).firstOrFail()
     const currentUser = auth.user!
@@ -301,8 +300,8 @@ export default class AdminUsersController {
    * Changement de rôle d'un utilisateur
    * PUT /admin/users/:id/role
    */
-  async updateRole({ params, request, response, session, bouncer, auth }: HttpContext) {
-    await bouncer.authorize('adminAccess')
+  async updateRole({ params, request, response, session, auth }: HttpContext) {
+    // Les permissions admin sont vérifiées par le middleware AdminAccessMiddleware
 
     const user = await User.query().preload('role').where('id', params.id).firstOrFail()
     const { roleId } = request.only(['roleId'])
@@ -343,8 +342,8 @@ export default class AdminUsersController {
    * Réinitialisation du mot de passe
    * POST /admin/users/:id/reset-password
    */
-  async resetPassword({ params, response, session, bouncer }: HttpContext) {
-    await bouncer.authorize('adminAccess')
+  async resetPassword({ params, response, session }: HttpContext) {
+    // Les permissions admin sont vérifiées par le middleware AdminAccessMiddleware
 
     const user = await User.findOrFail(params.id)
 

@@ -37,7 +37,6 @@
           />
         </svg>
         <span>Analytics</span>
-        <span class="ml-auto bg-red-600 text-xs px-2 py-1 rounded-full">Bientôt</span>
       </Link>
 
       <!-- Système -->

@@ -19,6 +19,7 @@ const AdminDashboardsController = () => import('#controllers/admin/admin_dashboa
 const AdminUsersController = () => import('#controllers/admin/admin_users_controller')
 const AdminNotificationsController = () =>
   import('#controllers/admin/admin_notifications_controller')
+const AdminPartiesController = () => import('#controllers/admin/admin_parties_controller')
 
 // Health check endpoint for Kubernetes
 router.get('/health', ({ response }) => {
@@ -165,13 +166,14 @@ router
       .get('/notifications/stats', [AdminNotificationsController, 'stats'])
       .as('notifications.stats')
 
+    // Gestion des parties (Phase 3)
+    router.get('/parties', [AdminPartiesController, 'index']).as('parties.index')
+    router.get('/parties/stats', [AdminPartiesController, 'stats']).as('parties.stats')
+    router.get('/parties/:id', [AdminPartiesController, 'show']).as('parties.show')
     router
-      .get('/parties', ({ response }) => {
-        return response.status(501).json({
-          message: 'Gestion des parties - En cours de développement (Phase 3)',
-        })
-      })
-      .as('parties.index')
+      .put('/parties/:id/status', [AdminPartiesController, 'updateStatus'])
+      .as('parties.update_status')
+    router.delete('/parties/:id', [AdminPartiesController, 'destroy']).as('parties.destroy')
 
     router
       .get('/analytics', ({ response }) => {

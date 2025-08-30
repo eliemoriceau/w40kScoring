@@ -21,6 +21,9 @@ const AdminNotificationsController = () =>
   import('#controllers/admin/admin_notifications_controller')
 const AdminPartiesController = () => import('#controllers/admin/admin_parties_controller')
 const AdminAnalyticsController = () => import('#controllers/admin/admin_analytics_controller')
+const AdminSystemConfigurationsController = () =>
+  import('#controllers/admin/admin_system_configurations_controller')
+const AdminSystemLogsController = () => import('#controllers/admin/admin_system_logs_controller')
 
 // Health check endpoint for Kubernetes
 router.get('/health', ({ response }) => {
@@ -198,21 +201,37 @@ router
       .get('/analytics/api/player-stats/:userId', [AdminAnalyticsController, 'playerStats'])
       .as('analytics.api.player_stats')
 
+    // Configuration système (Phase 5) - Super Admin uniquement
     router
-      .get('/system/config', ({ response }) => {
-        return response.status(501).json({
-          message: 'Configuration système - En cours de développement (Phase 5)',
-        })
-      })
-      .as('system.config')
+      .group(() => {
+        router.get('/config', [AdminSystemConfigurationsController, 'index']).as('config')
+        router.get('/config/:key', [AdminSystemConfigurationsController, 'show']).as('config.show')
+        router
+          .put('/config/:key', [AdminSystemConfigurationsController, 'update'])
+          .as('config.update')
+        router.post('/config', [AdminSystemConfigurationsController, 'store']).as('config.store')
+        router
+          .delete('/config/:key', [AdminSystemConfigurationsController, 'destroy'])
+          .as('config.destroy')
+        router
+          .post('/config/:key/rollback', [AdminSystemConfigurationsController, 'rollback'])
+          .as('config.rollback')
+        router
+          .post('/config/init-defaults', [AdminSystemConfigurationsController, 'initDefaults'])
+          .as('config.init_defaults')
 
-    router
-      .get('/system/logs', ({ response }) => {
-        return response.status(501).json({
-          message: 'Logs système - En cours de développement (Phase 5)',
-        })
+        // Logs système
+        router.get('/logs', [AdminSystemLogsController, 'index']).as('logs')
+        router.get('/logs/api/logs', [AdminSystemLogsController, 'getLogs']).as('logs.api.logs')
+        router.get('/logs/api/stats', [AdminSystemLogsController, 'getStats']).as('logs.api.stats')
+        router.get('/logs/export', [AdminSystemLogsController, 'export']).as('logs.export')
+        router.post('/logs/cleanup', [AdminSystemLogsController, 'cleanup']).as('logs.cleanup')
+        router.get('/logs/:id', [AdminSystemLogsController, 'show']).as('logs.show')
+        router.post('/logs/test', [AdminSystemLogsController, 'createTestLog']).as('logs.test')
       })
-      .as('system.logs')
+      .prefix('/system')
+      .as('system')
+      .middleware([middleware.superAdminAccess()])
   })
   .prefix('/admin')
   .as('admin')

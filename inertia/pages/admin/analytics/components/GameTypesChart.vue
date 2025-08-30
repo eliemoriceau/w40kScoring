@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Graphique en secteurs simplifié avec des barres -->
     <div class="space-y-4">
-      <div 
+      <div
         v-for="(count, gameType) in data"
         :key="gameType"
         class="flex items-center justify-between p-3 bg-slate-700 rounded-lg"
@@ -14,7 +14,7 @@
             <div class="text-slate-400 text-xs">{{ getTypeDescription(gameType) }}</div>
           </div>
         </div>
-        
+
         <div class="flex items-center gap-4">
           <div class="flex-1 w-32">
             <div class="bg-slate-600 rounded-full h-3 overflow-hidden">
@@ -26,9 +26,7 @@
             </div>
           </div>
           <div class="text-white font-bold text-lg w-8 text-center">{{ count }}</div>
-          <div class="text-slate-400 text-sm w-12 text-right">
-            {{ getPercentage(count) }}%
-          </div>
+          <div class="text-slate-400 text-sm w-12 text-right">{{ getPercentage(count) }}%</div>
         </div>
       </div>
     </div>
@@ -54,7 +52,7 @@
       <div class="text-sm font-medium text-slate-300">Répartition visuelle</div>
       <div class="bg-slate-700 rounded-lg p-4">
         <div class="flex items-end gap-3 h-24">
-          <div 
+          <div
             v-for="(count, gameType) in data"
             :key="gameType"
             class="flex flex-col items-center flex-1"
@@ -77,7 +75,12 @@
     <!-- Insights -->
     <div class="bg-slate-700 rounded-lg p-4">
       <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          class="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -91,12 +94,8 @@
             <div>• Le type le plus populaire est {{ formatGameType(getMostPopularType()) }}</div>
             <div>• {{ getTypeVariety() }} types différents sont joués</div>
             <div>• Le type dominant représente {{ getDominantPercentage() }}% des parties</div>
-            <div v-if="hasGoodDiversity()">
-              • Bonne diversité dans les types de parties joués
-            </div>
-            <div v-else>
-              • Les joueurs se concentrent sur quelques types de parties
-            </div>
+            <div v-if="hasGoodDiversity()">• Bonne diversité dans les types de parties joués</div>
+            <div v-else>• Les joueurs se concentrent sur quelques types de parties</div>
           </div>
         </div>
       </div>
@@ -106,7 +105,7 @@
     <div class="space-y-2">
       <div class="text-sm font-medium text-slate-300">Légende des types</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-        <div 
+        <div
           v-for="(count, gameType) in data"
           :key="gameType"
           class="flex items-center gap-2 text-sm"
@@ -151,7 +150,7 @@ const getTypeColor = (gameType: string) => {
     NARRATIVE: 'bg-blue-400',
     OPEN_PLAY: 'bg-green-400',
     CRUSADE: 'bg-purple-400',
-    TOURNAMENT: 'bg-yellow-400'
+    TOURNAMENT: 'bg-yellow-400',
   }
   return colors[gameType as keyof typeof colors] || 'bg-slate-400'
 }
@@ -162,7 +161,7 @@ const getTypeBarColor = (gameType: string) => {
     NARRATIVE: 'bg-blue-500',
     OPEN_PLAY: 'bg-green-500',
     CRUSADE: 'bg-purple-500',
-    TOURNAMENT: 'bg-yellow-500'
+    TOURNAMENT: 'bg-yellow-500',
   }
   return colors[gameType as keyof typeof colors] || 'bg-slate-500'
 }
@@ -173,7 +172,7 @@ const formatGameType = (gameType: string) => {
     NARRATIVE: 'Narratif',
     OPEN_PLAY: 'Jeu Libre',
     CRUSADE: 'Croisade',
-    TOURNAMENT: 'Tournoi'
+    TOURNAMENT: 'Tournoi',
   }
   return types[gameType as keyof typeof types] || gameType
 }
@@ -184,7 +183,7 @@ const getTypeShortName = (gameType: string) => {
     NARRATIVE: 'Narr.',
     OPEN_PLAY: 'Libre',
     CRUSADE: 'Crois.',
-    TOURNAMENT: 'Tour.'
+    TOURNAMENT: 'Tour.',
   }
   return shortNames[gameType as keyof typeof shortNames] || gameType
 }
@@ -195,7 +194,7 @@ const getTypeDescription = (gameType: string) => {
     NARRATIVE: 'Jeux orientés histoire et scénario',
     OPEN_PLAY: 'Parties libres et décontractées',
     CRUSADE: 'Campagnes évolutives',
-    TOURNAMENT: 'Compétitions officielles'
+    TOURNAMENT: 'Compétitions officielles',
   }
   return descriptions[gameType as keyof typeof descriptions] || 'Type de partie'
 }
@@ -203,14 +202,14 @@ const getTypeDescription = (gameType: string) => {
 const getMostPopularType = () => {
   let maxCount = 0
   let popularType = ''
-  
+
   for (const [type, count] of Object.entries(props.data)) {
     if (count > maxCount) {
       maxCount = count
       popularType = type
     }
   }
-  
+
   return formatGameType(popularType)
 }
 
@@ -226,9 +225,9 @@ const getDominantPercentage = () => {
 const hasGoodDiversity = () => {
   const total = getTotalGames()
   const typeCount = getTypeVariety()
-  
+
   if (typeCount < 2) return false
-  
+
   // Si le type dominant représente moins de 60% et qu'il y a au moins 3 types
   const dominantPercentage = getDominantPercentage()
   return dominantPercentage < 60 && typeCount >= 3

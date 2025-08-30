@@ -66,7 +66,12 @@
           </p>
         </div>
         <div class="w-12 h-12 bg-yellow-600/20 rounded-lg flex items-center justify-center">
-          <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            class="w-6 h-6 text-yellow-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -94,7 +99,12 @@
           </p>
         </div>
         <div class="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center">
-          <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            class="w-6 h-6 text-purple-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -164,7 +174,12 @@
           </p>
         </div>
         <div class="w-12 h-12 bg-indigo-600/20 rounded-lg flex items-center justify-center">
-          <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            class="w-6 h-6 text-indigo-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -175,9 +190,7 @@
         </div>
       </div>
       <div class="mt-4">
-        <div class="text-xs text-slate-400">
-          {{ calculateWeeklyEngagement() }}% du total
-        </div>
+        <div class="text-xs text-slate-400">{{ calculateWeeklyEngagement() }}% du total</div>
       </div>
     </div>
   </div>
@@ -200,7 +213,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  loading: false
+  loading: false,
 })
 
 const calculateCompletionRate = () => {
@@ -245,7 +258,8 @@ const getGrowthText = () => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

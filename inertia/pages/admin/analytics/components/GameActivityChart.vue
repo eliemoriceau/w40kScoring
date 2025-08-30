@@ -24,8 +24,8 @@
     <div class="space-y-4">
       <div class="text-sm font-medium text-slate-300">Répartition par statut</div>
       <div class="space-y-3">
-        <div 
-          v-for="(count, status) in data.gamesByStatus" 
+        <div
+          v-for="(count, status) in data.gamesByStatus"
           :key="status"
           class="flex items-center justify-between"
         >
@@ -44,9 +44,7 @@
                 ></div>
               </div>
             </div>
-            <div class="text-slate-400 text-sm w-12 text-right">
-              {{ getPercentage(count) }}%
-            </div>
+            <div class="text-slate-400 text-sm w-12 text-right">{{ getPercentage(count) }}%</div>
           </div>
         </div>
       </div>
@@ -73,7 +71,12 @@
     <!-- Performance insights -->
     <div class="bg-slate-700 rounded-lg p-4">
       <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -100,7 +103,7 @@
       <div class="text-sm font-medium text-slate-300">Visualisation des statuts</div>
       <div class="bg-slate-700 rounded-lg p-4">
         <div class="flex items-end gap-2 h-32">
-          <div 
+          <div
             v-for="(count, status) in data.gamesByStatus"
             :key="status"
             class="flex flex-col items-center flex-1"
@@ -144,7 +147,7 @@ const getStatusColor = (status: string) => {
     PLANNED: 'bg-blue-400',
     IN_PROGRESS: 'bg-yellow-400',
     COMPLETED: 'bg-green-400',
-    CANCELLED: 'bg-red-400'
+    CANCELLED: 'bg-red-400',
   }
   return colors[status as keyof typeof colors] || 'bg-slate-400'
 }
@@ -154,7 +157,7 @@ const getStatusBarColor = (status: string) => {
     PLANNED: 'bg-blue-500',
     IN_PROGRESS: 'bg-yellow-500',
     COMPLETED: 'bg-green-500',
-    CANCELLED: 'bg-red-500'
+    CANCELLED: 'bg-red-500',
   }
   return colors[status as keyof typeof colors] || 'bg-slate-500'
 }
@@ -164,7 +167,7 @@ const formatStatus = (status: string) => {
     PLANNED: 'Planifiées',
     IN_PROGRESS: 'En cours',
     COMPLETED: 'Terminées',
-    CANCELLED: 'Annulées'
+    CANCELLED: 'Annulées',
   }
   return statuses[status as keyof typeof statuses] || status
 }
@@ -174,7 +177,7 @@ const getStatusShortName = (status: string) => {
     PLANNED: 'Plan.',
     IN_PROGRESS: 'Cours',
     COMPLETED: 'Term.',
-    CANCELLED: 'Ann.'
+    CANCELLED: 'Ann.',
   }
   return shortNames[status as keyof typeof shortNames] || status
 }
@@ -198,14 +201,14 @@ const getCompletionRate = () => {
 const getMostActiveStatus = () => {
   let maxCount = 0
   let mostActiveStatus = ''
-  
+
   for (const [status, count] of Object.entries(props.data.gamesByStatus)) {
     if (count > maxCount) {
       maxCount = count
       mostActiveStatus = status
     }
   }
-  
+
   return mostActiveStatus
 }
 </script>

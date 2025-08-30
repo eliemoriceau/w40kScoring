@@ -16,13 +16,10 @@ export default class AdminAnalyticsController {
     const [platformMetrics, gameInsights, periodComparison] = await Promise.all([
       this.analyticsService.getPlatformMetrics(),
       this.analyticsService.getGameInsights(),
-      this.analyticsService.getPeriodComparison()
+      this.analyticsService.getPeriodComparison(),
     ])
 
-    const breadcrumbItems = [
-      { label: 'Administration', href: '/admin' },
-      { label: 'Analytics' }
-    ]
+    const breadcrumbItems = [{ label: 'Administration', href: '/admin' }, { label: 'Analytics' }]
 
     return inertia.render('admin/analytics/Index', {
       user,
@@ -30,7 +27,7 @@ export default class AdminAnalyticsController {
       gameInsights,
       periodComparison,
       breadcrumbItems,
-      title: 'Analytics - Administration'
+      title: 'Analytics - Administration',
     })
   }
 
@@ -42,12 +39,12 @@ export default class AdminAnalyticsController {
       const metrics = await this.analyticsService.getPlatformMetrics()
       return response.json({
         success: true,
-        data: metrics
+        data: metrics,
       })
     } catch (error) {
       return response.status(500).json({
         success: false,
-        error: 'Failed to load platform metrics'
+        error: 'Failed to load platform metrics',
       })
     }
   }
@@ -60,12 +57,12 @@ export default class AdminAnalyticsController {
       const insights = await this.analyticsService.getGameInsights()
       return response.json({
         success: true,
-        data: insights
+        data: insights,
       })
     } catch (error) {
       return response.status(500).json({
         success: false,
-        error: 'Failed to load game insights'
+        error: 'Failed to load game insights',
       })
     }
   }
@@ -81,12 +78,12 @@ export default class AdminAnalyticsController {
       const stats = await this.analyticsService.getPlayerStats(userId, period)
       return response.json({
         success: true,
-        data: stats
+        data: stats,
       })
     } catch (error) {
       return response.status(500).json({
         success: false,
-        error: 'Failed to load player statistics'
+        error: 'Failed to load player statistics',
       })
     }
   }
@@ -99,12 +96,12 @@ export default class AdminAnalyticsController {
       const comparison = await this.analyticsService.getPeriodComparison()
       return response.json({
         success: true,
-        data: comparison
+        data: comparison,
       })
     } catch (error) {
       return response.status(500).json({
         success: false,
-        error: 'Failed to load period comparison'
+        error: 'Failed to load period comparison',
       })
     }
   }
@@ -122,14 +119,14 @@ export default class AdminAnalyticsController {
     const breadcrumbItems = [
       { label: 'Administration', href: '/admin' },
       { label: 'Analytics', href: '/admin/analytics' },
-      { label: 'Joueurs' }
+      { label: 'Joueurs' },
     ]
 
     return inertia.render('admin/analytics/Players', {
       user,
       period,
       breadcrumbItems,
-      title: 'Analytics Joueurs - Administration'
+      title: 'Analytics Joueurs - Administration',
     })
   }
 
@@ -138,20 +135,20 @@ export default class AdminAnalyticsController {
    */
   async games({ inertia, auth }: HttpContext) {
     const user = auth.getUserOrFail()
-    
+
     const gameInsights = await this.analyticsService.getGameInsights()
 
     const breadcrumbItems = [
       { label: 'Administration', href: '/admin' },
       { label: 'Analytics', href: '/admin/analytics' },
-      { label: 'Parties' }
+      { label: 'Parties' },
     ]
 
     return inertia.render('admin/analytics/Games', {
       user,
       gameInsights,
       breadcrumbItems,
-      title: 'Analytics Parties - Administration'
+      title: 'Analytics Parties - Administration',
     })
   }
 
@@ -160,16 +157,16 @@ export default class AdminAnalyticsController {
    */
   async platform({ inertia, auth }: HttpContext) {
     const user = auth.getUserOrFail()
-    
+
     const [platformMetrics, periodComparison] = await Promise.all([
       this.analyticsService.getPlatformMetrics(),
-      this.analyticsService.getPeriodComparison()
+      this.analyticsService.getPeriodComparison(),
     ])
 
     const breadcrumbItems = [
       { label: 'Administration', href: '/admin' },
       { label: 'Analytics', href: '/admin/analytics' },
-      { label: 'Plateforme' }
+      { label: 'Plateforme' },
     ]
 
     return inertia.render('admin/analytics/Platform', {
@@ -177,7 +174,7 @@ export default class AdminAnalyticsController {
       platformMetrics,
       periodComparison,
       breadcrumbItems,
-      title: 'Analytics Plateforme - Administration'
+      title: 'Analytics Plateforme - Administration',
     })
   }
 }

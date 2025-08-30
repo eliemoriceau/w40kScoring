@@ -3,18 +3,16 @@
     <!-- Graphique en barres pour les heures de pointe -->
     <div class="bg-slate-700 rounded-lg p-4">
       <div class="flex items-end gap-1 h-32">
-        <div 
-          v-for="hour in 24"
-          :key="hour - 1"
-          class="flex flex-col items-center flex-1 group"
-        >
+        <div v-for="hour in 24" :key="hour - 1" class="flex flex-col items-center flex-1 group">
           <div
             :style="{ height: `${getBarHeight(hour - 1)}%` }"
             :class="getBarColor(hour - 1)"
             class="w-full rounded-t-sm mb-1 transition-all duration-300 group-hover:opacity-80 cursor-pointer"
             :title="`${hour - 1}h: ${getHourCount(hour - 1)} parties`"
           ></div>
-          <div class="text-xs text-slate-400 writing-mode-vertical transform rotate-90 origin-bottom">
+          <div
+            class="text-xs text-slate-400 writing-mode-vertical transform rotate-90 origin-bottom"
+          >
             {{ formatHour(hour - 1) }}
           </div>
         </div>
@@ -25,13 +23,13 @@
     <div class="space-y-3">
       <div class="text-sm font-medium text-slate-300">Heures les plus actives</div>
       <div class="space-y-2">
-        <div 
+        <div
           v-for="(hourData, index) in sortedPeakHours.slice(0, 5)"
           :key="hourData.hour"
           class="flex items-center justify-between p-3 bg-slate-700 rounded-lg"
         >
           <div class="flex items-center gap-3">
-            <div 
+            <div
               :class="getRankColor(index)"
               class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
             >
@@ -42,7 +40,7 @@
               <div class="text-slate-400 text-xs">{{ getTimeOfDay(hourData.hour) }}</div>
             </div>
           </div>
-          
+
           <div class="flex items-center gap-4">
             <div class="flex-1 w-24">
               <div class="bg-slate-600 rounded-full h-2 overflow-hidden">
@@ -81,7 +79,12 @@
     <!-- Analyse temporelle -->
     <div class="bg-slate-700 rounded-lg p-4">
       <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          class="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -92,10 +95,14 @@
         <div>
           <div class="text-slate-200 font-medium mb-2">Analyse des créneaux d'activité</div>
           <div class="text-sm text-slate-300 space-y-1">
-            <div>• Pic d'activité: {{ getMostActiveHour() }} ({{ getMostActiveCount() }} parties)</div>
+            <div>
+              • Pic d'activité: {{ getMostActiveHour() }} ({{ getMostActiveCount() }} parties)
+            </div>
             <div>• Période principale: {{ getPrimaryPeriod() }}</div>
             <div>• {{ getActiveHoursCount() }} créneaux actifs dans la journée</div>
-            <div>• Activité la plus faible: {{ getQuietestHour() }} ({{ getQuietestCount() }} parties)</div>
+            <div>
+              • Activité la plus faible: {{ getQuietestHour() }} ({{ getQuietestCount() }} parties)
+            </div>
           </div>
         </div>
       </div>
@@ -105,7 +112,7 @@
     <div class="space-y-4">
       <div class="text-sm font-medium text-slate-300">Répartition par période de la journée</div>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div 
+        <div
           v-for="period in timePeriods"
           :key="period.name"
           class="bg-slate-700 rounded-lg p-4 text-center"
@@ -143,35 +150,40 @@ const sortedPeakHours = computed(() => {
 
 const timePeriods = computed(() => {
   const periods = [
-    { name: 'Matin', range: '6h-12h', hours: [6,7,8,9,10,11], color: 'text-yellow-400' },
-    { name: 'Après-midi', range: '12h-18h', hours: [12,13,14,15,16,17], color: 'text-orange-400' },
-    { name: 'Soirée', range: '18h-24h', hours: [18,19,20,21,22,23], color: 'text-purple-400' },
-    { name: 'Nuit', range: '0h-6h', hours: [0,1,2,3,4,5], color: 'text-blue-400' }
+    { name: 'Matin', range: '6h-12h', hours: [6, 7, 8, 9, 10, 11], color: 'text-yellow-400' },
+    {
+      name: 'Après-midi',
+      range: '12h-18h',
+      hours: [12, 13, 14, 15, 16, 17],
+      color: 'text-orange-400',
+    },
+    { name: 'Soirée', range: '18h-24h', hours: [18, 19, 20, 21, 22, 23], color: 'text-purple-400' },
+    { name: 'Nuit', range: '0h-6h', hours: [0, 1, 2, 3, 4, 5], color: 'text-blue-400' },
   ]
 
-  return periods.map(period => ({
+  return periods.map((period) => ({
     ...period,
-    count: period.hours.reduce((sum, hour) => sum + getHourCount(hour), 0)
+    count: period.hours.reduce((sum, hour) => sum + getHourCount(hour), 0),
   }))
 })
 
 const getHourCount = (hour: number) => {
-  const hourData = props.data.find(h => h.hour === hour)
+  const hourData = props.data.find((h) => h.hour === hour)
   return hourData ? hourData.count : 0
 }
 
 const getBarHeight = (hour: number) => {
   const count = getHourCount(hour)
-  const maxCount = Math.max(...props.data.map(h => h.count))
+  const maxCount = Math.max(...props.data.map((h) => h.count))
   if (maxCount === 0) return 5
   return Math.max(5, (count / maxCount) * 100)
 }
 
 const getBarColor = (hour: number) => {
   const count = getHourCount(hour)
-  const maxCount = Math.max(...props.data.map(h => h.count))
+  const maxCount = Math.max(...props.data.map((h) => h.count))
   const intensity = count / maxCount
-  
+
   if (intensity > 0.8) return 'bg-red-500'
   if (intensity > 0.6) return 'bg-orange-500'
   if (intensity > 0.4) return 'bg-yellow-500'
@@ -202,9 +214,9 @@ const getRankColor = (index: number) => {
 }
 
 const getIntensityColor = (count: number) => {
-  const maxCount = Math.max(...props.data.map(h => h.count))
+  const maxCount = Math.max(...props.data.map((h) => h.count))
   const intensity = count / maxCount
-  
+
   if (intensity > 0.8) return 'bg-red-400'
   if (intensity > 0.6) return 'bg-orange-400'
   if (intensity > 0.4) return 'bg-yellow-400'
@@ -212,7 +224,7 @@ const getIntensityColor = (count: number) => {
 }
 
 const getIntensityPercentage = (count: number) => {
-  const maxCount = Math.max(...props.data.map(h => h.count))
+  const maxCount = Math.max(...props.data.map((h) => h.count))
   if (maxCount === 0) return 0
   return (count / maxCount) * 100
 }
@@ -234,7 +246,7 @@ const getMostActiveCount = () => {
 }
 
 const getActiveHoursCount = () => {
-  return props.data.filter(h => h.count > 0).length
+  return props.data.filter((h) => h.count > 0).length
 }
 
 const getTotalActivities = () => {
@@ -252,7 +264,7 @@ const getQuietestCount = () => {
 }
 
 const getPrimaryPeriod = () => {
-  const mostActivePeriod = timePeriods.value.reduce((max, period) => 
+  const mostActivePeriod = timePeriods.value.reduce((max, period) =>
     period.count > max.count ? period : max
   )
   return `${mostActivePeriod.name} (${mostActivePeriod.range})`

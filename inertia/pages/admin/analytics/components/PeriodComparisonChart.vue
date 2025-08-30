@@ -25,7 +25,10 @@
                 :d="getChangeIconPath(data.changes.gamesChange)"
               />
             </svg>
-            <span :class="getChangeTextClass(data.changes.gamesChange)" class="text-sm font-medium ml-1">
+            <span
+              :class="getChangeTextClass(data.changes.gamesChange)"
+              class="text-sm font-medium ml-1"
+            >
               {{ formatChange(data.changes.gamesChange) }}
             </span>
           </div>
@@ -59,7 +62,10 @@
                 :d="getChangeIconPath(data.changes.usersChange)"
               />
             </svg>
-            <span :class="getChangeTextClass(data.changes.usersChange)" class="text-sm font-medium ml-1">
+            <span
+              :class="getChangeTextClass(data.changes.usersChange)"
+              class="text-sm font-medium ml-1"
+            >
               {{ formatChange(data.changes.usersChange) }}
             </span>
           </div>
@@ -93,7 +99,10 @@
                 :d="getChangeIconPath(data.changes.scoreChange)"
               />
             </svg>
-            <span :class="getChangeTextClass(data.changes.scoreChange)" class="text-sm font-medium ml-1">
+            <span
+              :class="getChangeTextClass(data.changes.scoreChange)"
+              class="text-sm font-medium ml-1"
+            >
               {{ formatChange(data.changes.scoreChange) }}
             </span>
           </div>
@@ -115,14 +124,24 @@
           <div class="flex items-end justify-center gap-2 h-24">
             <div class="flex flex-col items-center">
               <div
-                :style="{ height: getBarHeight(data.previous.totalGames, Math.max(data.previous.totalGames, data.current.totalGames)) }"
+                :style="{
+                  height: getBarHeight(
+                    data.previous.totalGames,
+                    Math.max(data.previous.totalGames, data.current.totalGames)
+                  ),
+                }"
                 class="w-8 bg-slate-600 rounded-t-sm mb-1"
               ></div>
               <div class="text-xs text-slate-400">Avant</div>
             </div>
             <div class="flex flex-col items-center">
               <div
-                :style="{ height: getBarHeight(data.current.totalGames, Math.max(data.previous.totalGames, data.current.totalGames)) }"
+                :style="{
+                  height: getBarHeight(
+                    data.current.totalGames,
+                    Math.max(data.previous.totalGames, data.current.totalGames)
+                  ),
+                }"
                 class="w-8 bg-red-500 rounded-t-sm mb-1"
               ></div>
               <div class="text-xs text-white">Actuel</div>
@@ -136,14 +155,24 @@
           <div class="flex items-end justify-center gap-2 h-24">
             <div class="flex flex-col items-center">
               <div
-                :style="{ height: getBarHeight(data.previous.activeUsers, Math.max(data.previous.activeUsers, data.current.activeUsers)) }"
+                :style="{
+                  height: getBarHeight(
+                    data.previous.activeUsers,
+                    Math.max(data.previous.activeUsers, data.current.activeUsers)
+                  ),
+                }"
                 class="w-8 bg-slate-600 rounded-t-sm mb-1"
               ></div>
               <div class="text-xs text-slate-400">Avant</div>
             </div>
             <div class="flex flex-col items-center">
               <div
-                :style="{ height: getBarHeight(data.current.activeUsers, Math.max(data.previous.activeUsers, data.current.activeUsers)) }"
+                :style="{
+                  height: getBarHeight(
+                    data.current.activeUsers,
+                    Math.max(data.previous.activeUsers, data.current.activeUsers)
+                  ),
+                }"
                 class="w-8 bg-blue-500 rounded-t-sm mb-1"
               ></div>
               <div class="text-xs text-white">Actuel</div>
@@ -157,14 +186,24 @@
           <div class="flex items-end justify-center gap-2 h-24">
             <div class="flex flex-col items-center">
               <div
-                :style="{ height: getBarHeight(data.previous.averageScore, Math.max(data.previous.averageScore, data.current.averageScore)) }"
+                :style="{
+                  height: getBarHeight(
+                    data.previous.averageScore,
+                    Math.max(data.previous.averageScore, data.current.averageScore)
+                  ),
+                }"
                 class="w-8 bg-slate-600 rounded-t-sm mb-1"
               ></div>
               <div class="text-xs text-slate-400">Avant</div>
             </div>
             <div class="flex flex-col items-center">
               <div
-                :style="{ height: getBarHeight(data.current.averageScore, Math.max(data.previous.averageScore, data.current.averageScore)) }"
+                :style="{
+                  height: getBarHeight(
+                    data.current.averageScore,
+                    Math.max(data.previous.averageScore, data.current.averageScore)
+                  ),
+                }"
                 class="w-8 bg-yellow-500 rounded-t-sm mb-1"
               ></div>
               <div class="text-xs text-white">Actuel</div>
@@ -178,7 +217,12 @@
     <div class="bg-slate-700 rounded-lg p-4">
       <div class="text-sm text-slate-300">
         <div class="flex items-start gap-2">
-          <svg class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -190,24 +234,32 @@
             <div class="font-medium text-white mb-1">Insights de la période</div>
             <div class="space-y-1">
               <div v-if="data.changes.gamesChange !== 0">
-                Les parties ont {{ data.changes.gamesChange > 0 ? 'augmenté' : 'diminué' }} de 
+                Les parties ont {{ data.changes.gamesChange > 0 ? 'augmenté' : 'diminué' }} de
                 <span :class="getChangeTextClass(data.changes.gamesChange)" class="font-medium">
                   {{ Math.abs(data.changes.gamesChange) }}%
                 </span>
               </div>
               <div v-if="data.changes.usersChange !== 0">
-                L'engagement utilisateur a {{ data.changes.usersChange > 0 ? 'progressé' : 'reculé' }} de 
+                L'engagement utilisateur a
+                {{ data.changes.usersChange > 0 ? 'progressé' : 'reculé' }} de
                 <span :class="getChangeTextClass(data.changes.usersChange)" class="font-medium">
                   {{ Math.abs(data.changes.usersChange) }}%
                 </span>
               </div>
               <div v-if="data.changes.scoreChange !== 0">
-                Le niveau de jeu moyen a {{ data.changes.scoreChange > 0 ? 'augmenté' : 'diminué' }} de 
+                Le niveau de jeu moyen a
+                {{ data.changes.scoreChange > 0 ? 'augmenté' : 'diminué' }} de
                 <span :class="getChangeTextClass(data.changes.scoreChange)" class="font-medium">
                   {{ Math.abs(data.changes.scoreChange) }}%
                 </span>
               </div>
-              <div v-if="data.changes.gamesChange === 0 && data.changes.usersChange === 0 && data.changes.scoreChange === 0">
+              <div
+                v-if="
+                  data.changes.gamesChange === 0 &&
+                  data.changes.usersChange === 0 &&
+                  data.changes.scoreChange === 0
+                "
+              >
                 Les métriques sont restées stables par rapport à la période précédente.
               </div>
             </div>

@@ -178,15 +178,25 @@ router
 
     // Gestion des analytics (Phase 4)
     router.get('/analytics', [AdminAnalyticsController, 'index']).as('analytics.index')
-    router.get('/analytics/platform', [AdminAnalyticsController, 'platform']).as('analytics.platform')
+    router
+      .get('/analytics/platform', [AdminAnalyticsController, 'platform'])
+      .as('analytics.platform')
     router.get('/analytics/games', [AdminAnalyticsController, 'games']).as('analytics.games')
     router.get('/analytics/players', [AdminAnalyticsController, 'players']).as('analytics.players')
-    
+
     // API endpoints pour les analytics
-    router.get('/analytics/api/platform-metrics', [AdminAnalyticsController, 'platformMetrics']).as('analytics.api.platform_metrics')
-    router.get('/analytics/api/game-insights', [AdminAnalyticsController, 'gameInsights']).as('analytics.api.game_insights')
-    router.get('/analytics/api/period-comparison', [AdminAnalyticsController, 'periodComparison']).as('analytics.api.period_comparison')
-    router.get('/analytics/api/player-stats/:userId', [AdminAnalyticsController, 'playerStats']).as('analytics.api.player_stats')
+    router
+      .get('/analytics/api/platform-metrics', [AdminAnalyticsController, 'platformMetrics'])
+      .as('analytics.api.platform_metrics')
+    router
+      .get('/analytics/api/game-insights', [AdminAnalyticsController, 'gameInsights'])
+      .as('analytics.api.game_insights')
+    router
+      .get('/analytics/api/period-comparison', [AdminAnalyticsController, 'periodComparison'])
+      .as('analytics.api.period_comparison')
+    router
+      .get('/analytics/api/player-stats/:userId', [AdminAnalyticsController, 'playerStats'])
+      .as('analytics.api.player_stats')
 
     router
       .get('/system/config', ({ response }) => {

@@ -55,12 +55,15 @@
               <h3 class="text-lg font-semibold text-white group-hover:text-red-400">
                 Métriques Plateforme
               </h3>
-              <p class="text-slate-300 text-sm mt-1">
-                Utilisateurs, activité, croissance
-              </p>
+              <p class="text-slate-300 text-sm mt-1">Utilisateurs, activité, croissance</p>
             </div>
             <div class="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                class="w-6 h-6 text-blue-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -81,12 +84,15 @@
               <h3 class="text-lg font-semibold text-white group-hover:text-red-400">
                 Insights Parties
               </h3>
-              <p class="text-slate-300 text-sm mt-1">
-                Analyses des jeux et performances
-              </p>
+              <p class="text-slate-300 text-sm mt-1">Analyses des jeux et performances</p>
             </div>
             <div class="w-12 h-12 bg-yellow-600/20 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                class="w-6 h-6 text-yellow-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -107,12 +113,15 @@
               <h3 class="text-lg font-semibold text-white group-hover:text-red-400">
                 Analytics Joueurs
               </h3>
-              <p class="text-slate-300 text-sm mt-1">
-                Statistiques et performances
-              </p>
+              <p class="text-slate-300 text-sm mt-1">Statistiques et performances</p>
             </div>
             <div class="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                class="w-6 h-6 text-green-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -165,18 +174,14 @@
             class="flex items-center justify-between p-4 bg-slate-700 rounded-lg"
           >
             <div class="flex items-center gap-4">
-              <div class="text-lg font-mono text-yellow-400">
-                #{{ match.id }}
-              </div>
+              <div class="text-lg font-mono text-yellow-400">#{{ match.id }}</div>
               <div>
                 <div class="text-white font-medium">{{ match.players }}</div>
                 <div class="text-slate-400 text-sm">{{ match.date }}</div>
               </div>
             </div>
             <div class="text-right">
-              <div class="text-white font-medium">
-                Écart: {{ match.scoreDifference }} pts
-              </div>
+              <div class="text-white font-medium">Écart: {{ match.scoreDifference }} pts</div>
               <div class="text-green-400 text-sm">Match serré</div>
             </div>
           </div>
@@ -232,7 +237,7 @@ const refreshData = async () => {
 onMounted(() => {
   // Auto-refresh toutes les 5 minutes
   const interval = setInterval(refreshData, 5 * 60 * 1000)
-  
+
   // Cleanup sur unmount
   return () => clearInterval(interval)
 })

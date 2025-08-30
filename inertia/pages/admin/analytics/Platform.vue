@@ -48,9 +48,7 @@
           <div class="space-y-4">
             <div class="flex justify-between items-center p-4 bg-slate-700 rounded-lg">
               <span class="text-slate-300">Taux d'utilisateurs actifs (24h)</span>
-              <span class="text-blue-400 font-bold">
-                {{ calculateEngagementRate('daily') }}%
-              </span>
+              <span class="text-blue-400 font-bold"> {{ calculateEngagementRate('daily') }}% </span>
             </div>
             <div class="flex justify-between items-center p-4 bg-slate-700 rounded-lg">
               <span class="text-slate-300">Taux d'utilisateurs actifs (semaine)</span>
@@ -66,10 +64,7 @@
             </div>
             <div class="flex justify-between items-center p-4 bg-slate-700 rounded-lg">
               <span class="text-slate-300">Taux de croissance mensuel</span>
-              <span 
-                :class="getGrowthRateColor()"
-                class="font-bold"
-              >
+              <span :class="getGrowthRateColor()" class="font-bold">
                 {{ formatGrowthRate() }}
               </span>
             </div>
@@ -82,34 +77,64 @@
           <div class="space-y-4">
             <div class="p-4 bg-slate-700 rounded-lg">
               <div class="flex items-center gap-2 mb-2">
-                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  class="w-4 h-4 text-blue-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <span class="text-blue-400 font-medium text-sm">Pic d'activité</span>
               </div>
               <p class="text-slate-300 text-sm">
-                L'heure de pointe est {{ getMostActiveHour() }} avec 
+                L'heure de pointe est {{ getMostActiveHour() }} avec
                 {{ getMostActiveCount() }} activités enregistrées.
               </p>
             </div>
 
             <div class="p-4 bg-slate-700 rounded-lg">
               <div class="flex items-center gap-2 mb-2">
-                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  class="w-4 h-4 text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <span class="text-green-400 font-medium text-sm">Activité quotidienne</span>
               </div>
               <p class="text-slate-300 text-sm">
-                {{ platformMetrics.gamesCreatedToday }} nouvelles parties créées aujourd'hui,
-                dont {{ platformMetrics.gamesCompletedToday }} terminées.
+                {{ platformMetrics.gamesCreatedToday }} nouvelles parties créées aujourd'hui, dont
+                {{ platformMetrics.gamesCompletedToday }} terminées.
               </p>
             </div>
 
             <div class="p-4 bg-slate-700 rounded-lg">
               <div class="flex items-center gap-2 mb-2">
-                <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                <svg
+                  class="w-4 h-4 text-purple-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  />
                 </svg>
                 <span class="text-purple-400 font-medium text-sm">Tendance générale</span>
               </div>
@@ -120,8 +145,18 @@
 
             <div class="p-4 bg-slate-700 rounded-lg">
               <div class="flex items-center gap-2 mb-2">
-                <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  class="w-4 h-4 text-yellow-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <span class="text-yellow-400 font-medium text-sm">Recommandation</span>
               </div>
@@ -150,7 +185,9 @@
             <div class="text-xs text-slate-500 mt-1">Dernières 24h</div>
           </div>
           <div class="bg-slate-700 rounded-lg p-4 text-center">
-            <div class="text-2xl font-bold text-green-400">{{ platformMetrics.gamesCreatedToday }}</div>
+            <div class="text-2xl font-bold text-green-400">
+              {{ platformMetrics.gamesCreatedToday }}
+            </div>
             <div class="text-slate-400 text-sm">Parties créées</div>
             <div class="text-xs text-slate-500 mt-1">Aujourd'hui</div>
           </div>
@@ -160,7 +197,9 @@
             <div class="text-xs text-slate-500 mt-1">Parties terminées</div>
           </div>
           <div class="bg-slate-700 rounded-lg p-4 text-center">
-            <div class="text-2xl font-bold text-purple-400">{{ platformMetrics.totalRegisteredUsers }}</div>
+            <div class="text-2xl font-bold text-purple-400">
+              {{ platformMetrics.totalRegisteredUsers }}
+            </div>
             <div class="text-slate-400 text-sm">Total utilisateurs</div>
             <div class="text-xs text-slate-500 mt-1">Inscrits</div>
           </div>
@@ -188,11 +227,12 @@ const props = defineProps<Props>()
 
 const calculateEngagementRate = (period: 'daily' | 'weekly') => {
   if (props.platformMetrics.totalRegisteredUsers === 0) return 0
-  
-  const activeUsers = period === 'daily' 
-    ? props.platformMetrics.activeUsers24h
-    : props.platformMetrics.activeUsersThisWeek
-    
+
+  const activeUsers =
+    period === 'daily'
+      ? props.platformMetrics.activeUsers24h
+      : props.platformMetrics.activeUsersThisWeek
+
   return Math.round((activeUsers / props.platformMetrics.totalRegisteredUsers) * 100)
 }
 
@@ -221,7 +261,9 @@ const getMostActiveCount = () => {
 
 const getCompletionRate = () => {
   if (props.platformMetrics.gamesCreatedToday === 0) return 0
-  return Math.round((props.platformMetrics.gamesCompletedToday / props.platformMetrics.gamesCreatedToday) * 100)
+  return Math.round(
+    (props.platformMetrics.gamesCompletedToday / props.platformMetrics.gamesCreatedToday) * 100
+  )
 }
 
 const getTrendDescription = () => {
@@ -235,13 +277,13 @@ const getTrendDescription = () => {
 const getRecommendation = () => {
   const engagement = calculateEngagementRate('daily')
   const completion = getCompletionRate()
-  
+
   if (engagement < 20) {
-    return 'Considérer l\'ajout de notifications ou de fonctionnalités d\'engagement.'
+    return "Considérer l'ajout de notifications ou de fonctionnalités d'engagement."
   } else if (completion < 60) {
-    return 'Améliorer l\'expérience utilisateur pour augmenter le taux de complétion.'
+    return "Améliorer l'expérience utilisateur pour augmenter le taux de complétion."
   } else if (props.platformMetrics.growthRate < 0) {
-    return 'Analyser les causes de la baisse d\'activité et déployer des mesures correctives.'
+    return "Analyser les causes de la baisse d'activité et déployer des mesures correctives."
   }
   return 'Les métriques sont saines. Continuer le développement des fonctionnalités.'
 }

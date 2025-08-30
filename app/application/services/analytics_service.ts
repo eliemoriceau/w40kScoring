@@ -66,17 +66,20 @@ export default class AnalyticsService {
   /**
    * Obtient les statistiques détaillées d'un joueur
    */
-  async getPlayerStats(userId: number, period: 'week' | 'month' | 'all' = 'all'): Promise<PlayerStats> {
+  async getPlayerStats(
+    userId: number,
+    period: 'week' | 'month' | 'all' = 'all'
+  ): Promise<PlayerStats> {
     const startDate = this.getStartDate(period)
-    
+
     const playerGames = await Game.query()
       .where('user_id', userId)
       .if(startDate, (query) => query.where('created_at', '>=', startDate))
       .preload('opponent')
-    
-    const completedGames = playerGames.filter(game => game.status === 'COMPLETED')
+
+    const completedGames = playerGames.filter((game) => game.status === 'COMPLETED')
     const totalGames = completedGames.length
-    
+
     if (totalGames === 0) {
       return {
         totalGames: 0,
@@ -86,13 +89,13 @@ export default class AnalyticsService {
         favoriteGameType: 'MATCHED_PLAY',
         mostActiveHour: '20',
         winLossStreak: 0,
-        improvementTrend: 'stable'
+        improvementTrend: 'stable',
       }
     }
 
     // Calcul du taux de victoire
-    const wins = completedGames.filter(game => 
-      (game.playerScore || 0) > (game.opponentScore || 0)
+    const wins = completedGames.filter(
+      (game) => (game.playerScore || 0) > (game.opponentScore || 0)
     ).length
     const winRate = Math.round((wins / totalGames) * 100)
 
@@ -105,21 +108,26 @@ export default class AnalyticsService {
     )
 
     // Type de jeu favori
-    const gameTypeCounts = completedGames.reduce((counts, game) => {
-      counts[game.gameType] = (counts[game.gameType] || 0) + 1
-      return counts
-    }, {} as Record<string, number>)
-    const favoriteGameType = Object.entries(gameTypeCounts)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] || 'MATCHED_PLAY'
+    const gameTypeCounts = completedGames.reduce(
+      (counts, game) => {
+        counts[game.gameType] = (counts[game.gameType] || 0) + 1
+        return counts
+      },
+      {} as Record<string, number>
+    )
+    const favoriteGameType =
+      Object.entries(gameTypeCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || 'MATCHED_PLAY'
 
     // Heure la plus active
-    const hourCounts = completedGames.reduce((counts, game) => {
-      const hour = DateTime.fromISO(game.createdAt.toString()).hour
-      counts[hour] = (counts[hour] || 0) + 1
-      return counts
-    }, {} as Record<number, number>)
-    const mostActiveHour = Object.entries(hourCounts)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] || '20'
+    const hourCounts = completedGames.reduce(
+      (counts, game) => {
+        const hour = DateTime.fromISO(game.createdAt.toString()).hour
+        counts[hour] = (counts[hour] || 0) + 1
+        return counts
+      },
+      {} as Record<number, number>
+    )
+    const mostActiveHour = Object.entries(hourCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || '20'
 
     // Série actuelle (approximation simple)
     const recentGames = completedGames.slice(-10)
@@ -145,7 +153,7 @@ export default class AnalyticsService {
       favoriteGameType,
       mostActiveHour,
       winLossStreak: streak,
-      improvementTrend
+      improvementTrend,
     }
   }
 
@@ -158,39 +166,49 @@ export default class AnalyticsService {
       .preload('opponent')
       .orderBy('created_at', 'desc')
 
-    const completedGames = allGames.filter(game => game.status === 'COMPLETED')
+    const completedGames = allGames.filter((game) => game.status === 'COMPLETED')
     const totalGames = allGames.length
 
     // Durée moyenne des jeux (estimation basée sur les timestamps)
     const avgDuration = this.calculateAverageGameDuration(completedGames)
 
     // Répartition par type de jeu
-    const gamesByType = allGames.reduce((counts, game) => {
-      counts[game.gameType] = (counts[game.gameType] || 0) + 1
-      return counts
-    }, {} as Record<string, number>)
+    const gamesByType = allGames.reduce(
+      (counts, game) => {
+        counts[game.gameType] = (counts[game.gameType] || 0) + 1
+        return counts
+      },
+      {} as Record<string, number>
+    )
 
     // Répartition par statut
-    const gamesByStatus = allGames.reduce((counts, game) => {
-      counts[game.status] = (counts[game.status] || 0) + 1
-      return counts
-    }, {} as Record<string, number>)
+    const gamesByStatus = allGames.reduce(
+      (counts, game) => {
+        counts[game.status] = (counts[game.status] || 0) + 1
+        return counts
+      },
+      {} as Record<string, number>
+    )
 
     // Score moyen par round (estimation)
-    const averageScorePerRound = completedGames.length > 0 ? 
-      Math.round(
-        completedGames.reduce((sum, game) => 
-          sum + ((game.playerScore || 0) + (game.opponentScore || 0)), 0
-        ) / (completedGames.length * 5) // 5 rounds par jeu
-      ) : 0
+    const averageScorePerRound =
+      completedGames.length > 0
+        ? Math.round(
+            completedGames.reduce(
+              (sum, game) => sum + ((game.playerScore || 0) + (game.opponentScore || 0)),
+              0
+            ) /
+              (completedGames.length * 5) // 5 rounds par jeu
+          )
+        : 0
 
     // Matchs les plus compétitifs
     const mostCompetitiveMatches = completedGames
-      .map(game => ({
+      .map((game) => ({
         id: game.id,
         scoreDifference: Math.abs((game.playerScore || 0) - (game.opponentScore || 0)),
         players: `${game.user.username} vs ${game.opponent?.username || 'IA/Bot'}`,
-        date: DateTime.fromISO(game.createdAt.toString()).toFormat('dd/MM/yyyy')
+        date: DateTime.fromISO(game.createdAt.toString()).toFormat('dd/MM/yyyy'),
       }))
       .sort((a, b) => a.scoreDifference - b.scoreDifference)
       .slice(0, 5)
@@ -201,7 +219,7 @@ export default class AnalyticsService {
       gamesByType,
       gamesByStatus,
       averageScorePerRound,
-      mostCompetitiveMatches
+      mostCompetitiveMatches,
     }
   }
 
@@ -219,7 +237,7 @@ export default class AnalyticsService {
         query.where('created_at', '>=', yesterday.toSQL())
       })
       .count('* as total')
-    
+
     const activeUsersThisWeek = await User.query()
       .whereHas('games', (query) => {
         query.where('created_at', '>=', weekAgo.toSQL())
@@ -252,7 +270,7 @@ export default class AnalyticsService {
       gamesCompletedToday: Number(gamesCompletedToday[0]?.total || 0),
       averageSessionDuration: '45 min', // Valeur fixe pour l'instant
       peakHours,
-      growthRate
+      growthRate,
     }
   }
 
@@ -269,14 +287,18 @@ export default class AnalyticsService {
       .where('created_at', '>=', weekAgo.toSQL())
       .preload('user')
 
-    const currentUsers = new Set(currentGames.map(game => game.userId)).size
-    const currentCompleted = currentGames.filter(game => game.status === 'COMPLETED')
-    const currentAvgScore = currentCompleted.length > 0 ?
-      Math.round(
-        currentCompleted.reduce((sum, game) => 
-          sum + ((game.playerScore || 0) + (game.opponentScore || 0)), 0
-        ) / (currentCompleted.length * 2)
-      ) : 0
+    const currentUsers = new Set(currentGames.map((game) => game.userId)).size
+    const currentCompleted = currentGames.filter((game) => game.status === 'COMPLETED')
+    const currentAvgScore =
+      currentCompleted.length > 0
+        ? Math.round(
+            currentCompleted.reduce(
+              (sum, game) => sum + ((game.playerScore || 0) + (game.opponentScore || 0)),
+              0
+            ) /
+              (currentCompleted.length * 2)
+          )
+        : 0
 
     // Période précédente (semaine d'avant)
     const previousGames = await Game.query()
@@ -284,31 +306,35 @@ export default class AnalyticsService {
       .where('created_at', '<', weekAgo.toSQL())
       .preload('user')
 
-    const previousUsers = new Set(previousGames.map(game => game.userId)).size
-    const previousCompleted = previousGames.filter(game => game.status === 'COMPLETED')
-    const previousAvgScore = previousCompleted.length > 0 ?
-      Math.round(
-        previousCompleted.reduce((sum, game) => 
-          sum + ((game.playerScore || 0) + (game.opponentScore || 0)), 0
-        ) / (previousCompleted.length * 2)
-      ) : 0
+    const previousUsers = new Set(previousGames.map((game) => game.userId)).size
+    const previousCompleted = previousGames.filter((game) => game.status === 'COMPLETED')
+    const previousAvgScore =
+      previousCompleted.length > 0
+        ? Math.round(
+            previousCompleted.reduce(
+              (sum, game) => sum + ((game.playerScore || 0) + (game.opponentScore || 0)),
+              0
+            ) /
+              (previousCompleted.length * 2)
+          )
+        : 0
 
     return {
       current: {
         totalGames: currentGames.length,
         activeUsers: currentUsers,
-        averageScore: currentAvgScore
+        averageScore: currentAvgScore,
       },
       previous: {
         totalGames: previousGames.length,
         activeUsers: previousUsers,
-        averageScore: previousAvgScore
+        averageScore: previousAvgScore,
       },
       changes: {
         gamesChange: this.calculatePercentageChange(previousGames.length, currentGames.length),
         usersChange: this.calculatePercentageChange(previousUsers, currentUsers),
-        scoreChange: this.calculatePercentageChange(previousAvgScore, currentAvgScore)
-      }
+        scoreChange: this.calculatePercentageChange(previousAvgScore, currentAvgScore),
+      },
     }
   }
 
@@ -326,13 +352,16 @@ export default class AnalyticsService {
 
   private calculateImprovementTrend(games: any[]): 'up' | 'down' | 'stable' {
     if (games.length < 10) return 'stable'
-    
+
     const recent = games.slice(-10)
     const older = games.slice(-20, -10)
-    
+
     const recentAvg = recent.reduce((sum, game) => sum + (game.playerScore || 0), 0) / recent.length
-    const olderAvg = older.length > 0 ? older.reduce((sum, game) => sum + (game.playerScore || 0), 0) / older.length : recentAvg
-    
+    const olderAvg =
+      older.length > 0
+        ? older.reduce((sum, game) => sum + (game.playerScore || 0), 0) / older.length
+        : recentAvg
+
     const difference = recentAvg - olderAvg
     if (difference > 2) return 'up'
     if (difference < -2) return 'down'
@@ -341,27 +370,32 @@ export default class AnalyticsService {
 
   private calculateAverageGameDuration(games: any[]): string {
     const durations = games
-      .filter(game => game.completedAt && game.startedAt)
-      .map(game => {
+      .filter((game) => game.completedAt && game.startedAt)
+      .map((game) => {
         const start = DateTime.fromISO(game.startedAt.toString())
         const end = DateTime.fromISO(game.completedAt.toString())
         return end.diff(start, 'minutes').minutes
       })
-    
+
     if (durations.length === 0) return '60 min'
-    
-    const avgMinutes = Math.round(durations.reduce((sum, duration) => sum + duration, 0) / durations.length)
+
+    const avgMinutes = Math.round(
+      durations.reduce((sum, duration) => sum + duration, 0) / durations.length
+    )
     return `${avgMinutes} min`
   }
 
   private async calculatePeakHours(): Promise<Array<{ hour: number; count: number }>> {
     const games = await Game.query().select('created_at')
-    
-    const hourCounts = games.reduce((counts, game) => {
-      const hour = DateTime.fromISO(game.createdAt.toString()).hour
-      counts[hour] = (counts[hour] || 0) + 1
-      return counts
-    }, {} as Record<number, number>)
+
+    const hourCounts = games.reduce(
+      (counts, game) => {
+        const hour = DateTime.fromISO(game.createdAt.toString()).hour
+        counts[hour] = (counts[hour] || 0) + 1
+        return counts
+      },
+      {} as Record<number, number>
+    )
 
     return Object.entries(hourCounts)
       .map(([hour, count]) => ({ hour: Number(hour), count }))
@@ -374,7 +408,7 @@ export default class AnalyticsService {
     const thisMonth = await User.query()
       .where('created_at', '>=', now.startOf('month').toSQL())
       .count('* as total')
-    
+
     const lastMonth = await User.query()
       .where('created_at', '>=', now.minus({ months: 1 }).startOf('month').toSQL())
       .where('created_at', '<', now.startOf('month').toSQL())
@@ -382,7 +416,7 @@ export default class AnalyticsService {
 
     const thisMonthCount = Number(thisMonth[0]?.total || 0)
     const lastMonthCount = Number(lastMonth[0]?.total || 0)
-    
+
     return this.calculatePercentageChange(lastMonthCount, thisMonthCount)
   }
 

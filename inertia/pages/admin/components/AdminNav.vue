@@ -45,7 +45,7 @@
 
         <Link
           href="/admin/system/config"
-          :class="navItemClasses($page.url.startsWith('/admin/system'))"
+          :class="navItemClasses($page.url.startsWith('/admin/system/config'))"
         >
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path
@@ -54,17 +54,20 @@
             <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span>Configuration</span>
-          <span class="ml-auto bg-red-600 text-xs px-2 py-1 rounded-full">Bientôt</span>
+          <span class="ml-auto bg-yellow-500 text-xs px-2 py-1 rounded-full">SUPER</span>
         </Link>
 
-        <Link href="/admin/system/logs" :class="navItemClasses($page.url === '/admin/system/logs')">
+        <Link
+          href="/admin/system/logs"
+          :class="navItemClasses($page.url.startsWith('/admin/system/logs'))"
+        >
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
           <span>Logs Système</span>
-          <span class="ml-auto bg-red-600 text-xs px-2 py-1 rounded-full">Bientôt</span>
+          <span class="ml-auto bg-yellow-500 text-xs px-2 py-1 rounded-full">SUPER</span>
         </Link>
       </div>
 

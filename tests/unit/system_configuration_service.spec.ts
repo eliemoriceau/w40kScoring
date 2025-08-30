@@ -160,11 +160,16 @@ test.group('SystemConfigurationService', (group) => {
 
   test('can rollback configuration', async ({ assert }) => {
     // Create configuration using service to enable proper rollback
-    const config = await service.setConfiguration('test.rollback_config', 'initial_value', superAdmin.id, {
-      category: 'general',
-      description: 'Test rollback configuration',
-      changeReason: 'Initial creation',
-    })
+    const config = await service.setConfiguration(
+      'test.rollback_config',
+      'initial_value',
+      superAdmin.id,
+      {
+        category: 'general',
+        description: 'Test rollback configuration',
+        changeReason: 'Initial creation',
+      }
+    )
 
     // Update the configuration
     await service.setConfiguration('test.rollback_config', 'updated_value', superAdmin.id, {

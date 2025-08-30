@@ -19,6 +19,7 @@ test.group('Admin System Logs', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     // Create test log
@@ -51,6 +52,7 @@ test.group('Admin System Logs', (group) => {
       email: `admin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: adminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     const response = await client.get('/admin/system/logs').loginAs(admin)
@@ -69,6 +71,7 @@ test.group('Admin System Logs', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     // Create logs with different levels
@@ -112,6 +115,7 @@ test.group('Admin System Logs', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     await SystemLog.create({
@@ -141,6 +145,7 @@ test.group('Admin System Logs', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     // Create old log (simulate by setting old timestamp)
@@ -179,6 +184,7 @@ test.group('Admin System Logs', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     // Create test logs

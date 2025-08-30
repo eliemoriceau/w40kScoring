@@ -22,6 +22,7 @@ test.group('SystemConfigurationService', (group) => {
       email: `superadmin_unit_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
   })
 

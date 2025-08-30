@@ -21,12 +21,12 @@ export default class AdminSystemLogsController {
         level: request.qs().level,
         category: request.qs().category,
         eventType: request.qs().event_type,
-        userId: request.qs().user_id ? parseInt(request.qs().user_id) : undefined,
+        userId: request.qs().user_id ? Number.parseInt(request.qs().user_id) : undefined,
         startDate: request.qs().start_date,
         endDate: request.qs().end_date,
         search: request.qs().search,
-        limit: request.qs().limit ? parseInt(request.qs().limit) : 50,
-        offset: request.qs().offset ? parseInt(request.qs().offset) : 0,
+        limit: request.qs().limit ? Number.parseInt(request.qs().limit) : 50,
+        offset: request.qs().offset ? Number.parseInt(request.qs().offset) : 0,
       }
 
       const [logsResult, stats, eventTypes, logUsers] = await Promise.all([
@@ -70,12 +70,12 @@ export default class AdminSystemLogsController {
         level: request.qs().level,
         category: request.qs().category,
         eventType: request.qs().event_type,
-        userId: request.qs().user_id ? parseInt(request.qs().user_id) : undefined,
+        userId: request.qs().user_id ? Number.parseInt(request.qs().user_id) : undefined,
         startDate: request.qs().start_date,
         endDate: request.qs().end_date,
         search: request.qs().search,
-        limit: request.qs().limit ? parseInt(request.qs().limit) : 50,
-        offset: request.qs().offset ? parseInt(request.qs().offset) : 0,
+        limit: request.qs().limit ? Number.parseInt(request.qs().limit) : 50,
+        offset: request.qs().offset ? Number.parseInt(request.qs().offset) : 0,
       }
 
       const result = await this.systemLogService.getLogs(filters)
@@ -106,7 +106,7 @@ export default class AdminSystemLogsController {
    */
   async getStats({ request, response, auth }: HttpContext) {
     try {
-      const days = request.qs().days ? parseInt(request.qs().days) : 7
+      const days = request.qs().days ? Number.parseInt(request.qs().days) : 7
       const stats = await this.systemLogService.getLogStats(days)
 
       return response.json(stats)
@@ -134,7 +134,7 @@ export default class AdminSystemLogsController {
         level: request.qs().level,
         category: request.qs().category,
         eventType: request.qs().event_type,
-        userId: request.qs().user_id ? parseInt(request.qs().user_id) : undefined,
+        userId: request.qs().user_id ? Number.parseInt(request.qs().user_id) : undefined,
         startDate: request.qs().start_date,
         endDate: request.qs().end_date,
         search: request.qs().search,
@@ -236,7 +236,7 @@ export default class AdminSystemLogsController {
       })
 
       // Find the specific log by ID
-      const specificLog = log.data.find((l) => l.id === parseInt(params.id))
+      const specificLog = log.data.find((l) => l.id === Number.parseInt(params.id))
 
       if (!specificLog) {
         return response.status(404).json({

@@ -53,6 +53,7 @@ test.group('Admin System Configurations', (group) => {
       email: `admin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: adminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     const response = await client.get('/admin/system/config').loginAs(admin)
@@ -71,6 +72,7 @@ test.group('Admin System Configurations', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     const response = await client.post('/admin/system/config').loginAs(superAdmin).form({
@@ -102,6 +104,7 @@ test.group('Admin System Configurations', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     // Create initial setting
@@ -142,6 +145,7 @@ test.group('Admin System Configurations', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     const setting = await SystemSetting.create({
@@ -179,6 +183,7 @@ test.group('Admin System Configurations', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     const response = await client.post('/admin/system/config').loginAs(superAdmin).form({
@@ -201,6 +206,7 @@ test.group('Admin System Configurations', (group) => {
       email: `superadmin_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
+      termsAcceptedAt: new Date(),
     })
 
     const criticalSetting = await SystemSetting.create({

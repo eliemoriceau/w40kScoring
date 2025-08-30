@@ -80,7 +80,7 @@ export default class SystemLogService {
     // Count total before pagination
     const totalQuery = query.clone()
     const total = await totalQuery.count('* as total')
-    const totalCount = parseInt(total[0].$extras.total)
+    const totalCount = Number.parseInt(total[0].$extras.total)
 
     // Apply pagination
     const limit = filters.limit || 50
@@ -160,7 +160,7 @@ export default class SystemLogService {
           .orderBy('hour', 'asc'),
       ])
 
-    const totalLogs = parseInt(totalResult[0].$extras.total) || 0
+    const totalLogs = Number.parseInt(totalResult[0].$extras.total) || 0
 
     // Process level counts
     let errorCount = 0
@@ -169,7 +169,7 @@ export default class SystemLogService {
     let debugCount = 0
 
     levelCounts.forEach((row) => {
-      const count = parseInt(row.$extras.count)
+      const count = Number.parseInt(row.$extras.count)
       switch (row.level) {
         case SystemLog.LEVELS.ERROR:
           errorCount = count
@@ -200,15 +200,15 @@ export default class SystemLogService {
       recentErrors,
       topEventTypes: eventTypeCounts.map((row) => ({
         eventType: row.eventType,
-        count: parseInt(row.$extras.count),
+        count: Number.parseInt(row.$extras.count),
       })),
       logsByCategory: categoryCounts.map((row) => ({
         category: row.category,
-        count: parseInt(row.$extras.count),
+        count: Number.parseInt(row.$extras.count),
       })),
       logsByHour: hourlyCounts.map((row) => ({
-        hour: parseInt(row.$extras.hour),
-        count: parseInt(row.$extras.count),
+        hour: Number.parseInt(row.$extras.hour),
+        count: Number.parseInt(row.$extras.count),
       })),
     }
   }

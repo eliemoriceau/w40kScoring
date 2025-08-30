@@ -1,4 +1,5 @@
 import { test } from '@japa/runner'
+import { DateTime } from 'luxon'
 import User from '#models/user'
 import Role from '#models/role'
 import SystemSetting from '#models/system_setting'
@@ -22,7 +23,7 @@ test.group('SystemConfigurationService', (group) => {
       email: `superadmin_unit_${Date.now()}@test.com`,
       password: 'password123',
       roleId: superAdminRole.id,
-      termsAcceptedAt: new Date(),
+      termsAcceptedAt: DateTime.now(),
     })
   })
 
@@ -65,8 +66,8 @@ test.group('SystemConfigurationService', (group) => {
 
     // Check that history was created
     const history = await ConfigurationHistory.query()
-      .where('settingId', config.id)
-      .where('action', 'created')
+      .where('settingKey', 'test.new_config')
+      .where('action', 'CREATE')
       .first()
 
     assert.isNotNull(history)
@@ -99,8 +100,8 @@ test.group('SystemConfigurationService', (group) => {
 
     // Check that history was created
     const history = await ConfigurationHistory.query()
-      .where('settingId', updatedConfig.id)
-      .where('action', 'updated')
+      .where('settingKey', 'test.update_config')
+      .where('action', 'UPDATE')
       .first()
 
     assert.isNotNull(history)
@@ -129,8 +130,8 @@ test.group('SystemConfigurationService', (group) => {
 
     // Check that history was created
     const history = await ConfigurationHistory.query()
-      .where('settingId', config.id)
-      .where('action', 'deleted')
+      .where('settingKey', 'test.delete_config')
+      .where('action', 'DELETE')
       .first()
 
     assert.isNotNull(history)
@@ -138,18 +139,14 @@ test.group('SystemConfigurationService', (group) => {
   })
 
   test('can get configuration history', async ({ assert }) => {
-    const config = await SystemSetting.create({
-      key: 'test.history_config',
-      value: 'initial_value',
+    // Create configuration using service to log CREATE action
+    await service.setConfiguration('test.history_config', 'initial_value', superAdmin.id, {
       category: 'general',
       description: 'Test history configuration',
-      isCritical: false,
-      requiresRestart: false,
-      createdBy: superAdmin.id,
-      updatedBy: superAdmin.id,
+      changeReason: 'Initial creation',
     })
 
-    // Update the configuration to create history
+    // Update the configuration to create UPDATE history
     await service.setConfiguration('test.history_config', 'updated_value', superAdmin.id, {
       changeReason: 'Test update',
     })
@@ -157,20 +154,16 @@ test.group('SystemConfigurationService', (group) => {
     const history = await service.getConfigurationHistory('test.history_config')
 
     assert.lengthOf(history, 2) // created + updated
-    assert.equal(history[0].action, 'updated')
-    assert.equal(history[1].action, 'created')
+    assert.equal(history[0].action, 'UPDATE')
+    assert.equal(history[1].action, 'CREATE')
   })
 
   test('can rollback configuration', async ({ assert }) => {
-    const config = await SystemSetting.create({
-      key: 'test.rollback_config',
-      value: 'initial_value',
+    // Create configuration using service to enable proper rollback
+    const config = await service.setConfiguration('test.rollback_config', 'initial_value', superAdmin.id, {
       category: 'general',
       description: 'Test rollback configuration',
-      isCritical: false,
-      requiresRestart: false,
-      createdBy: superAdmin.id,
-      updatedBy: superAdmin.id,
+      changeReason: 'Initial creation',
     })
 
     // Update the configuration
@@ -180,8 +173,8 @@ test.group('SystemConfigurationService', (group) => {
 
     // Get the update history entry
     const updateHistory = await ConfigurationHistory.query()
-      .where('settingId', config.id)
-      .where('action', 'updated')
+      .where('settingKey', 'test.rollback_config')
+      .where('action', 'UPDATE')
       .first()
 
     assert.isNotNull(updateHistory)
@@ -196,8 +189,8 @@ test.group('SystemConfigurationService', (group) => {
 
     // Check rollback history was created
     const rollbackHistory = await ConfigurationHistory.query()
-      .where('settingId', config.id)
-      .where('action', 'rollback')
+      .where('settingKey', 'test.rollback_config')
+      .where('action', 'ROLLBACK')
       .first()
 
     assert.isNotNull(rollbackHistory)

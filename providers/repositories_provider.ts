@@ -24,86 +24,86 @@ export default class RepositoriesProvider {
    */
   register() {
     // Game Repositories - avec fallback vers implémentations standards
-    this.app.container.bind('GameCommandRepository', () => {
-      const {
-        LucidGameCommandRepository,
-      } = require('#infrastructure/repositories/lucid_game_command_repository')
+    this.app.container.bind('GameCommandRepository', async () => {
+      const { LucidGameCommandRepository } = await import(
+        '#infrastructure/repositories/lucid_game_command_repository'
+      )
       return new LucidGameCommandRepository()
     })
 
-    this.app.container.bind('GameQueryRepository', () => {
-      const {
-        LucidGameQueryRepository,
-      } = require('#infrastructure/repositories/lucid_game_query_repository')
+    this.app.container.bind('GameQueryRepository', async () => {
+      const { LucidGameQueryRepository } = await import(
+        '#infrastructure/repositories/lucid_game_query_repository'
+      )
       return new LucidGameQueryRepository()
     })
 
     // Player Repositories
-    this.app.container.bind('PlayerCommandRepository', () => {
-      const {
-        LucidPlayerCommandRepository,
-      } = require('#infrastructure/repositories/lucid_player_command_repository')
+    this.app.container.bind('PlayerCommandRepository', async () => {
+      const { LucidPlayerCommandRepository } = await import(
+        '#infrastructure/repositories/lucid_player_command_repository'
+      )
       return new LucidPlayerCommandRepository()
     })
 
-    this.app.container.bind('PlayerQueryRepository', () => {
-      const {
-        LucidPlayerQueryRepository,
-      } = require('#infrastructure/repositories/lucid_player_query_repository')
+    this.app.container.bind('PlayerQueryRepository', async () => {
+      const { LucidPlayerQueryRepository } = await import(
+        '#infrastructure/repositories/lucid_player_query_repository'
+      )
       return new LucidPlayerQueryRepository()
     })
 
     // Round Repositories
-    this.app.container.bind('RoundCommandRepository', () => {
-      const {
-        LucidRoundCommandRepository,
-      } = require('#infrastructure/repositories/lucid_round_command_repository')
+    this.app.container.bind('RoundCommandRepository', async () => {
+      const { LucidRoundCommandRepository } = await import(
+        '#infrastructure/repositories/lucid_round_command_repository'
+      )
       return new LucidRoundCommandRepository()
     })
 
-    this.app.container.bind('RoundQueryRepository', () => {
-      const {
-        LucidRoundQueryRepository,
-      } = require('#infrastructure/repositories/lucid_round_query_repository')
+    this.app.container.bind('RoundQueryRepository', async () => {
+      const { LucidRoundQueryRepository } = await import(
+        '#infrastructure/repositories/lucid_round_query_repository'
+      )
       return new LucidRoundQueryRepository()
     })
 
     // Score Repositories - avec version optimisée prioritaire
-    this.app.container.bind('ScoreCommandRepository', () => {
-      const {
-        LucidScoreCommandRepository,
-      } = require('#infrastructure/repositories/lucid_score_command_repository')
+    this.app.container.bind('ScoreCommandRepository', async () => {
+      const { LucidScoreCommandRepository } = await import(
+        '#infrastructure/repositories/lucid_score_command_repository'
+      )
       return new LucidScoreCommandRepository()
     })
 
-    this.app.container.bind('ScoreQueryRepository', () => {
+    this.app.container.bind('ScoreQueryRepository', async () => {
       // 🚀 OPTIMISATION - Utilise la version enhanced par défaut
       try {
-        const {
-          EnhancedScoreQueryRepository,
-        } = require('#infrastructure/repositories/enhanced_score_query_repository')
+        const { EnhancedScoreQueryRepository } = await import(
+          '#infrastructure/repositories/enhanced_score_query_repository'
+        )
         return new EnhancedScoreQueryRepository()
       } catch (error) {
         // Fallback vers l'implémentation standard si enhanced non disponible
-        const {
-          LucidScoreQueryRepository,
-        } = require('#infrastructure/repositories/lucid_score_query_repository')
+        const { LucidScoreQueryRepository } = await import(
+          '#infrastructure/repositories/lucid_score_query_repository'
+        )
         return new LucidScoreQueryRepository()
       }
     })
 
     // Services - avec versions cachées optimisées
-    this.app.container.bind('GameDetailService', () => {
-      const {
-        CachedGameDetailService,
-      } = require('#application/services/cached_game_detail_service')
-      const { MemoryCacheService } = require('#infrastructure/cache/memory_cache_service')
+    this.app.container.bind('GameDetailService', async () => {
+      const { CachedGameDetailService } = await import(
+        '#application/services/cached_game_detail_service'
+      )
+      const { MemoryCacheService } = await import('#infrastructure/cache/memory_cache_service')
 
       // Récupération des repositories via le container
-      const gameQueryRepo = this.app.container.use('GameQueryRepository')
-      const playerQueryRepo = this.app.container.use('PlayerQueryRepository')
-      const roundQueryRepo = this.app.container.use('RoundQueryRepository')
-      const scoreQueryRepo = this.app.container.use('ScoreQueryRepository')
+      const gameQueryRepo = await this.app.container.use('GameQueryRepository')
+      const playerQueryRepo = await this.app.container.use('PlayerQueryRepository')
+      const roundQueryRepo = await this.app.container.use('RoundQueryRepository')
+      const scoreQueryRepo = await this.app.container.use('ScoreQueryRepository')
 
       const cacheService = new MemoryCacheService()
 
@@ -117,8 +117,8 @@ export default class RepositoriesProvider {
     })
 
     // Cache Service - Singleton pattern
-    this.app.container.singleton('MemoryCacheService', () => {
-      const { MemoryCacheService } = require('#infrastructure/cache/memory_cache_service')
+    this.app.container.singleton('MemoryCacheService', async () => {
+      const { MemoryCacheService } = await import('#infrastructure/cache/memory_cache_service')
       return new MemoryCacheService()
     })
   }

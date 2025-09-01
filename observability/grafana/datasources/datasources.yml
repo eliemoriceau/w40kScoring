@@ -1,0 +1,92 @@
+# Grafana Datasources Configuration
+# W40K Scoring - Provisioning automatique
+apiVersion: 1
+
+# Liste des datasources
+datasources:
+  # =================================
+  # Prometheus - Métriques
+  # =================================
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: POST
+      queryTimeout: 60s
+      timeInterval: 30s
+      exemplarTraceIdDestinations:
+        # Corrélation avec les traces Tempo
+        - name: traceID
+          datasourceUid: tempo-uid
+          urlDisplayLabel: 'View in Tempo'
+
+  # =================================
+  # Loki - Logs
+  # =================================
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    version: 1
+    editable: true
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        # Extraction automatique du trace ID depuis les logs
+        - matcherRegex: "traceID=(\\w+)"
+          name: 'TraceID'
+          url: '$${__value.raw}'
+          datasourceUid: tempo-uid
+          urlDisplayLabel: 'View Trace'
+
+  # =================================
+  # Tempo - Traces distribuées
+  # =================================
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    uid: tempo-uid
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: GET
+      serviceMap:
+        datasourceUid: 'prometheus-uid'
+      search:
+        hide: false
+      nodeGraph:
+        enabled: true
+      lokiSearch:
+        datasourceUid: 'loki-uid'
+      tracesToLogsV2:
+        # Corrélation automatique traces -> logs
+        datasourceUid: 'loki-uid'
+        tags: ['job', 'instance', 'pod', 'namespace']
+        mappedTags: [{ key: 'service.name', value: 'job' }]
+        mapTagNamesEnabled: true
+        spanStartTimeShift: '1m'
+        spanEndTimeShift: '1m'
+        filterByTraceID: true
+        filterBySpanID: false
+      tracesToMetrics:
+        # Corrélation automatique traces -> métriques
+        datasourceUid: 'prometheus-uid'
+        tags: [{ key: 'service.name', value: 'job' }, { key: 'job' }]
+        queries:
+          - name: 'Sample query'
+            query: 'sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))'
+
+  # =================================
+  # TestData - Pour les tests
+  # =================================
+  - name: TestData
+    type: testdata
+    access: proxy
+    version: 1
+    editable: false
+    isDefault: false

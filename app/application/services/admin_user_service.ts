@@ -375,13 +375,31 @@ export class AdminUserService {
 
   private async sendWelcomeEmail(user: User, tempPassword: string): Promise<void> {
     // TODO: Implémentation de l'envoi d'email
-    console.log(`Welcome email would be sent to ${user.email} with temp password: ${tempPassword}`)
+    logger.info('Welcome email queued for new user', {
+      userId: user.id,
+      userEmail: this.maskEmail(user.email),
+      action: 'welcome_email',
+      timestamp: DateTime.now().toISO(),
+    })
   }
 
   private async sendPasswordResetEmail(user: User, tempPassword: string): Promise<void> {
     // TODO: Implémentation de l'envoi d'email
-    console.log(
-      `Password reset email would be sent to ${user.email} with temp password: ${tempPassword}`
-    )
+    logger.info('Password reset email queued for user', {
+      userId: user.id,
+      userEmail: this.maskEmail(user.email),
+      action: 'password_reset_email',
+      timestamp: DateTime.now().toISO(),
+    })
+  }
+
+  /**
+   * Masque l'email pour les logs (garde premières lettres + domaine)
+   * ex: john.doe@example.com → jo***@example.com
+   */
+  private maskEmail(email: string): string {
+    const [localPart, domain] = email.split('@')
+    if (localPart.length <= 2) return `${localPart[0]}***@${domain}`
+    return `${localPart.substring(0, 2)}***@${domain}`
   }
 }

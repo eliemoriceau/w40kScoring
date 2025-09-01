@@ -1,0 +1,85 @@
+# Tempo Configuration
+# W40K Scoring - Distributed Tracing
+# HTTP Server
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9095
+  log_level: info
+
+# Distributor
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+# Ingester
+ingester:
+  trace_idle_period: 10s
+  max_block_bytes: 1_000_000
+  max_block_duration: 5m
+
+# Compactor
+compactor:
+  compaction:
+    block_retention: 1h
+
+# Storage
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /tmp/tempo/wal
+    local:
+      path: /tmp/tempo/blocks
+    pool:
+      max_workers: 100
+      queue_depth: 10000
+
+# Query Frontend
+query_frontend:
+  search:
+    duration_slo: 5s
+    throughput_bytes_slo: 1.073741824e+09
+  trace_by_id:
+    duration_slo: 5s
+
+# Overrides
+overrides:
+  defaults:
+    # Global limits
+    global:
+      max_traces_per_user: 10000
+      max_bytes_per_trace: 5000000
+    # Ingestion limits
+    ingestion:
+      max_trace_size_bytes: 5000000
+      max_spans_per_trace: 1000
+    # Query limits
+    read:
+      max_search_duration: 24h
+
+# Metrics generator (for RED metrics)
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+      cluster: w40k-scoring-dev
+  storage:
+    path: /tmp/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+
+# Usage report
+usage_report:
+  reporting_enabled: false
+
+# Multi-tenancy (disabled for single-tenant)
+auth_enabled: false
+
+# Target configuration
+target: all

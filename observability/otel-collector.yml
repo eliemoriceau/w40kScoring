@@ -1,0 +1,197 @@
+# OpenTelemetry Collector Configuration
+# W40K Scoring - Phase 4 Observability
+# Collecte, traite et route toutes les données de télémétrie
+
+# =================================
+# RECEIVERS - Points d'entrée
+# =================================
+receivers:
+  # OTLP receiver pour les applications instrumentées
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        max_recv_msg_size: 4194304 # 4MB
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - 'http://localhost:*'
+            - 'http://127.0.0.1:*'
+            - 'http://0.0.0.0:*'
+
+  # Prometheus receiver pour scraper les métriques
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['localhost:8888']
+
+        - job_name: 'w40k-app'
+          scrape_interval: 30s
+          metrics_path: /metrics
+          static_configs:
+            - targets: ['host.docker.internal:3333']
+          scrape_timeout: 10s
+
+        - job_name: 'node-exporter'
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['node-exporter:9100']
+
+        - job_name: 'cadvisor'
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['cadvisor:8080']
+
+  # Health check receiver
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+      network:
+      processes:
+
+# =================================
+# PROCESSORS - Traitement des données
+# =================================
+processors:
+  # Batch processor pour l'efficacité
+  batch:
+    timeout: 5s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  # Memory limiter pour éviter les OOM
+  memory_limiter:
+    limit_mib: 256
+    spike_limit_mib: 64
+
+  # Resource processor pour enrichir les données
+  resource:
+    attributes:
+      - key: service.instance.id
+        value: '${HOSTNAME}'
+        action: upsert
+      - key: deployment.environment
+        value: 'development'
+        action: upsert
+
+  # Sampling processor pour réduire le volume de traces
+  probabilistic_sampler:
+    sampling_percentage: 20 # 20% des traces en dev
+
+  # Transform processor pour nettoyer les données
+  transform:
+    trace_statements:
+      - context: span
+        statements:
+          # Redact sensitive data
+          - replace_pattern(attributes["http.url"], "password=[^&]*", "password=***")
+          - replace_pattern(attributes["http.target"], "token=[^&]*", "token=***")
+
+# =================================
+# EXPORTERS - Destinations des données
+# =================================
+exporters:
+  # Prometheus exporter
+  prometheus:
+    endpoint: '0.0.0.0:8889'
+    namespace: w40k_scoring
+    const_labels:
+      environment: development
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Loki exporter pour les logs
+  loki:
+    endpoint: 'http://loki:3100/loki/api/v1/push'
+    default_labels_enabled:
+      exporter: false
+      job: true
+      instance: true
+      level: true
+    labels:
+      attributes:
+        service.name: 'service_name'
+        service.version: 'service_version'
+        level: 'level'
+      resource:
+        service.name: 'service_name'
+
+  # Tempo exporter pour les traces
+  otlp/tempo:
+    endpoint: http://tempo:4317
+    tls:
+      insecure: true
+
+  # Debug exporter pour le développement
+  debug:
+    verbosity: normal
+    sampling_initial: 2
+    sampling_thereafter: 500
+
+  # Prometheus remote write (pour Prometheus direct)
+  prometheusremotewrite:
+    endpoint: 'http://prometheus:9090/api/v1/write'
+    tls:
+      insecure: true
+    resource_to_telemetry_conversion:
+      enabled: true
+
+# =================================
+# EXTENSIONS - Fonctionnalités supplémentaires
+# =================================
+extensions:
+  # Health check extension
+  health_check:
+    endpoint: 0.0.0.0:13133
+    path: /health
+
+  # Performance profiler
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # Memory ballast pour la stabilité mémoire
+  memory_ballast:
+    size_mib: 64
+
+# =================================
+# SERVICE PIPELINE - Orchestration
+# =================================
+service:
+  extensions: [health_check, pprof, memory_ballast]
+
+  pipelines:
+    # Pipeline pour les métriques
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics]
+      processors: [memory_limiter, batch, resource]
+      exporters: [prometheus, prometheusremotewrite, debug]
+
+    # Pipeline pour les traces
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, probabilistic_sampler, batch, resource, transform]
+      exporters: [otlp/tempo, debug]
+
+    # Pipeline pour les logs
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [loki, debug]
+
+  # Telemetry du collector lui-même
+  telemetry:
+    logs:
+      level: info
+      development: false
+    metrics:
+      address: 0.0.0.0:8888
+      level: detailed
+    traces:
+      processors: [batch]

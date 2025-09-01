@@ -1,0 +1,210 @@
+# Docker Compose - W40K Scoring Observability Stack
+# Phase 4 - Infrastructure complète Grafana + OpenTelemetry
+version: '3.8'
+
+networks:
+  observability:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:
+  loki-data:
+  tempo-data:
+
+services:
+  # =================================
+  # OpenTelemetry Collector
+  # Point d'entrée central pour toutes les données d'observabilité
+  # =================================
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    container_name: w40k-otel-collector
+    restart: unless-stopped
+    ports:
+      - '4317:4317' # OTLP gRPC receiver
+      - '4318:4318' # OTLP HTTP receiver
+      - '8888:8888' # Prometheus metrics endpoint
+      - '8889:8889' # Prometheus metrics endpoint (internal)
+      - '13133:13133' # Health check endpoint
+    volumes:
+      - ./observability/otel-collector.yml:/etc/otelcol-contrib/otel-collector.yml:ro
+    command: ['--config=/etc/otelcol-contrib/otel-collector.yml']
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    networks:
+      - observability
+    environment:
+      - GOMEMLIMIT=512MiB
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+  # =================================
+  # Prometheus - Métriques et Alerting
+  # =================================
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: w40k-prometheus
+    restart: unless-stopped
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # =================================
+  # Loki - Logs Centralisés
+  # =================================
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: w40k-loki
+    restart: unless-stopped
+    ports:
+      - '3100:3100'
+    volumes:
+      - ./observability/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # =================================
+  # Tempo - Distributed Tracing
+  # =================================
+  tempo:
+    image: grafana/tempo:2.3.0
+    container_name: w40k-tempo
+    restart: unless-stopped
+    ports:
+      - '3200:3200' # Tempo query frontend
+      - '9095:9095' # Tempo gRPC
+    volumes:
+      - ./observability/tempo.yml:/etc/tempo.yaml:ro
+      - tempo-data:/tmp/tempo
+    command: ['-config.file=/etc/tempo.yaml']
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # =================================
+  # Grafana - Interface Unifiée
+  # =================================
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: w40k-grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./observability/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./observability/grafana/dashboard-configs:/var/lib/grafana/dashboards:ro
+    environment:
+      # Security
+      - GF_SECURITY_ADMIN_PASSWORD=w40k-admin-2024
+      - GF_SECURITY_SECRET_KEY=w40k-secret-key-change-in-production
+
+      # Features
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor,correlations,publicDashboards
+      - GF_EXPLORE_ENABLED=true
+
+      # Performance
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+
+      # UI
+      - GF_DEFAULT_THEME=dark
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_USERS_DEFAULT_THEME=dark
+
+      # Data sources
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # =================================
+  # Node Exporter - Métriques Système
+  # =================================
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: w40k-node-exporter
+    restart: unless-stopped
+    ports:
+      - '9100:9100'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # =================================
+  # cAdvisor - Métriques Containers
+  # =================================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    container_name: w40k-cadvisor
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+    networks:
+      - observability
+    deploy:
+      resources:
+        limits:
+          memory: 256M

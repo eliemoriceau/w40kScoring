@@ -1,0 +1,27 @@
+# Grafana Dashboards Provisioning
+# W40K Scoring - Configuration des dashboards
+apiVersion: 1
+
+providers:
+  # Dashboards from files
+  - name: 'w40k-scoring-dashboards'
+    orgId: 1
+    folder: 'W40K Scoring'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true
+
+  # Dashboards from configmaps (for Kubernetes deployment)
+  - name: 'w40k-system-dashboards'
+    orgId: 1
+    folder: 'System'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/system

@@ -1,0 +1,167 @@
+# Prometheus Alert Rules
+# W40K Scoring - Règles d'alerting de base
+groups:
+  # =================================
+  # Alertes Application
+  # =================================
+  - name: w40k-application
+    rules:
+      # Taux d'erreur HTTP élevé
+      - alert: HighHTTPErrorRate
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m]) / 
+            rate(http_requests_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Taux d'erreur HTTP élevé pour W40K Scoring"
+          description: "Le taux d'erreur HTTP est de {{ $value | humanizePercentage }} sur les 5 dernières minutes."
+
+      # Latence élevée
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, 
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 2
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: 'Latence élevée détectée'
+          description: 'La latence P95 est de {{ $value }}s, dépassant le seuil de 2s.'
+
+      # Cache hit rate faible
+      - alert: LowCacheHitRate
+        expr: |
+          (
+            cache_hits_total / 
+            (cache_hits_total + cache_misses_total)
+          ) < 0.7
+        for: 15m
+        labels:
+          severity: warning
+          team: performance
+        annotations:
+          summary: 'Taux de cache hit faible'
+          description: 'Le cache hit rate est de {{ $value | humanizePercentage }}, en dessous de 70%.'
+
+  # =================================
+  # Alertes Infrastructure
+  # =================================
+  - name: infrastructure
+    rules:
+      # Utilisation CPU élevée
+      - alert: HighCPUUsage
+        expr: |
+          (
+            100 - (avg by (instance) 
+              (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+          ) > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: 'Utilisation CPU élevée'
+          description: 'CPU usage est de {{ $value }}% sur {{ $labels.instance }}.'
+
+      # Utilisation mémoire élevée
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / 
+            node_memory_MemTotal_bytes * 100
+          ) > 85
+        for: 10m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: 'Utilisation mémoire élevée'
+          description: 'Memory usage est de {{ $value }}% sur {{ $labels.instance }}.'
+
+      # Espace disque faible
+      - alert: LowDiskSpace
+        expr: |
+          (
+            (node_filesystem_size_bytes{fstype!="tmpfs"} - 
+             node_filesystem_avail_bytes{fstype!="tmpfs"}) / 
+            node_filesystem_size_bytes{fstype!="tmpfs"} * 100
+          ) > 90
+        for: 15m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: 'Espace disque faible'
+          description: 'Espace disque utilisé à {{ $value }}% sur {{ $labels.instance }}:{{ $labels.mountpoint }}.'
+
+  # =================================
+  # Alertes Base de Données
+  # =================================
+  - name: database
+    rules:
+      # Connexions DB élevées
+      - alert: HighDatabaseConnections
+        expr: db_connections_active / db_connections_max > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: 'Nombre élevé de connexions DB'
+          description: '{{ $value | humanizePercentage }} des connexions DB sont utilisées.'
+
+      # Requêtes lentes
+      - alert: SlowQueries
+        expr: rate(db_query_duration_seconds{quantile="0.95"}[5m]) > 1
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: 'Requêtes DB lentes détectées'
+          description: 'P95 des requêtes DB est de {{ $value }}s.'
+
+  # =================================
+  # Alertes Observabilité
+  # =================================
+  - name: observability
+    rules:
+      # Service down
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Service {{ $labels.job }} down'
+          description: 'Service {{ $labels.job }} sur {{ $labels.instance }} est down depuis plus de 2 minutes.'
+
+      # Trop peu d'échantillons de métriques
+      - alert: LowSampleIngestionRate
+        expr: |
+          rate(prometheus_tsdb_samples_appended_total[5m]) < 100
+        for: 10m
+        labels:
+          severity: warning
+          team: observability
+        annotations:
+          summary: "Taux d'ingestion de métriques faible"
+          description: 'Prometheus ingère seulement {{ $value }} échantillons/sec.'
+
+      # OpenTelemetry Collector problems
+      - alert: OTelCollectorDown
+        expr: up{job="otel-collector"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: observability
+        annotations:
+          summary: 'OpenTelemetry Collector down'
+          description: 'Le collector OpenTelemetry est indisponible.'

@@ -25,6 +25,7 @@ export interface PartiesIndexProps {
     id: number
     fullName: string
   }
+  errorParam?: string | null
 }
 
 /**

@@ -28,6 +28,19 @@ const filters = ref<PartiesFilters>({
 // Composables et helpers
 const { enrichParties, getStatusColor, getStatusLabel, formatPlayersText } = usePartiesHelpers()
 
+// Messages d'erreur selon le paramètre (SSR-safe via props)
+const errorMessages = {
+  invalid_id: 'Identifiant de partie invalide',
+  not_found: "Cette partie n'existe pas ou vous n'y avez pas accès",
+  forbidden: "Vous n'avez pas accès à cette partie",
+  server_error: "Une erreur est survenue lors de l'accès à la partie",
+}
+
+// Définir l'erreur initiale si présente dans les props
+if (props.errorParam && errorMessages[props.errorParam as keyof typeof errorMessages]) {
+  loading.value.error = errorMessages[props.errorParam as keyof typeof errorMessages]
+}
+
 // Computed properties avec cache
 const enrichedParties = computed(() => {
   // Cache les parties pour éviter les recalculs inutiles

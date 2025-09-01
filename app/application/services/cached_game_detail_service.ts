@@ -1,4 +1,4 @@
-import { GameDetailService } from './game_detail_service'
+import { GameDetailService } from '#application/services/game_detail_service'
 import { GameDetailSummary } from '#domain/value-objects/game_detail_summary'
 import GameId from '#domain/value-objects/game_id'
 import { MemoryCacheService } from '#infrastructure/cache/memory_cache_service'

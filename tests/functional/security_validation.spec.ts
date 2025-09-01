@@ -39,8 +39,8 @@ test.group('Security Validation', (group) => {
     const headerString = JSON.stringify(headers).toLowerCase()
 
     // Should not expose password-related information in headers
-    response.assert?.doesNotMatch(headerString, /password/)
-    response.assert?.doesNotMatch(headerString, /temp.*pass/)
+    response.assert?.notMatch(headerString, /password/)
+    response.assert?.notMatch(headerString, /temp.*pass/)
   })
 
   test('should handle CSRF protection', async ({ client }) => {
@@ -69,11 +69,11 @@ test.group('Security Validation', (group) => {
       .header('X-Forwarded-Host', 'evil.com')
       .header('Host', 'w40kscoring.moriceau.dev')
 
-    // Should not redirect to malicious host
-    response.assertStatus(200)
+    // Should block malicious host headers (403 Forbidden)
+    response.assertStatus(403)
     const location = response.headers().location
     if (location) {
-      response.assert?.doesNotMatch(location, /evil\.com/)
+      response.assert?.notMatch(location, /evil\.com/)
     }
   })
 })

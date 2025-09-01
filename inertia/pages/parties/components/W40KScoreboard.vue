@@ -124,7 +124,7 @@
 import { computed, ref } from 'vue'
 import type { GameDetailDto } from '../types'
 import { useW40KScoring } from '../composables/use_w40k_scoring'
-import { useW40KSecondaryObjectives } from '../composables/useW40KSecondaryObjectives'
+import { useW40KSecondaryObjectives } from '../composables/use_w40k_secondary_objectives'
 import W40KGameHeader from './W40KGameHeader.vue'
 import W40KPlayerGrid from './W40KPlayerGrid.vue'
 import W40KScoreActions from './W40KScoreActions.vue'

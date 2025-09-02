@@ -35,4 +35,14 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_USER: Env.schema.string(),
   DB_PASSWORD: Env.schema.string.optional(),
   DB_DATABASE: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for OpenTelemetry configuration
+  |----------------------------------------------------------
+  */
+  OTEL_ENABLED: Env.schema.boolean.optional(),
+  OTEL_EXPORTER_OTLP_ENDPOINT: Env.schema.string.optional(),
+  OTEL_SAMPLING_RATE: Env.schema.string.optional(),
+  APP_VERSION: Env.schema.string.optional(),
 })

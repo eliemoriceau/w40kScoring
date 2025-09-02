@@ -36,7 +36,7 @@ scrape_configs:
   # W40K Scoring Application
   - job_name: 'w40k-scoring-app'
     static_configs:
-      - targets: ['host.docker.internal:3333']
+      - targets: ['192.168.1.52:3333']
     metrics_path: /metrics
     scrape_interval: 30s
     scrape_timeout: 10s
@@ -60,10 +60,4 @@ scrape_configs:
       - targets: ['grafana:3000']
     metrics_path: /metrics
     scrape_interval: 60s
-
-# Configuration storage
-storage:
-  tsdb:
-    retention.time: 15d
-    retention.size: 10GB
-    wal-compression: true
+# Configuration storage (définie via command line arguments dans docker-compose)

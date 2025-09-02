@@ -11,7 +11,6 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
-        max_recv_msg_size: 4194304 # 4MB
       http:
         endpoint: 0.0.0.0:4318
         cors:
@@ -70,6 +69,7 @@ processors:
   memory_limiter:
     limit_mib: 256
     spike_limit_mib: 64
+    check_interval: 1s
 
   # Resource processor pour enrichir les données
   resource:
@@ -107,21 +107,11 @@ exporters:
     resource_to_telemetry_conversion:
       enabled: true
 
-  # Loki exporter pour les logs
-  loki:
-    endpoint: 'http://loki:3100/loki/api/v1/push'
-    default_labels_enabled:
-      exporter: false
-      job: true
-      instance: true
-      level: true
-    labels:
-      attributes:
-        service.name: 'service_name'
-        service.version: 'service_version'
-        level: 'level'
-      resource:
-        service.name: 'service_name'
+  # Logs via OTLP vers Loki (exporter loki supprimé dans v0.122.0)
+  otlp/loki:
+    endpoint: http://loki:3100
+    tls:
+      insecure: true
 
   # Tempo exporter pour les traces
   otlp/tempo:
@@ -156,15 +146,13 @@ extensions:
   pprof:
     endpoint: 0.0.0.0:1777
 
-  # Memory ballast pour la stabilité mémoire
-  memory_ballast:
-    size_mib: 64
+  # Memory ballast supprimé dans v0.122.0 - utiliser memory_limiter processor
 
 # =================================
 # SERVICE PIPELINE - Orchestration
 # =================================
 service:
-  extensions: [health_check, pprof, memory_ballast]
+  extensions: [health_check, pprof]
 
   pipelines:
     # Pipeline pour les métriques
@@ -179,11 +167,11 @@ service:
       processors: [memory_limiter, probabilistic_sampler, batch, resource, transform]
       exporters: [otlp/tempo, debug]
 
-    # Pipeline pour les logs
+    # Pipeline pour les logs - Utilisation d'OTLP vers Loki
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch, resource]
-      exporters: [loki, debug]
+      exporters: [otlp/loki, debug]
 
   # Telemetry du collector lui-même
   telemetry:
@@ -194,4 +182,3 @@ service:
       address: 0.0.0.0:8888
       level: detailed
     traces:
-      processors: [batch]

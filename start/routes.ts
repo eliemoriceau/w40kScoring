@@ -13,6 +13,7 @@ import { middleware } from '#start/kernel'
 const PagesController = () => import('#controllers/pages_controller')
 const PartiesController = () => import('#controllers/parties_controller')
 const AuthController = () => import('#controllers/auth_controller')
+const TelemetryController = () => import('#controllers/telemetry_controller')
 
 // Admin Controllers
 const AdminDashboardsController = () => import('#controllers/admin/admin_dashboards_controller')
@@ -24,6 +25,51 @@ const AdminAnalyticsController = () => import('#controllers/admin/admin_analytic
 const AdminSystemConfigurationsController = () =>
   import('#controllers/admin/admin_system_configurations_controller')
 const AdminSystemLogsController = () => import('#controllers/admin/admin_system_logs_controller')
+
+// Metrics endpoint for Prometheus scraping (placed first to avoid CORS issues)
+router.get('/metrics', async ({ response, request }) => {
+  // Log debug pour identifier les blocages
+  console.log('📊 Metrics request:', {
+    ip: request.ip(),
+    userAgent: request.header('user-agent'),
+    origin: request.header('origin'),
+    url: request.url(),
+  })
+
+  // Headers pour bypasser CORS complètement
+  response.header('Access-Control-Allow-Origin', '*')
+  response.header('Access-Control-Allow-Methods', 'GET')
+  response.header('Access-Control-Allow-Headers', '*')
+  response.header('Cache-Control', 'no-cache, no-store, must-revalidate')
+
+  try {
+    const { globalRegistry, updateBusinessMetrics } = await import('#start/metrics')
+    const BusinessMetricsServiceModule = await import('#services/business_metrics_service')
+    const BusinessMetricsService = BusinessMetricsServiceModule.default
+    const SLOMetricsServiceModule = await import('#services/slo_metrics_service')
+    const SLOMetricsService = SLOMetricsServiceModule.default
+
+    // Collecter les métriques business
+    const businessMetrics = await BusinessMetricsService.collectBusinessMetrics()
+    const engagementMetrics = await BusinessMetricsService.getUserEngagementMetrics()
+
+    // Mettre à jour toutes les métriques en une seule fois
+    updateBusinessMetrics(businessMetrics, engagementMetrics)
+
+    // Mettre à jour les métriques SLO
+    await SLOMetricsService.updateSLOMetrics()
+
+    const metricsText = await globalRegistry.metrics()
+
+    response.type('text/plain; version=0.0.4; charset=utf-8')
+    return response.send(metricsText)
+  } catch (error) {
+    console.error('❌ Failed to export metrics:', error.message)
+    console.error('Stack trace:', error.stack)
+    response.status(500)
+    return response.send('# Failed to export metrics\n')
+  }
+})
 
 // Health check endpoint for Kubernetes
 router.get('/health', ({ response }) => {
@@ -105,6 +151,18 @@ router.post('/register', [AuthController, 'register']).as('auth.register')
 router.get('/login', [AuthController, 'showLogin']).as('auth.show_login')
 router.post('/login', [AuthController, 'login']).as('auth.login')
 router.post('/logout', [AuthController, 'logout']).as('auth.logout')
+
+/*
+|--------------------------------------------------------------------------
+| Telemetry API Routes
+|--------------------------------------------------------------------------
+| Routes for frontend telemetry data collection
+*/
+router
+  .group(() => {
+    router.post('/telemetry/events', [TelemetryController, 'receiveEvents'])
+  })
+  .prefix('/api')
 
 /*
 |--------------------------------------------------------------------------

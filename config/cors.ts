@@ -9,6 +9,11 @@ import { defineConfig } from '@adonisjs/cors'
 const corsConfig = defineConfig({
   enabled: true,
   origin: (requestOrigin, ctx) => {
+    // Bypass CORS completely for metrics endpoint
+    if (ctx.request.url()?.includes('/metrics')) {
+      return true
+    }
+
     // Define allowed origins based on environment
     const allowedOrigins = [
       // Production domain and subdomains
@@ -19,6 +24,9 @@ const corsConfig = defineConfig({
       // Development origins
       'http://localhost:3333',
       'http://127.0.0.1:3333',
+      'http://0.0.0.0:3333',
+      // Docker container access for monitoring
+      'http://host.docker.internal:3333',
     ]
 
     // Allow same-origin requests (no origin header) - common for direct server requests

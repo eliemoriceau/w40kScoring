@@ -59,6 +59,8 @@ export default defineConfig({
     () => import('@adonisjs/inertia/inertia_provider'),
     () => import('@adonisjs/bouncer/bouncer_provider'),
     () => import('#providers/repositories_provider'),
+    () => import('#providers/telemetry_provider'),
+    () => import('#providers/telemetry_service_provider'),
   ],
 
   /*

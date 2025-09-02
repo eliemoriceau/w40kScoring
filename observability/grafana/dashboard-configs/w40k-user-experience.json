@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "Performance applicative W40K Scoring - Latence, erreurs, throughput",
+  "description": "Real User Monitoring W40K Scoring - Performance frontend et UX",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -28,71 +28,20 @@
       "keepTime": false,
       "tags": [],
       "targetBlank": true,
-      "title": "Business Overview",
+      "title": "Application Performance",
       "tooltip": "",
       "type": "link",
-      "url": "/d/w40k-business-overview"
+      "url": "/d/w40k-app-performance"
     }
   ],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-uid"
+        "type": "loki",
+        "uid": "loki-uid"
       },
-      "description": "Requests per second",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 1,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "reqps"
-        }
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 0
-      },
-      "id": 1,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"]
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "sum(rate(w40k_http_requests_total[5m]))",
-          "refId": "A"
-        }
-      ],
-      "title": "Request Rate",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-uid"
-      },
-      "description": "Latence médiane (P50)",
+      "description": "Largest Contentful Paint - Core Web Vital",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -109,11 +58,70 @@
               },
               {
                 "color": "yellow",
-                "value": 500
+                "value": 2500
               },
               {
                 "color": "red",
-                "value": 1000
+                "value": 4000
+              }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["mean"]
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_web_vitals_lcp\" | unwrap metric_value [5m])",
+          "refId": "A"
+        }
+      ],
+      "title": "LCP (P50)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-uid"
+      },
+      "description": "First Input Delay - Core Web Vital",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 300
               }
             ]
           },
@@ -132,24 +140,81 @@
         "graphMode": "area",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": ["mean"]
         }
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(w40k_http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_web_vitals_fid\" | unwrap metric_value [5m])",
           "refId": "A"
         }
       ],
-      "title": "Latency P50",
+      "title": "FID (P50)",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-uid"
+        "type": "loki",
+        "uid": "loki-uid"
       },
-      "description": "Latence 95e percentile",
+      "description": "Cumulative Layout Shift - Core Web Vital",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.25
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["mean"]
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_web_vitals_cls\" | unwrap metric_value [5m])",
+          "refId": "A"
+        }
+      ],
+      "title": "CLS (P50)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-uid"
+      },
+      "description": "Time to First Byte - Core Web Vital",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -166,72 +231,15 @@
               },
               {
                 "color": "yellow",
-                "value": 1000
+                "value": 800
               },
               {
                 "color": "red",
-                "value": 2000
+                "value": 1800
               }
             ]
           },
           "unit": "ms"
-        }
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 0
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"]
-        }
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "refId": "A"
-        }
-      ],
-      "title": "Latency P95",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-uid"
-      },
-      "description": "Taux d'erreur HTTP 5xx",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 2,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 5
-              }
-            ]
-          },
-          "unit": "percent"
         }
       },
       "gridPos": {
@@ -246,24 +254,24 @@
         "graphMode": "area",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": ["mean"]
         }
       },
       "targets": [
         {
-          "expr": "(sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))) * 100",
+          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_web_vitals_ttfb\" | unwrap metric_value [5m])",
           "refId": "A"
         }
       ],
-      "title": "Error Rate",
+      "title": "TTFB (P50)",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-uid"
+        "type": "loki",
+        "uid": "loki-uid"
       },
-      "description": "Latence par endpoint",
+      "description": "Erreurs frontend par type",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -309,7 +317,7 @@
               }
             ]
           },
-          "unit": "ms"
+          "unit": "short"
         }
       },
       "gridPos": {
@@ -333,195 +341,20 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route)) * 1000",
-          "legendFormat": "P95 - {{route}}",
+          "expr": "count_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_error\" [5m]) by (error_type)",
+          "legendFormat": "{{error_type}}",
           "refId": "A"
-        },
-        {
-          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route)) * 1000",
-          "legendFormat": "P50 - {{route}}",
-          "refId": "B"
         }
       ],
-      "title": "Request Latency by Endpoint",
+      "title": "Frontend Errors",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-uid"
+        "type": "loki",
+        "uid": "loki-uid"
       },
-      "description": "Taux de succès par endpoint",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "max": 100,
-          "min": 90,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "percent"
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 4
-      },
-      "id": 6,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "expr": "(sum(rate(http_requests_total{status!~\"5..\"}[5m])) by (route) / sum(rate(http_requests_total[5m])) by (route)) * 100",
-          "legendFormat": "{{route}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Success Rate by Endpoint",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-uid"
-      },
-      "description": "Performance du cache",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "percent"
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 12
-      },
-      "id": 7,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "expr": "(w40k_scoring_cache_hits_total / (w40k_scoring_cache_hits_total + w40k_scoring_cache_misses_total)) * 100",
-          "legendFormat": "Hit Rate - {{cache_name}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Cache Performance",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-uid"
-      },
-      "description": "Performance base de données",
+      "description": "Issues de performance côté client",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -574,9 +407,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 12
+        "y": 4
       },
-      "id": 8,
+      "id": 6,
       "options": {
         "legend": {
           "calcs": [],
@@ -591,54 +424,104 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(w40k_scoring_db_query_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "legendFormat": "P95 Query Time",
+          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"performance_issue\" | unwrap duration_ms [5m]) by (performance_issue)",
+          "legendFormat": "{{performance_issue}}",
           "refId": "A"
-        },
-        {
-          "expr": "histogram_quantile(0.50, sum(rate(w40k_scoring_db_query_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "legendFormat": "P50 Query Time",
-          "refId": "B"
         }
       ],
-      "title": "Database Performance",
+      "title": "Performance Issues",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-uid"
+      },
+      "description": "Parcours utilisateur - navigation entre pages",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"navigation\" | unwrap navigation_duration_ms [5m]) by (to_route)",
+          "legendFormat": "{{to_route}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Navigation Performance",
       "type": "timeseries"
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["w40k", "performance", "monitoring"],
+  "tags": ["w40k", "frontend", "rum", "ux"],
   "templating": {
-    "list": [
-      {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus-uid"
-        },
-        "definition": "label_values(http_requests_total, route)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Route",
-        "multi": true,
-        "name": "route",
-        "options": [],
-        "query": {
-          "query": "label_values(http_requests_total, route)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      }
-    ]
+    "list": []
   },
   "time": {
     "from": "now-1h",
@@ -646,8 +529,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "W40K Application Performance",
-  "uid": "w40k-app-performance",
+  "title": "W40K User Experience",
+  "uid": "w40k-user-experience",
   "version": 1,
   "weekStart": ""
 }

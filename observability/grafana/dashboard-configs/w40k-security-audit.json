@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "Performance applicative W40K Scoring - Latence, erreurs, throughput",
+  "description": "Security audit dashboard - W40K Scoring infrastructure monitoring",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -32,6 +32,18 @@
       "tooltip": "",
       "type": "link",
       "url": "/d/w40k-business-overview"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Performance Dashboard",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/w40k-application-performance"
     }
   ],
   "liveNow": false,
@@ -41,13 +53,13 @@
         "type": "prometheus",
         "uid": "prometheus-uid"
       },
-      "description": "Requests per second",
+      "description": "HTTP 4xx error rate over time",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 1,
+          "decimals": 2,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -55,10 +67,18 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
               }
             ]
           },
-          "unit": "reqps"
+          "unit": "percentunit"
         }
       },
       "gridPos": {
@@ -80,11 +100,11 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(w40k_http_requests_total[5m]))",
+          "expr": "sum(rate(w40k_http_requests_total{status_code=~\"4..\"}[5m])) / sum(rate(w40k_http_requests_total[5m]))",
           "refId": "A"
         }
       ],
-      "title": "Request Rate",
+      "title": "4xx Error Rate",
       "type": "stat"
     },
     {
@@ -92,13 +112,13 @@
         "type": "prometheus",
         "uid": "prometheus-uid"
       },
-      "description": "Latence médiane (P50)",
+      "description": "HTTP 5xx error rate over time",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 0,
+          "decimals": 2,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -109,15 +129,15 @@
               },
               {
                 "color": "yellow",
-                "value": 500
+                "value": 0.001
               },
               {
                 "color": "red",
-                "value": 1000
+                "value": 0.01
               }
             ]
           },
-          "unit": "ms"
+          "unit": "percentunit"
         }
       },
       "gridPos": {
@@ -137,11 +157,11 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(w40k_http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "expr": "sum(rate(w40k_http_requests_total{status_code=~\"5..\"}[5m])) / sum(rate(w40k_http_requests_total[5m]))",
           "refId": "A"
         }
       ],
-      "title": "Latency P50",
+      "title": "5xx Error Rate",
       "type": "stat"
     },
     {
@@ -149,13 +169,12 @@
         "type": "prometheus",
         "uid": "prometheus-uid"
       },
-      "description": "Latence 95e percentile",
+      "description": "Rate limiting violations per minute",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 0,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -166,15 +185,15 @@
               },
               {
                 "color": "yellow",
-                "value": 1000
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 2000
+                "value": 10
               }
             ]
           },
-          "unit": "ms"
+          "unit": "reqpm"
         }
       },
       "gridPos": {
@@ -194,11 +213,11 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "expr": "sum(rate(w40k_http_requests_total{status_code=\"429\"}[1m])) * 60",
           "refId": "A"
         }
       ],
-      "title": "Latency P95",
+      "title": "Rate Limiting Violations",
       "type": "stat"
     },
     {
@@ -206,13 +225,12 @@
         "type": "prometheus",
         "uid": "prometheus-uid"
       },
-      "description": "Taux d'erreur HTTP 5xx",
+      "description": "Active HTTP connections",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 2,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -223,15 +241,15 @@
               },
               {
                 "color": "yellow",
-                "value": 1
+                "value": 50
               },
               {
                 "color": "red",
-                "value": 5
+                "value": 100
               }
             ]
           },
-          "unit": "percent"
+          "unit": "short"
         }
       },
       "gridPos": {
@@ -251,11 +269,11 @@
       },
       "targets": [
         {
-          "expr": "(sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))) * 100",
+          "expr": "w40k_http_active_connections",
           "refId": "A"
         }
       ],
-      "title": "Error Rate",
+      "title": "Active Connections",
       "type": "stat"
     },
     {
@@ -263,7 +281,7 @@
         "type": "prometheus",
         "uid": "prometheus-uid"
       },
-      "description": "Latence par endpoint",
+      "description": "HTTP error rates by endpoint",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -284,7 +302,7 @@
               "vis": false
             },
             "lineInterpolation": "linear",
-            "lineWidth": 2,
+            "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -306,10 +324,14 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "ms"
+          "unit": "reqps"
         }
       },
       "gridPos": {
@@ -333,17 +355,17 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route)) * 1000",
-          "legendFormat": "P95 - {{route}}",
+          "expr": "sum(rate(w40k_http_requests_total{status_code=~\"4..\"}[5m])) by (route)",
+          "legendFormat": "4xx - {{route}}",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route)) * 1000",
-          "legendFormat": "P50 - {{route}}",
+          "expr": "sum(rate(w40k_http_requests_total{status_code=~\"5..\"}[5m])) by (route)",
+          "legendFormat": "5xx - {{route}}",
           "refId": "B"
         }
       ],
-      "title": "Request Latency by Endpoint",
+      "title": "Error Rates by Endpoint",
       "type": "timeseries"
     },
     {
@@ -351,7 +373,7 @@
         "type": "prometheus",
         "uid": "prometheus-uid"
       },
-      "description": "Taux de succès par endpoint",
+      "description": "Response time percentiles",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -372,7 +394,7 @@
               "vis": false
             },
             "lineInterpolation": "linear",
-            "lineWidth": 2,
+            "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -388,18 +410,20 @@
             }
           },
           "mappings": [],
-          "max": 100,
-          "min": 90,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "percent"
+          "unit": "ms"
         }
       },
       "gridPos": {
@@ -423,12 +447,22 @@
       },
       "targets": [
         {
-          "expr": "(sum(rate(http_requests_total{status!~\"5..\"}[5m])) by (route) / sum(rate(http_requests_total[5m])) by (route)) * 100",
-          "legendFormat": "{{route}}",
+          "expr": "histogram_quantile(0.50, sum(rate(w40k_http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "legendFormat": "P50",
           "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(w40k_http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "legendFormat": "P95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(w40k_http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+          "legendFormat": "P99",
+          "refId": "C"
         }
       ],
-      "title": "Success Rate by Endpoint",
+      "title": "Response Time Percentiles",
       "type": "timeseries"
     },
     {
@@ -436,7 +470,7 @@
         "type": "prometheus",
         "uid": "prometheus-uid"
       },
-      "description": "Performance du cache",
+      "description": "Container resource usage and security metrics",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -457,7 +491,7 @@
               "vis": false
             },
             "lineInterpolation": "linear",
-            "lineWidth": 2,
+            "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -473,14 +507,16 @@
             }
           },
           "mappings": [],
-          "max": 100,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -508,68 +544,25 @@
       },
       "targets": [
         {
-          "expr": "(w40k_scoring_cache_hits_total / (w40k_scoring_cache_hits_total + w40k_scoring_cache_misses_total)) * 100",
-          "legendFormat": "Hit Rate - {{cache_name}}",
+          "expr": "rate(container_cpu_usage_seconds_total{name=\"w40k-scoring-app\"}[5m]) * 100",
+          "legendFormat": "CPU Usage",
           "refId": "A"
+        },
+        {
+          "expr": "(container_memory_usage_bytes{name=\"w40k-scoring-app\"} / container_spec_memory_limit_bytes{name=\"w40k-scoring-app\"}) * 100",
+          "legendFormat": "Memory Usage",
+          "refId": "B"
         }
       ],
-      "title": "Cache Performance",
+      "title": "Container Resource Usage",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-uid"
+        "type": "loki",
+        "uid": "loki-uid"
       },
-      "description": "Performance base de données",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "ms"
-        }
-      },
+      "description": "Security-related log events",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -578,11 +571,62 @@
       },
       "id": 8,
       "options": {
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false,
+        "enableLogDetails": true,
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "expr": "{container=\"w40k-scoring-app\"} |= \"error\" or \"fail\" or \"unauthorized\" or \"forbidden\"",
+          "refId": "A"
+        }
+      ],
+      "title": "Security Events",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-uid"
+      },
+      "description": "System security metrics overview",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            }
+          },
+          "mappings": []
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 9,
+      "options": {
         "legend": {
-          "calcs": [],
           "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "placement": "right",
+          "showLegend": true,
+          "values": []
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
         },
         "tooltip": {
           "mode": "single",
@@ -591,52 +635,57 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(w40k_scoring_db_query_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "legendFormat": "P95 Query Time",
+          "expr": "sum(rate(w40k_http_requests_total[5m])) by (status_code)",
+          "legendFormat": "{{status_code}}",
           "refId": "A"
-        },
-        {
-          "expr": "histogram_quantile(0.50, sum(rate(w40k_scoring_db_query_duration_seconds_bucket[5m])) by (le)) * 1000",
-          "legendFormat": "P50 Query Time",
-          "refId": "B"
         }
       ],
-      "title": "Database Performance",
-      "type": "timeseries"
+      "title": "HTTP Status Code Distribution",
+      "type": "piechart"
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["w40k", "performance", "monitoring"],
+  "tags": ["w40k", "security", "monitoring"],
   "templating": {
     "list": [
       {
         "current": {
           "selected": false,
-          "text": "All",
-          "value": "$__all"
+          "text": "5m",
+          "value": "5m"
         },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus-uid"
-        },
-        "definition": "label_values(http_requests_total, route)",
         "hide": 0,
-        "includeAll": true,
-        "label": "Route",
-        "multi": true,
-        "name": "route",
-        "options": [],
-        "query": {
-          "query": "label_values(http_requests_total, route)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
+        "includeAll": false,
+        "multi": false,
+        "name": "interval",
+        "options": [
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": true,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "15m",
+            "value": "15m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          }
+        ],
+        "query": "1m,5m,15m,1h",
+        "queryValue": "",
         "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
+        "type": "custom"
       }
     ]
   },
@@ -646,8 +695,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "W40K Application Performance",
-  "uid": "w40k-app-performance",
+  "title": "W40K Security Audit",
+  "uid": "w40k-security-audit",
   "version": 1,
   "weekStart": ""
 }

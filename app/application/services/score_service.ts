@@ -29,6 +29,7 @@ import { InsufficientDeficitForChallengerError } from '#domain/errors/insufficie
 import { OpponentNotFoundForChallengerError } from '#domain/errors/opponent_not_found_for_challenger_error'
 import { UnauthorizedScoreAccessError } from '#domain/errors/unauthorized_score_access_error'
 import { RoundNotFoundError } from '#domain/errors/round_not_found_error'
+import { TelemetryService } from '#infrastructure/services/telemetry_service'
 
 /**
  * ScoreService - Application Service
@@ -48,13 +49,24 @@ export default class ScoreService {
     private gameRepository: GameRepository,
     private roundRepository: RoundRepository,
     private playerRepository: PlayerRepository,
-    private idGenerator: IdGenerator
+    private idGenerator: IdGenerator,
+    private telemetryService: TelemetryService = new TelemetryService()
   ) {}
 
   /**
    * Add a new score with comprehensive validation and business rules
    */
   async addScore(dto: AddScoreDto): Promise<ScoreResponseDto> {
+    return this.telemetryService.trackServiceOperation(
+      'ScoreService',
+      'addScore',
+      async () => this.executeAddScore(dto),
+      dto.requestingUserId,
+      dto.roundId
+    )
+  }
+
+  private async executeAddScore(dto: AddScoreDto): Promise<ScoreResponseDto> {
     // 1. Basic validation
     this.validateScoreType(dto.scoreType)
     this.validateScoreValue(dto.scoreValue)
@@ -97,7 +109,15 @@ export default class ScoreService {
 
     const savedScore = await this.scoreRepository.save(score)
 
-    // 6. Return response with authorization context
+    // 6. Track business metrics
+    this.telemetryService.trackScoreUpdated(
+      dto.scoreType,
+      'UNKNOWN', // gameType à récupérer depuis game si nécessaire
+      dto.requestingUserId,
+      dto.scoreValue
+    )
+
+    // 7. Return response with authorization context
     const canModify = await this.canUserModifyScores(game.id, dto.requestingUserId)
     return ScoreMapper.toDto(savedScore, game, canModify)
   }

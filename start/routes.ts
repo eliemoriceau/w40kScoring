@@ -13,6 +13,7 @@ import { middleware } from '#start/kernel'
 const PagesController = () => import('#controllers/pages_controller')
 const PartiesController = () => import('#controllers/parties_controller')
 const AuthController = () => import('#controllers/auth_controller')
+const TelemetryController = () => import('#controllers/telemetry_controller')
 
 // Admin Controllers
 const AdminDashboardsController = () => import('#controllers/admin/admin_dashboards_controller')
@@ -105,6 +106,16 @@ router.post('/register', [AuthController, 'register']).as('auth.register')
 router.get('/login', [AuthController, 'showLogin']).as('auth.show_login')
 router.post('/login', [AuthController, 'login']).as('auth.login')
 router.post('/logout', [AuthController, 'logout']).as('auth.logout')
+
+/*
+|--------------------------------------------------------------------------
+| Telemetry API Routes
+|--------------------------------------------------------------------------
+| Routes for frontend telemetry data collection
+*/
+router.group(() => {
+  router.post('/telemetry/events', [TelemetryController, 'receiveEvents'])
+}).prefix('/api')
 
 /*
 |--------------------------------------------------------------------------

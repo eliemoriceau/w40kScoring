@@ -16,9 +16,46 @@ const loggerConfig = defineConfig({
       level: env.get('LOG_LEVEL'),
       transport: {
         targets: targets()
-          .pushIf(!app.inProduction, targets.pretty())
-          .pushIf(app.inProduction, targets.file({ destination: 1 }))
+          .pushIf(!app.inProduction, {
+            target: 'pino-pretty',
+            level: env.get('LOG_LEVEL', 'info'),
+            options: {
+              colorize: true,
+              translateTime: 'HH:MM:ss',
+              ignore: 'pid,hostname',
+            },
+          })
+          .pushIf(app.inProduction, {
+            target: 'pino/file',
+            level: env.get('LOG_LEVEL', 'info'),
+            options: {
+              destination: 1, // stdout
+            },
+          })
           .toArray(),
+      },
+      // Configuration pour logs structurés avec corrélation OpenTelemetry
+      redact: {
+        paths: [
+          'password',
+          '*.password',
+          'token',
+          '*.token',
+          'secret',
+          '*.secret',
+          'authorization',
+          'cookie',
+          'req.headers.authorization',
+          'req.headers.cookie',
+        ],
+        censor: '[REDACTED]',
+      },
+      // Champs de base pour tous les logs
+      base: {
+        service: 'w40k-scoring',
+        version: env.get('APP_VERSION', '1.0.0'),
+        environment: env.get('NODE_ENV', 'development'),
+        pid: process.pid,
       },
     },
   },

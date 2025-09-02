@@ -11,7 +11,6 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
-        max_recv_msg_size: 4194304 # 4MB
       http:
         endpoint: 0.0.0.0:4318
         cors:
@@ -70,6 +69,7 @@ processors:
   memory_limiter:
     limit_mib: 256
     spike_limit_mib: 64
+    check_interval: 1s
 
   # Resource processor pour enrichir les données
   resource:
@@ -115,13 +115,6 @@ exporters:
       job: true
       instance: true
       level: true
-    labels:
-      attributes:
-        service.name: 'service_name'
-        service.version: 'service_version'
-        level: 'level'
-      resource:
-        service.name: 'service_name'
 
   # Tempo exporter pour les traces
   otlp/tempo:
@@ -194,4 +187,3 @@ service:
       address: 0.0.0.0:8888
       level: detailed
     traces:
-      processors: [batch]

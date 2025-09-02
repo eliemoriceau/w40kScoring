@@ -70,7 +70,7 @@
       "pluginVersion": "10.2.0",
       "targets": [
         {
-          "expr": "sum(w40k_scoring_games_created_total)",
+          "expr": "sum(w40k_games_created_total)",
           "refId": "A"
         }
       ],

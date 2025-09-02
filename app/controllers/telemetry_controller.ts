@@ -4,14 +4,14 @@ import { TelemetryService } from '#infrastructure/services/telemetry_service'
 
 /**
  * TelemetryController - Endpoint pour réception des événements frontend
- * 
+ *
  * 🎯 ARCHITECTURE HEXAGONALE - Interface Layer
  * Reçoit les événements de télémétrie du frontend Vue3/Inertia :
  * - Web Vitals (LCP, FID, CLS, TTFB)
  * - Business events (game actions, user interactions)
  * - Error events (JavaScript errors, Promise rejections)
  * - Performance events (slow resources, long tasks)
- * 
+ *
  * 📊 PROCESSING :
  * - Forward vers OpenTelemetry Collector
  * - Log structuré avec corrélation
@@ -28,7 +28,7 @@ export default class TelemetryController {
     try {
       const user = auth.user
       const data = request.only(['events', 'web_vitals', 'session_id'])
-      
+
       // Validation basique
       if (!data.events || !Array.isArray(data.events)) {
         return response.status(400).json({
@@ -39,7 +39,7 @@ export default class TelemetryController {
 
       // Limite de sécurité : max 100 événements par batch
       const events = data.events.slice(0, 100)
-      
+
       // Traitement des événements par type
       for (const event of events) {
         await this.processEvent(event, user?.id, data.session_id)
@@ -83,7 +83,7 @@ export default class TelemetryController {
   private async processEvent(event: any, userId?: number, sessionId?: string) {
     // Sanitize et valider l'événement
     const sanitizedEvent = this.sanitizeEvent(event)
-    
+
     // Enrichir avec contexte serveur
     const enrichedEvent = {
       ...sanitizedEvent,
@@ -114,7 +114,7 @@ export default class TelemetryController {
    */
   private async processWebVitals(webVitals: any, userId?: number, sessionId?: string) {
     const validMetrics = this.sanitizeWebVitals(webVitals)
-    
+
     // Track chaque métrique individuellement
     for (const [metric, value] of Object.entries(validMetrics)) {
       if (typeof value === 'number' && value > 0) {
@@ -142,19 +142,19 @@ export default class TelemetryController {
       case 'business':
         await this.processBusinessEvent(event, userId, sessionId)
         break
-        
+
       case 'error':
         await this.processErrorEvent(event, userId, sessionId)
         break
-        
+
       case 'performance':
         await this.processPerformanceEvent(event, userId, sessionId)
         break
-        
+
       case 'navigation':
         await this.processNavigationEvent(event, userId, sessionId)
         break
-        
+
       default:
         // Generic event processing
         break
@@ -166,19 +166,17 @@ export default class TelemetryController {
    */
   private async processBusinessEvent(event: any, userId?: number, sessionId?: string) {
     const eventName = event.name.replace('business_', '')
-    
+
     // Track métriques selon le type d'événement business
     if (eventName.startsWith('game_')) {
       const action = eventName.replace('game_', '')
       if (action === 'created' && event.attributes.game_type) {
-        this.telemetryService.trackGameCreated(
-          event.attributes.game_type,
-          userId || 0,
-          { source: 'frontend' }
-        )
+        this.telemetryService.trackGameCreated(event.attributes.game_type, userId || 0, {
+          source: 'frontend',
+        })
       }
     }
-    
+
     if (eventName === 'score_updated') {
       this.telemetryService.trackScoreUpdated(
         event.attributes.score_type || 'UNKNOWN',
@@ -260,21 +258,21 @@ export default class TelemetryController {
    */
   private sanitizeAttributes(attributes: any) {
     const sanitized: any = {}
-    
+
     for (const [key, value] of Object.entries(attributes)) {
       // Skip sensitive fields
       if (this.isSensitiveField(key)) continue
-      
+
       // Limit string lengths
       if (typeof value === 'string') {
         sanitized[key] = value.slice(0, 500)
-      } else if (typeof value === 'number' && !isNaN(value)) {
+      } else if (typeof value === 'number' && !Number.isNaN(value)) {
         sanitized[key] = value
       } else if (typeof value === 'boolean') {
         sanitized[key] = value
       }
     }
-    
+
     return sanitized
   }
 
@@ -284,13 +282,17 @@ export default class TelemetryController {
   private sanitizeWebVitals(webVitals: any) {
     const validMetrics: any = {}
     const allowedMetrics = ['lcp', 'fid', 'cls', 'ttfb']
-    
+
     for (const metric of allowedMetrics) {
-      if (typeof webVitals[metric] === 'number' && webVitals[metric] >= 0 && webVitals[metric] < 60000) {
+      if (
+        typeof webVitals[metric] === 'number' &&
+        webVitals[metric] >= 0 &&
+        webVitals[metric] < 60000
+      ) {
         validMetrics[metric] = webVitals[metric]
       }
     }
-    
+
     return validMetrics
   }
 
@@ -299,11 +301,20 @@ export default class TelemetryController {
    */
   private isSensitiveField(fieldName: string): boolean {
     const sensitiveFields = [
-      'password', 'token', 'secret', 'key', 'auth', 'cookie',
-      'email', 'phone', 'address', 'credit_card', 'ssn'
+      'password',
+      'token',
+      'secret',
+      'key',
+      'auth',
+      'cookie',
+      'email',
+      'phone',
+      'address',
+      'credit_card',
+      'ssn',
     ]
     const lowerField = fieldName.toLowerCase()
-    return sensitiveFields.some(sensitive => lowerField.includes(sensitive))
+    return sensitiveFields.some((sensitive) => lowerField.includes(sensitive))
   }
 
   /**
@@ -311,10 +322,14 @@ export default class TelemetryController {
    */
   private getLogLevelForEvent(eventType: string): 'debug' | 'info' | 'warn' | 'error' {
     switch (eventType) {
-      case 'error': return 'error'
-      case 'performance': return 'warn'
-      case 'business': return 'info'
-      default: return 'debug'
+      case 'error':
+        return 'error'
+      case 'performance':
+        return 'warn'
+      case 'business':
+        return 'info'
+      default:
+        return 'debug'
     }
   }
 
@@ -336,23 +351,23 @@ export default class TelemetryController {
    */
   private trackWebVitalThreshold(metric: string, value: number, userId?: number) {
     const thresholds = {
-      lcp: { good: 2500, poor: 4000 },  // ms
-      fid: { good: 100, poor: 300 },    // ms
-      cls: { good: 0.1, poor: 0.25 },   // ratio
-      ttfb: { good: 800, poor: 1800 },  // ms
+      lcp: { good: 2500, poor: 4000 }, // ms
+      fid: { good: 100, poor: 300 }, // ms
+      cls: { good: 0.1, poor: 0.25 }, // ratio
+      ttfb: { good: 800, poor: 1800 }, // ms
     }
-    
+
     const threshold = thresholds[metric as keyof typeof thresholds]
     if (!threshold) return
-    
-    const performance_level = value <= threshold.good ? 'good' : 
-                             value <= threshold.poor ? 'needs_improvement' : 'poor'
-    
+
+    const performanceLevel =
+      value <= threshold.good ? 'good' : value <= threshold.poor ? 'needs_improvement' : 'poor'
+
     // Log pour agrégation dans les dashboards
     logger.info(`📈 Performance threshold: ${metric}`, {
       metric_name: metric,
       metric_value: value,
-      performance_level,
+      performance_level: performanceLevel,
       user_id: userId || 'anonymous',
       action: 'performance_threshold',
       domain: 'performance_analytics',

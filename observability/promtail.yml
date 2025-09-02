@@ -1,0 +1,65 @@
+# Promtail Configuration
+# Collecte des logs Docker vers Loki
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Logs des containers Docker - W40K Application
+  - job_name: w40k-docker-logs
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      # Filtrer seulement les containers pertinents
+      - source_labels: ['__meta_docker_container_name']
+        regex: '.*(w40k|node|npm|adonis).*'
+        action: keep
+      # Labels pour identifier les containers
+      - source_labels: ['__meta_docker_container_name']
+        target_label: container_name
+      - source_labels: ['__meta_docker_container_id']
+        target_label: container_id
+      # Labels par défaut
+      - target_label: job
+        replacement: w40k-containers
+      - target_label: service
+        replacement: w40k-scoring
+      - target_label: environment
+        replacement: development
+    pipeline_stages:
+      # Parse des logs génériques
+      - regex:
+          expression: '^(?P<message>.*)$'
+      - output:
+          source: message
+
+  # Logs des containers d'observabilité
+  - job_name: observability-logs
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 10s
+    relabel_configs:
+      # Filtrer les containers d'observabilité
+      - source_labels: ['__meta_docker_container_name']
+        regex: '.*(prometheus|loki|grafana|tempo|otel|cadvisor).*'
+        action: keep
+      - source_labels: ['__meta_docker_container_name']
+        target_label: container_name
+      - target_label: job
+        replacement: observability
+      - target_label: environment
+        replacement: development
+    pipeline_stages:
+      - regex:
+          expression: '^level=(?P<level>\w+).*msg="(?P<message>.*?)"'
+      - labels:
+          level:
+      - output:
+          source: message

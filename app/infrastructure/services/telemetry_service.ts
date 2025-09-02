@@ -3,13 +3,13 @@ import logger from '@adonisjs/core/services/logger'
 
 /**
  * TelemetryService - Service centralisé pour instrumentation manuelle W40K
- * 
+ *
  * 🎯 ARCHITECTURE HEXAGONALE - Infrastructure Layer
  * Fournit les primitives d'instrumentation pour tous les services :
  * - Application Layer (GameService, ScoreService, etc.)
  * - Domain Layer (Operations métier complexes)
  * - Infrastructure Layer (Repository operations)
- * 
+ *
  * 📊 FEATURES :
  * - Custom spans avec attributs business W40K
  * - Métriques custom (compteurs, histogrammes, gauges)
@@ -19,29 +19,29 @@ import logger from '@adonisjs/core/services/logger'
 export class TelemetryService {
   private tracer = trace.getTracer('w40k-scoring-business')
   private meter = metrics.getMeter('w40k-scoring-metrics')
-  
+
   // Métriques business W40K
   private gameCreatedCounter = this.meter.createCounter('w40k_games_created_total', {
     description: 'Total number of games created by type',
   })
-  
+
   private gameCompletedCounter = this.meter.createCounter('w40k_games_completed_total', {
     description: 'Total number of games completed by type',
   })
-  
+
   private scoreUpdatedCounter = this.meter.createCounter('w40k_scores_updated_total', {
     description: 'Total number of score updates by type',
   })
-  
+
   private userActiveGauge = this.meter.createUpDownCounter('w40k_active_users', {
     description: 'Number of currently active users',
   })
-  
+
   private operationDuration = this.meter.createHistogram('w40k_operation_duration_seconds', {
     description: 'Duration of business operations',
     boundaries: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10], // En secondes
   })
-  
+
   private cacheHitRatio = this.meter.createHistogram('w40k_cache_hit_ratio', {
     description: 'Cache hit ratio by cache type',
     boundaries: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
@@ -56,7 +56,7 @@ export class TelemetryService {
     attributes: Record<string, string | number | boolean> = {}
   ): Promise<T> {
     const startTime = Date.now()
-    
+
     const span = this.tracer.startSpan(operation, {
       kind: SpanKind.INTERNAL,
       attributes: {
@@ -68,17 +68,17 @@ export class TelemetryService {
 
     try {
       const result = await fn()
-      
+
       const duration = (Date.now() - startTime) / 1000 // en secondes
-      
+
       span.setAttributes({
         'w40k.operation.success': true,
         'w40k.operation.duration_ms': Date.now() - startTime,
       })
-      
+
       // Enregistrer la métrique de durée
       this.operationDuration.record(duration, attributes)
-      
+
       // Log pour operations lentes (> 2s)
       if (duration > 2) {
         logger.warn('🐌 Slow business operation detected', {
@@ -87,18 +87,18 @@ export class TelemetryService {
           attributes,
         })
       }
-      
+
       return result
     } catch (error) {
       span.recordException(error)
       span.setStatus({ code: SpanStatusCode.ERROR, message: error.message })
-      
+
       span.setAttributes({
         'w40k.operation.success': false,
         'w40k.error.type': error.constructor.name,
         'w40k.error.message': error.message,
       })
-      
+
       logger.error('❌ Business operation failed', {
         operation,
         duration_ms: Date.now() - startTime,
@@ -106,7 +106,7 @@ export class TelemetryService {
         error_message: error.message,
         attributes,
       })
-      
+
       throw error
     } finally {
       span.end()
@@ -122,7 +122,7 @@ export class TelemetryService {
       user_id: userId.toString(),
       ...attributes,
     })
-    
+
     logger.info('🎮 Game created', {
       game_type: gameType,
       user_id: userId,
@@ -140,7 +140,7 @@ export class TelemetryService {
       user_id: userId.toString(),
       winner: winner || 'draw',
     })
-    
+
     logger.info('🏆 Game completed', {
       game_type: gameType,
       user_id: userId,
@@ -159,7 +159,7 @@ export class TelemetryService {
       game_type: gameType,
       user_id: userId.toString(),
     })
-    
+
     // Métriques spéciales pour scores très élevés ou inhabituels
     if (value > 30) {
       logger.info('📊 High score recorded', {
@@ -181,7 +181,7 @@ export class TelemetryService {
     } else {
       this.userActiveGauge.add(-1, { user_id: userId.toString() })
     }
-    
+
     logger.info('👤 User activity', {
       user_id: userId,
       action: `user_${action}`,
@@ -193,12 +193,12 @@ export class TelemetryService {
    */
   trackCachePerformance(cacheType: string, operation: 'hit' | 'miss', key?: string) {
     const hitRatio = operation === 'hit' ? 1.0 : 0.0
-    
+
     this.cacheHitRatio.record(hitRatio, {
       cache_type: cacheType,
       operation,
     })
-    
+
     // Log cache misses pour debug
     if (operation === 'miss') {
       logger.debug('💾 Cache miss', {
@@ -232,7 +232,7 @@ export class TelemetryService {
     attributes: Record<string, string | number | boolean> = {}
   ): Promise<T> {
     const span = this.createSpan(operation, attributes)
-    
+
     try {
       const result = await fn(span)
       span.setAttributes({ 'w40k.operation.success': true })
@@ -255,15 +255,11 @@ export class TelemetryService {
     fn: () => Promise<T>,
     entityId?: string | number
   ): Promise<T> {
-    return this.executeWithTelemetry(
-      `${repository}.${operation}`,
-      fn,
-      {
-        'w40k.repository': repository,
-        'w40k.operation.type': 'repository',
-        'w40k.entity.id': entityId?.toString() || 'unknown',
-      }
-    )
+    return this.executeWithTelemetry(`${repository}.${operation}`, fn, {
+      'w40k.repository': repository,
+      'w40k.operation.type': 'repository',
+      'w40k.entity.id': entityId?.toString() || 'unknown',
+    })
   }
 
   /**
@@ -276,15 +272,11 @@ export class TelemetryService {
     userId?: number,
     gameId?: string
   ): Promise<T> {
-    return this.executeWithTelemetry(
-      `${service}.${operation}`,
-      fn,
-      {
-        'w40k.service.name': service,
-        'w40k.operation.type': 'service',
-        'w40k.user.id': userId?.toString() || 'anonymous',
-        'w40k.game.id': gameId || 'unknown',
-      }
-    )
+    return this.executeWithTelemetry(`${service}.${operation}`, fn, {
+      'w40k.service.name': service,
+      'w40k.operation.type': 'service',
+      'w40k.user.id': userId?.toString() || 'anonymous',
+      'w40k.game.id': gameId || 'unknown',
+    })
   }
 }

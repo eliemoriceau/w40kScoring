@@ -23,8 +23,7 @@ createInertiaApp({
   },
 
   setup({ el, App, props, plugin }) {
-    const vueApp = createSSRApp({ render: () => h(App, props) })
-      .use(plugin)
+    const vueApp = createSSRApp({ render: () => h(App, props) }).use(plugin)
 
     // Configure Vue error handler pour telemetry
     vueApp.config.errorHandler = (error: Error, instance: any, info: string) => {
@@ -34,7 +33,7 @@ createInertiaApp({
         component_name: instance?.$options?.name || 'unknown',
         stack: error.stack || 'No stack trace',
       })
-      
+
       // Log aussi dans console en développement
       if (import.meta.env.DEV) {
         console.error('Vue error:', error, info)

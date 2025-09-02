@@ -15,58 +15,47 @@
       }
     ]
   },
-  "description": "Real User Monitoring W40K Scoring - Performance frontend et UX",
+  "description": "SLI/SLO Dashboard - W40K Scoring service level monitoring",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": null,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": false,
-      "tags": [],
-      "targetBlank": true,
-      "title": "Application Performance",
-      "tooltip": "",
-      "type": "link",
-      "url": "/d/w40k-app-performance"
-    }
-  ],
+  "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki-uid"
+        "type": "prometheus",
+        "uid": "prometheus-uid"
       },
-      "description": "Largest Contentful Paint - Core Web Vital",
+      "description": "Service availability SLI vs SLO target (99.9%)",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 0,
+          "decimals": 3,
           "mappings": [],
+          "max": 1,
+          "min": 0.995,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
               },
               {
                 "color": "yellow",
-                "value": 2500
+                "value": 0.999
               },
               {
-                "color": "red",
-                "value": 4000
+                "color": "green",
+                "value": 0.9999
               }
             ]
           },
-          "unit": "ms"
+          "unit": "percentunit"
         }
       },
       "gridPos": {
@@ -82,25 +71,25 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["mean"]
+          "calcs": ["lastNotNull"]
         },
         "textMode": "auto"
       },
       "targets": [
         {
-          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_web_vitals_lcp\" | unwrap metric_value [5m])",
+          "expr": "w40k_sli_availability",
           "refId": "A"
         }
       ],
-      "title": "LCP (P50)",
+      "title": "Availability SLI (Target: 99.9%)",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki-uid"
+        "type": "prometheus",
+        "uid": "prometheus-uid"
       },
-      "description": "First Input Delay - Core Web Vital",
+      "description": "95th percentile latency vs SLO target (500ms)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -108,6 +97,8 @@
           },
           "decimals": 0,
           "mappings": [],
+          "max": 1000,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -117,11 +108,11 @@
               },
               {
                 "color": "yellow",
-                "value": 100
+                "value": 400
               },
               {
                 "color": "red",
-                "value": 300
+                "value": 500
               }
             ]
           },
@@ -140,31 +131,33 @@
         "graphMode": "area",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["mean"]
+          "calcs": ["lastNotNull"]
         }
       },
       "targets": [
         {
-          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_web_vitals_fid\" | unwrap metric_value [5m])",
+          "expr": "w40k_sli_latency_p95_seconds * 1000",
           "refId": "A"
         }
       ],
-      "title": "FID (P50)",
+      "title": "Latency P95 SLI (Target: <500ms)",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki-uid"
+        "type": "prometheus",
+        "uid": "prometheus-uid"
       },
-      "description": "Cumulative Layout Shift - Core Web Vital",
+      "description": "Error rate vs SLO target (0.1%)",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 3,
+          "decimals": 4,
           "mappings": [],
+          "max": 0.01,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -174,15 +167,15 @@
               },
               {
                 "color": "yellow",
-                "value": 0.1
+                "value": 0.0005
               },
               {
                 "color": "red",
-                "value": 0.25
+                "value": 0.001
               }
             ]
           },
-          "unit": "short"
+          "unit": "percentunit"
         }
       },
       "gridPos": {
@@ -197,31 +190,33 @@
         "graphMode": "area",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["mean"]
+          "calcs": ["lastNotNull"]
         }
       },
       "targets": [
         {
-          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_web_vitals_cls\" | unwrap metric_value [5m])",
+          "expr": "w40k_sli_error_rate",
           "refId": "A"
         }
       ],
-      "title": "CLS (P50)",
+      "title": "Error Rate SLI (Target: <0.1%)",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki-uid"
+        "type": "prometheus",
+        "uid": "prometheus-uid"
       },
-      "description": "Time to First Byte - Core Web Vital",
+      "description": "Game creation latency vs SLO target (1s)",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 0,
+          "decimals": 2,
           "mappings": [],
+          "max": 2,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -231,15 +226,15 @@
               },
               {
                 "color": "yellow",
-                "value": 800
+                "value": 0.8
               },
               {
                 "color": "red",
-                "value": 1800
+                "value": 1
               }
             ]
           },
-          "unit": "ms"
+          "unit": "s"
         }
       },
       "gridPos": {
@@ -254,24 +249,24 @@
         "graphMode": "area",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["mean"]
+          "calcs": ["lastNotNull"]
         }
       },
       "targets": [
         {
-          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_web_vitals_ttfb\" | unwrap metric_value [5m])",
+          "expr": "w40k_sli_game_creation_latency_seconds",
           "refId": "A"
         }
       ],
-      "title": "TTFB (P50)",
+      "title": "Game Creation SLI (Target: <1s)",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki-uid"
+        "type": "prometheus",
+        "uid": "prometheus-uid"
       },
-      "description": "Erreurs frontend par type",
+      "description": "Error Budget remaining for all SLOs (1.0 = full budget, 0.0 = budget exhausted)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -304,20 +299,26 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "line+area"
             }
           },
           "mappings": [],
+          "max": 1,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "transparent",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.1
               }
             ]
           },
-          "unit": "short"
+          "unit": "percentunit"
         }
       },
       "gridPos": {
@@ -341,20 +342,30 @@
       },
       "targets": [
         {
-          "expr": "count_over_time({service_name=\"w40k-scoring\"} | json | action=\"frontend_error\" [5m]) by (error_type)",
-          "legendFormat": "{{error_type}}",
+          "expr": "w40k_error_budget_availability",
+          "legendFormat": "Availability Error Budget",
           "refId": "A"
+        },
+        {
+          "expr": "w40k_error_budget_latency",
+          "legendFormat": "Latency Error Budget",
+          "refId": "B"
+        },
+        {
+          "expr": "w40k_error_budget_error_rate",
+          "legendFormat": "Error Rate Error Budget",
+          "refId": "C"
         }
       ],
-      "title": "Frontend Errors",
+      "title": "Error Budget Remaining",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki-uid"
+        "type": "prometheus",
+        "uid": "prometheus-uid"
       },
-      "description": "Issues de performance côté client",
+      "description": "SLO compliance status (1 = compliant, 0 = breach)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -366,8 +377,8 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -375,7 +386,7 @@
               "vis": false
             },
             "lineInterpolation": "linear",
-            "lineWidth": 2,
+            "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -390,17 +401,37 @@
               "mode": "off"
             }
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "BREACH"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "OK"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "max": 1,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "ms"
+          "unit": "short"
         }
       },
       "gridPos": {
@@ -424,68 +455,20 @@
       },
       "targets": [
         {
-          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"performance_issue\" | unwrap duration_ms [5m]) by (performance_issue)",
-          "legendFormat": "{{performance_issue}}",
+          "expr": "w40k_slo_compliance",
+          "legendFormat": "{{slo_type}} SLO",
           "refId": "A"
         }
       ],
-      "title": "Performance Issues",
+      "title": "SLO Compliance Status",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "loki-uid"
+        "type": "prometheus",
+        "uid": "prometheus-uid"
       },
-      "description": "Parcours utilisateur - navigation entre pages",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "ms"
-        }
-      },
+      "description": "SLO targets and current performance overview",
       "gridPos": {
         "h": 8,
         "w": 24,
@@ -494,32 +477,18 @@
       },
       "id": 7,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "content": "## W40K Scoring - Service Level Objectives (SLO)\n\n### 🎯 **Availability SLO**\n- **Target**: 99.9% uptime (8.7 hours downtime per year allowed)\n- **Current**: ${__field.labels.w40k_sli_availability} \n- **Error Budget**: ${__field.labels.w40k_error_budget_availability}\n\n### ⚡ **Latency SLO**\n- **Target**: 95% of requests under 500ms\n- **Current P95**: ${__field.labels.w40k_sli_latency_p95_seconds}ms\n- **Error Budget**: ${__field.labels.w40k_error_budget_latency}\n\n### ❌ **Error Rate SLO**\n- **Target**: Less than 0.1% error rate\n- **Current**: ${__field.labels.w40k_sli_error_rate}%\n- **Error Budget**: ${__field.labels.w40k_error_budget_error_rate}\n\n### 🎮 **Game Creation SLO**\n- **Target**: 99% of game creations under 1 second\n- **Current**: ${__field.labels.w40k_sli_game_creation_latency_seconds}s\n\n### 🔒 **Security SLO**\n- **Target**: Zero successful attacks per month\n- **Current**: Monitoring active\n\n---\n\n**Error Budget Burn Rate Alerting:**\n- 🔥 **Fast Burn**: 2% budget consumed in 1 hour → Critical alert\n- 🔥 **Slow Burn**: 10% budget consumed in 6 hours → Warning alert\n",
+        "mode": "markdown"
       },
-      "targets": [
-        {
-          "expr": "avg_over_time({service_name=\"w40k-scoring\"} | json | action=\"navigation\" | unwrap navigation_duration_ms [5m]) by (to_route)",
-          "legendFormat": "{{to_route}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Navigation Performance",
-      "type": "timeseries"
+      "pluginVersion": "10.2.0",
+      "title": "SLO Overview",
+      "type": "text"
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["w40k", "frontend", "rum", "ux"],
+  "tags": ["w40k", "slo", "sli", "objectives"],
   "templating": {
     "list": []
   },
@@ -529,8 +498,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "W40K User Experience",
-  "uid": "w40k-user-experience",
+  "title": "W40K SLO Dashboard",
+  "uid": "w40k-slo-dashboard",
   "version": 1,
   "weekStart": ""
 }

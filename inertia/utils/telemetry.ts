@@ -1,13 +1,13 @@
 /**
  * Frontend Telemetry Utils for W40K Scoring
- * 
+ *
  * 🎯 REAL USER MONITORING (RUM) - Vue 3 + Inertia.js
  * Collecte les métriques de performance frontend et événements business :
  * - Core Web Vitals (LCP, FID, CLS, TTFB)
  * - User interactions et navigation
  * - Business events (game actions, score updates)
  * - Error tracking avec contexte utilisateur
- * 
+ *
  * 📊 EXPORT vers OTEL Collector :
  * - Custom metrics via API endpoint
  * - Performance observations
@@ -24,9 +24,9 @@ interface TelemetryEvent {
 }
 
 interface WebVitals {
-  lcp?: number  // Largest Contentful Paint
-  fid?: number  // First Input Delay
-  cls?: number  // Cumulative Layout Shift
+  lcp?: number // Largest Contentful Paint
+  fid?: number // First Input Delay
+  cls?: number // Cumulative Layout Shift
   ttfb?: number // Time to First Byte
 }
 
@@ -41,10 +41,10 @@ class W40KTelemetry {
     this.initializeWebVitals()
     this.setupPerformanceObserver()
     this.setupErrorTracking()
-    
+
     // Batch send events every 30 seconds
     setInterval(() => this.flushEvents(), 30000)
-    
+
     // Send events before page unload
     window.addEventListener('beforeunload', () => this.flushEvents())
   }
@@ -108,7 +108,7 @@ class W40KTelemetry {
     new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         const resource = entry as PerformanceResourceTiming
-        
+
         // Track slow resources (>1s)
         if (resource.duration > 1000) {
           this.trackEvent('slow_resource', 'performance', {

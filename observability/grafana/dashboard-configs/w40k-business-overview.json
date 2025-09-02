@@ -70,7 +70,7 @@
       "pluginVersion": "10.2.0",
       "targets": [
         {
-          "expr": "sum(w40k_games_created_total)",
+          "expr": "w40k_games_created_total",
           "refId": "A"
         }
       ],
@@ -122,7 +122,7 @@
       },
       "targets": [
         {
-          "expr": "count(count by (user_id) (increase(w40k_scoring_user_sessions_total[24h])))",
+          "expr": "w40k_scoring_active_users_24h",
           "refId": "A"
         }
       ],
@@ -171,7 +171,7 @@
       },
       "targets": [
         {
-          "expr": "avg(w40k_scoring_average_score)",
+          "expr": "w40k_scoring_average_score",
           "refId": "A"
         }
       ],
@@ -228,7 +228,7 @@
       },
       "targets": [
         {
-          "expr": "(sum(w40k_scoring_games_completed_total) / sum(w40k_scoring_games_created_total)) * 100",
+          "expr": "w40k_scoring_completion_rate_percent",
           "refId": "A"
         }
       ],
@@ -310,13 +310,13 @@
       },
       "targets": [
         {
-          "expr": "increase(w40k_scoring_games_created_total[1h])",
-          "legendFormat": "Games Created",
+          "expr": "rate(w40k_games_created_total[1h]) * 3600",
+          "legendFormat": "Games Created (hourly rate)",
           "refId": "A"
         },
         {
-          "expr": "increase(w40k_scoring_games_completed_total[1h])",
-          "legendFormat": "Games Completed",
+          "expr": "rate(w40k_scoring_games_completed_total[1h]) * 3600",
+          "legendFormat": "Games Completed (hourly rate)",
           "refId": "B"
         }
       ],
@@ -371,7 +371,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (game_type) (w40k_scoring_games_created_total)",
+          "expr": "w40k_scoring_games_by_type_total",
           "legendFormat": "{{game_type}}",
           "refId": "A"
         }

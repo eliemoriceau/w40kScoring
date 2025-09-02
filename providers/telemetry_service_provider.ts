@@ -3,7 +3,7 @@ import { TelemetryService } from '#infrastructure/services/telemetry_service'
 
 /**
  * TelemetryServiceProvider - Enregistre TelemetryService dans le conteneur IoC
- * 
+ *
  * Permet l'injection de TelemetryService dans tous les services applicatifs
  * pour une instrumentation cohérente à travers toute l'application.
  */

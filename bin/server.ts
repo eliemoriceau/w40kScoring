@@ -10,6 +10,10 @@
 */
 
 import 'reflect-metadata'
+
+// Initialize OpenTelemetry before any other imports
+import '#config/telemetry'
+
 import { Ignitor, prettyPrintError } from '@adonisjs/core'
 
 /**

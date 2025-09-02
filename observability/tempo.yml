@@ -47,20 +47,13 @@ query_frontend:
   trace_by_id:
     duration_slo: 5s
 
-# Overrides
+# Overrides - Configuration simplifiée compatible Tempo 2.3
 overrides:
-  defaults:
-    # Global limits
-    global:
-      max_traces_per_user: 10000
-      max_bytes_per_trace: 5000000
-    # Ingestion limits
-    ingestion:
-      max_trace_size_bytes: 5000000
-      max_spans_per_trace: 1000
-    # Query limits
-    read:
-      max_search_duration: 24h
+  max_traces_per_user: 10000
+  max_bytes_per_trace: 5000000
+  ingestion_rate_strategy: global
+  ingestion_burst_size_bytes: 20000000
+  max_search_duration: 24h
 
 # Metrics generator (for RED metrics)
 metrics_generator:

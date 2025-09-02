@@ -4,28 +4,28 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http'
 import { Resource } from '@opentelemetry/resources'
-import { 
-  SEMRESATTRS_SERVICE_NAME, 
-  SEMRESATTRS_SERVICE_VERSION 
+import {
+  SEMRESATTRS_SERVICE_NAME,
+  SEMRESATTRS_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions'
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
 import env from '#start/env'
 
 /**
  * TelemetryProvider - Configuration centralisée OpenTelemetry pour W40K Scoring
- * 
+ *
  * 🎯 ARCHITECTURE HEXAGONALE - Infrastructure Layer
  * Configure l'instrumentation automatique et manuelle pour toutes les couches :
  * - Interface Layer (Controllers HTTP)
- * - Application Layer (Services métier)  
+ * - Application Layer (Services métier)
  * - Infrastructure Layer (Repositories, Database)
- * 
+ *
  * 🔧 AUTO-INSTRUMENTATION INCLUSE :
  * - HTTP requests (incoming/outgoing)
  * - PostgreSQL queries via pg driver
  * - Pino logger integration
  * - DNS, FS operations
- * 
+ *
  * 📊 EXPORTERS OTLP :
  * - Traces → Tempo via OTEL Collector
  * - Metrics → Prometheus via OTEL Collector
@@ -112,7 +112,7 @@ export default class TelemetryProvider {
 
     // 4. Auto-instrumentations pour W40K Scoring
     const instrumentations = getNodeAutoInstrumentations({
-      // HTTP - pour les requêtes entrantes/sortantes  
+      // HTTP - pour les requêtes entrantes/sortantes
       '@opentelemetry/instrumentation-http': {
         requestHook: (span, request) => {
           // Enrichir les spans HTTP avec contexte métier W40K
@@ -190,10 +190,10 @@ export default class TelemetryProvider {
   private async initializeTelemetry() {
     try {
       this.sdk?.start()
-      
+
       // Test de connectivité avec le collector
       await this.testCollectorConnectivity()
-      
+
       console.log('🔍 W40K Scoring telemetry initialized', {
         service: 'w40k-scoring',
         environment: env.get('NODE_ENV'),
@@ -222,7 +222,7 @@ export default class TelemetryProvider {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resourceSpans: [] }),
       })
-      
+
       if (response.ok || response.status === 400) {
         // 200 OK ou 400 (données vides) = collector accessible
         console.log('🔍 OTEL Collector connectivity: OK', {
@@ -240,5 +240,4 @@ export default class TelemetryProvider {
       // Warn seulement, pas de throw pour éviter de bloquer l'app
     }
   }
-
 }

@@ -138,6 +138,45 @@ docker-compose -f docker-compose.observability.yml logs -f
 docker-compose -f docker-compose.observability.yml logs grafana
 ```
 
-## 🔗 Documentation Complète
+## 📚 Documentation Complète
 
-Voir [OBSERVABILITY_SETUP.md](../OBSERVABILITY_SETUP.md) pour la documentation complète.
+### Guides Disponibles
+
+- **[ARCHITECTURE-GUIDE.md](./ARCHITECTURE-GUIDE.md)** - Architecture détaillée Phase 4C
+  - 🏗️ Vue d'ensemble infrastructure enterprise-grade
+  - 📊 SLO/SLI et error budget management
+  - 🔄 OpenTelemetry push-based strategy
+  - 🎨 4 dashboards avancés (Business, Performance, Security, SLO)
+
+- **[OPERATIONS-GUIDE.md](./OPERATIONS-GUIDE.md)** - Guide opérationnel quotidien
+  - 🚀 Daily health checks et maintenance
+  - 📊 Monitoring playbooks et procedures
+  - 🛡️ Security incident response
+  - 🔧 Performance optimization
+
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Résolution problèmes critiques
+  - ❌ Loki crash loop solution (allow_structured_metadata: false)
+  - 🌐 DNS resolution fixes et networking
+  - 📝 Log collection hybrid strategy
+  - 🔧 18 erreurs ESLint résolues
+
+### Architecture Technique
+
+**Phase 4C Implémentée** ✅
+- **400+ métriques** business et techniques exposées
+- **Hybrid collection**: Pull (Promtail) + Push (OTLP SDK)
+- **Enterprise dashboards**: KPIs, Performance, Security, SLO
+- **SLO compliance**: 99.9% uptime, P95<500ms, <0.1% errors
+
+### Quick Reference
+
+```bash
+# Démarrage stack complète
+docker-compose -f docker-compose.observability.yml up -d
+
+# Health check quotidien
+bash observability/scripts/daily-health-check.sh
+
+# Troubleshooting automatisé
+bash observability/scripts/diagnose-issues.sh
+```

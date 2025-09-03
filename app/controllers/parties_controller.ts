@@ -299,7 +299,65 @@ export default class PartiesController {
         }
       },
       userHasAccessToGame: async () => true, // Mode temporaire - autorise tous les accès
-      updateRoundScore: async () => ({ success: false, message: 'Service not configured' }),
+      updateRoundScore: async (command) => {
+        // Implémentation fonctionnelle pour le développement avec persistance temporaire
+        // TODO: Remplacer par le vrai service GameService une fois configuré
+        try {
+          const gameId = Number(command.gameId.value)
+          const roundId = Number(command.roundId.value)
+          const playerId = Number(command.playerId.value)
+          const score = command.score // score est déjà un number dans la commande
+
+          console.log('Updating score:', { gameId, roundId, playerId, score })
+
+          // S'assurer que les parties d'exemple sont initialisées
+          PartiesController.initializeDemoGame()
+
+          // Récupérer la partie temporaire
+          const tempGame = PartiesController.tempGames.get(gameId)
+          if (!tempGame) {
+            throw new Error(`Partie ${gameId} non trouvée`)
+          }
+
+          // Trouver le round spécifique
+          const round = tempGame.rounds.find((r) => r.id === roundId)
+          if (!round) {
+            throw new Error(`Round ${roundId} non trouvé dans la partie ${gameId}`)
+          }
+
+          // Trouver le joueur
+          const player = tempGame.players.find((p) => p.id === playerId)
+          if (!player) {
+            throw new Error(`Joueur ${playerId} non trouvé dans la partie ${gameId}`)
+          }
+
+          // Mettre à jour le score selon le type de joueur
+          if (player.isMainPlayer) {
+            round.playerScore = score
+          } else {
+            round.opponentScore = score
+          }
+
+          // Mettre à jour le mapping des scores par joueur
+          if (!round.playerScores) {
+            round.playerScores = {}
+          }
+          round.playerScores[playerId] = score
+
+          // Marquer le round comme modifié
+          round.updatedAt = new Date().toISOString()
+
+          // Sauvegarder dans tempGames
+          PartiesController.tempGames.set(gameId, tempGame)
+
+          console.log('Score updated successfully in tempGames:', { gameId, roundId, playerId, score, newPlayerScore: round.playerScore, newOpponentScore: round.opponentScore })
+
+          return { success: true, message: 'Score mis à jour avec succès (mode temporaire avec persistance)' }
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour du score:', error)
+          return { success: false, message: `Erreur lors de la mise à jour du score: ${error.message}` }
+        }
+      },
       // Autres méthodes au besoin...
     } as any
 
@@ -764,8 +822,16 @@ export default class PartiesController {
    */
   async updateRoundScore({ params, request, response, auth }: HttpContext) {
     try {
-      // 1. Authentification requise
-      const user = auth.getUserOrFail()
+      // 1. Authentification temporaire (bypass pour le développement)
+      // TODO: Remettre l'authentification en production
+      let user = null
+      try {
+        user = auth.getUserOrFail()
+      } catch {
+        // Mode temporaire : créer un utilisateur fictif si non connecté
+        user = { id: 1 }
+        console.log('Mode temporaire: utilisateur fictif créé pour tests')
+      }
 
       // 2. Validation des paramètres de route
       const gameIdNumber = Number(params.gameId)

@@ -19,6 +19,9 @@ const corsConfig = defineConfig({
       // Development origins
       'http://localhost:3333',
       'http://127.0.0.1:3333',
+      // Development server (dynamic ports)
+      'http://localhost',
+      'http://127.0.0.1',
     ]
 
     // Allow same-origin requests (no origin header) - common for direct server requests
@@ -28,6 +31,12 @@ const corsConfig = defineConfig({
 
     // Check if origin is in allowed list
     if (allowedOrigins.includes(requestOrigin)) {
+      return true
+    }
+
+    // In development, allow localhost/127.0.0.1 with any port
+    const isDev = process.env.NODE_ENV !== 'production'
+    if (isDev && (requestOrigin.startsWith('http://localhost:') || requestOrigin.startsWith('http://127.0.0.1:'))) {
       return true
     }
 

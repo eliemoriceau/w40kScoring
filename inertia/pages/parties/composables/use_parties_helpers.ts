@@ -158,6 +158,15 @@ export function usePartiesHelpers() {
   }
 
   /**
+   * Formate les points de manière cohérente (évite les problèmes d'hydration)
+   * Utilise toujours le format français pour éviter les différences serveur/client
+   */
+  const formatPoints = (points: number): string => {
+    // Format cohérent : espace comme séparateur de milliers (format français)
+    return points.toLocaleString('fr-FR')
+  }
+
+  /**
    * Calcule les statistiques de score
    */
   const getScoreStats = (partie: PartieResponseDto) => {
@@ -185,6 +194,7 @@ export function usePartiesHelpers() {
     formatPlayersText,
     formatDate,
     formatRelativeDate,
+    formatPoints,
     getGameTypeIcon,
     getScoreStats,
     calculateDuration,

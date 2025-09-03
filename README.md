@@ -196,6 +196,57 @@ Le projet suit les conventions AdonisJS 6 avec :
 - Hot Module Replacement pour le développement
 - Support SSR pour les performances
 
+## 📚 Documentation Complète
+
+### 🎯 Guides Principaux
+- **[API Documentation](./API_DOCUMENTATION.md)** - Endpoints, authentification, exemples d'utilisation
+- **[Security Guide](./SECURITY_GUIDE.md)** - Sécurité, authentification, RBAC, rate limiting
+- **[Docker & Déploiement](./DOCKER.md)** - Conteneurisation, Kubernetes, CI/CD
+- **[Architecture Guide](./CLAUDE.md)** - Patterns hexagonaux, trunk-based dev
+
+### 🏗️ Documentation Technique
+- **[Seeder Guide](./SEEDER_README.md)** - Données de test et développement
+- **[Observability Stack](./observability/README.md)** - Monitoring, métriques, alerting Phase 4C
+
+### 📖 Documentation Spécialisée
+- **[Features Documentation](./docs/)** - Spécifications techniques détaillées
+- **[Domain Documentation](./docs/domains/)** - Architecture DDD et domaines métier
+
+### 🔧 Guides de Configuration
+- **Tailwind Integration** - [TAILWIND_INTEGRATION.md](./TAILWIND_INTEGRATION.md)
+- **Observability Setup** - [OBSERVABILITY_SETUP.md](./OBSERVABILITY_SETUP.md)
+- **Implementation Summaries** - Phase 2 & 3 résumés disponibles
+
+## 🔒 Sécurité
+
+Le projet implémente des standards de sécurité enterprise :
+
+- **Authentification sécurisée** avec protection brute force
+- **Role-based Access Control (RBAC)** avec 5 niveaux
+- **Rate limiting** multi-niveaux avec backoff exponentiel
+- **Protection CSRF** automatique
+- **Validation et sanitisation** VineJS
+- **Logging sécuritaire** avec monitoring proactif
+
+Voir [SECURITY_GUIDE.md](./SECURITY_GUIDE.md) pour les détails complets.
+
+## 📊 Observabilité
+
+**Phase 4C** - Stack enterprise complète :
+
+- **Grafana + Prometheus + Loki + Tempo** avec OpenTelemetry
+- **400+ métriques** business et techniques
+- **SLO/SLI** : 99.9% uptime, P95<500ms, <0.1% errors  
+- **Dashboards enterprise** : Business KPIs, Performance, Security, SLO
+- **Monitoring proactif** avec alerting et incident response
+
+```bash
+# Démarrer la stack d'observabilité
+docker-compose -f docker-compose.observability.yml up -d
+```
+
+Voir [observability/](./observability/) pour la documentation complète.
+
 ## 🤝 Contribution
 
 1. Fork le projet
@@ -203,6 +254,13 @@ Le projet suit les conventions AdonisJS 6 avec :
 3. Commit les changements (`git commit -m 'Add amazing feature'`)
 4. Push vers la branche (`git push origin feature/amazing-feature`)
 5. Ouvrir une Pull Request
+
+### Standards de Qualité
+- **Architecture hexagonale** respectée
+- **Tests unitaires et d'intégration** requis
+- **Conventional Commits** avec `npm run commit`
+- **Security-first** - Voir guide sécurité
+- **Documentation** à jour pour nouvelles features
 
 ## 📄 Licence
 

@@ -36,39 +36,32 @@
         :min="minScore"
         :max="maxScore"
         type="number"
-        class="w-16 px-2 py-1 text-center font-bold bg-w40k-bg-secondary border-2 border-w40k-red-500 rounded text-w40k-text-primary focus:outline-none focus:ring-2 focus:ring-w40k-red-400 focus:border-w40k-red-300 transition-all duration-200"
-        @blur="saveScore"
-        @keyup.enter="saveScore"
+        class="w-20 px-2 py-1 text-center font-bold bg-w40k-bg-secondary border-2 border-w40k-red-500 rounded text-w40k-text-primary focus:outline-none focus:ring-2 focus:ring-w40k-red-400 focus:border-w40k-red-300 transition-all duration-200"
+        @blur="handleBlur"
+        @keyup.enter="handleEnter"
         @keyup.escape="cancelEdit"
         @keyup.arrow-up="incrementScore"
         @keyup.arrow-down="decrementScore"
-        @input="validateInput"
+        @input="handleInput"
+        placeholder="0"
       />
 
-      <!-- Boutons d'action avec effets Magic UI -->
-      <div class="flex gap-1">
-        <button
-          @click="saveScore"
-          :class="[
-            'w-7 h-7 flex items-center justify-center rounded transition-all duration-200 font-bold text-xs',
-            'bg-green-600 hover:bg-green-500 text-white shadow-lg hover:shadow-xl hover:scale-110',
-            'border border-green-500 hover:border-green-400',
-          ]"
-          title="Sauvegarder"
+      <!-- Indicateur de validation automatique -->
+      <div class="flex items-center gap-1 ml-1">
+        <div
+          v-if="!isSaving && !hasError"
+          class="text-xs text-green-400 opacity-70"
+          title="Auto-save activé"
         >
-          ✓
-        </button>
-        <button
-          @click="cancelEdit"
-          :class="[
-            'w-7 h-7 flex items-center justify-center rounded transition-all duration-200 font-bold text-xs',
-            'bg-w40k-red-600 hover:bg-w40k-red-500 text-white shadow-lg hover:shadow-xl hover:scale-110',
-            'border border-w40k-red-500 hover:border-w40k-red-400',
-          ]"
-          title="Annuler"
+          💾
+        </div>
+        <div
+          v-if="hasError"
+          class="text-xs text-red-400 animate-pulse"
+          title="Valeur invalide"
         >
-          ✕
-        </button>
+          ⚠️
+        </div>
       </div>
     </div>
 
@@ -112,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick, watch } from 'vue'
+import { computed, ref, nextTick, watch, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import type { ScoreCellProps, ScoreUpdateEvent } from '../types'
 
@@ -139,6 +132,10 @@ const editValue = ref(0)
 const isSaving = ref(false)
 const hasError = ref(false)
 const scoreInput = ref<HTMLInputElement>()
+
+// Auto-save avec délai (debounce)
+const autoSaveTimeout = ref<NodeJS.Timeout | null>(null)
+const AUTO_SAVE_DELAY = 800 // ms
 
 // Computed properties
 const maxScore = computed(() => SCORE_LIMITS[props.scoreType].max)
@@ -238,6 +235,7 @@ const startEditing = async () => {
 }
 
 const saveScore = async () => {
+  console.log('Saving score:', editValue.value)
   if (!isEditing.value || isSaving.value) return
 
   const newScore = editValue.value
@@ -256,7 +254,8 @@ const saveScore = async () => {
   hasError.value = false
 
   try {
-    await router.put(
+    console.log('Sending request to update score:', newScore)
+    router.put(
       `/parties/${props.gameId}/rounds/${props.round.id}/score`,
       {
         playerId: props.player.id,
@@ -266,6 +265,7 @@ const saveScore = async () => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
+          console.log('Score saved successfully:', newScore)
           emit('score-updated', {
             roundId: props.round.id,
             playerId: props.player.id,
@@ -279,6 +279,15 @@ const saveScore = async () => {
         onError: (errors) => {
           hasError.value = true
           console.error('Erreur de validation du score:', errors)
+
+          // Si erreur d'authentification, ne pas rediriger
+          if (errors && typeof errors === 'object' && 'message' in errors) {
+            console.error('Erreur serveur:', errors.message)
+          }
+        },
+        onFinish: () => {
+          // S'assurer que l'état est nettoyé
+          isSaving.value = false
         },
       }
     )
@@ -313,24 +322,90 @@ const decrementScore = () => {
   }
 }
 
-const validateInput = () => {
+// Nouvelles méthodes pour l'auto-save
+const scheduleAutoSave = () => {
+  // Annuler le timeout précédent
+  if (autoSaveTimeout.value) {
+    clearTimeout(autoSaveTimeout.value)
+  }
+
+  // Programmer une nouvelle sauvegarde
+  autoSaveTimeout.value = setTimeout(() => {
+    if (isEditing.value && validateScore(editValue.value) && editValue.value !== currentScore.value) {
+      saveScore()
+    }
+  }, AUTO_SAVE_DELAY)
+}
+
+const handleInput = () => {
   const value = editValue.value
 
+  // Validation et correction des limites
   if (value > maxScore.value) {
     editValue.value = maxScore.value
   } else if (value < minScore.value) {
     editValue.value = minScore.value
   }
 
-  if (validateScore(editValue.value)) {
-    hasError.value = false
+  // Mise à jour du statut d'erreur
+  hasError.value = !validateScore(editValue.value)
+
+  // Programmer auto-save si valide
+  if (!hasError.value) {
+    scheduleAutoSave()
   }
 }
+
+const handleBlur = () => {
+  // Sauvegarder immédiatement si valide et différent
+  if (validateScore(editValue.value) && editValue.value !== currentScore.value) {
+    saveScore()
+  } else if (!validateScore(editValue.value)) {
+    // Revenir à la valeur précédente si invalide
+    cancelEdit()
+  } else {
+    // Pas de changement, sortir du mode édition
+    cancelEdit()
+  }
+}
+
+const handleEnter = () => {
+  // Enter force la sauvegarde si valide
+  if (validateScore(editValue.value)) {
+    saveScore()
+  }
+}
+
+// Legacy method conservé pour compatibilité
+const validateInput = handleInput
+
+// Cleanup du timeout au démontage
+onUnmounted(() => {
+  if (autoSaveTimeout.value) {
+    clearTimeout(autoSaveTimeout.value)
+  }
+})
 
 // Watchers
 watch(isEditing, (newValue) => {
   if (newValue) {
     hasError.value = false
+  } else {
+    // Nettoyer le timeout si on sort du mode édition
+    if (autoSaveTimeout.value) {
+      clearTimeout(autoSaveTimeout.value)
+      autoSaveTimeout.value = null
+    }
+  }
+})
+
+// Watch pour auto-save sur les changements flèches
+watch(editValue, () => {
+  if (isEditing.value) {
+    hasError.value = !validateScore(editValue.value)
+    if (!hasError.value) {
+      scheduleAutoSave()
+    }
   }
 })
 </script>

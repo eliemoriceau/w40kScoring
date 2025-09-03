@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { PartieUI } from '../types'
 import { usePartiesHelpers } from '../composables/use_parties_helpers'
+import { useFormatting } from '~/shared/composables/useFormatting'
 
 interface Props {
   partie: PartieUI
@@ -15,6 +16,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const { formatRelativeDate, getScoreStats, getGameTypeIcon } = usePartiesHelpers()
+const { formatPoints, formatScore } = useFormatting()
 
 const scoreStats = computed(() => getScoreStats(props.partie))
 
@@ -53,9 +55,7 @@ const handleViewDetails = () => {
   emit('view-details', props.partie.id)
 }
 
-const formatScore = (score?: number) => {
-  return score?.toLocaleString() || '0'
-}
+// formatScore maintenant importé du composable useFormatting
 </script>
 
 <template>
@@ -92,7 +92,7 @@ const formatScore = (score?: number) => {
       <div class="grid grid-cols-2 gap-4 text-sm">
         <div>
           <span class="text-gray-400">Points :</span>
-          <span class="text-white ml-2 font-medium">{{ partie.pointsLimit.toLocaleString() }}</span>
+          <span class="text-white ml-2 font-medium">{{ formatPoints(partie.pointsLimit) }}</span>
         </div>
         <div>
           <span class="text-gray-400">Joueurs :</span>

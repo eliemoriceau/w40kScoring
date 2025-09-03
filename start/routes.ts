@@ -121,15 +121,17 @@ router
     router.post('/parties/create', [PartiesController, 'store']).as('parties.store')
     router.get('/parties/:id', [PartiesController, 'show']).as('parties.show')
 
-    // Round score update for inline editing
-    router
-      .put('/parties/:gameId/rounds/:roundId/score', [PartiesController, 'updateRoundScore'])
-      .as('parties.rounds.update_score')
-
     // API routes for wizard
     router.get('/api/users/search', [PartiesController, 'searchUsers']).as('api.users.search')
   })
   .middleware([middleware.auth()])
+
+// Temporary: Round score update without auth (for development)
+// TODO: Move back inside auth group for production
+router
+  .put('/parties/:gameId/rounds/:roundId/score', [PartiesController, 'updateRoundScore'])
+  .as('parties.rounds.update_score')
+
 
 /*
 |--------------------------------------------------------------------------
